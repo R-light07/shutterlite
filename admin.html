@@ -1,0 +1,1459 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SHUTTERLITE — Admin</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@200;300;400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#000;
+  --neutral-950:#0a0a0a;
+  --neutral-900:#171717;
+  --neutral-800:#262626;
+  --w05:rgba(255,255,255,.05);
+  --w10:rgba(255,255,255,.1);
+  --w20:rgba(255,255,255,.2);
+  --w30:rgba(255,255,255,.3);
+  --w40:rgba(255,255,255,.4);
+  --w50:rgba(255,255,255,.5);
+  --w60:rgba(255,255,255,.6);
+  --w70:rgba(255,255,255,.7);
+  --danger:#ff4444;
+  --success:#4ade80;
+  --ease:cubic-bezier(0.16,1,0.3,1);
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%;overflow-x:hidden}
+body{background:#000;color:#fff;font-family:'Outfit',sans-serif;font-weight:300;-webkit-font-smoothing:antialiased;line-height:1.5}
+a{color:inherit;text-decoration:none}
+button{cursor:pointer;border:none;background:none;color:inherit;font-family:inherit}
+input,textarea,select{font-family:inherit;color:inherit;outline:none;font-weight:300}
+img{display:block;max-width:100%}
+::selection{background:#fff;color:#000}
+
+/* LOGIN */
+#login{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;padding:24px;z-index:100}
+.login-bg{position:absolute;inset:0;background:radial-gradient(ellipse at center,#1a1a1a 0%,#000 70%)}
+.login-card{position:relative;width:100%;max-width:440px;background:var(--neutral-950);border:1px solid var(--w10);border-radius:24px;padding:48px 40px;text-align:center}
+.login-logo{font-size:24px;letter-spacing:.4em;font-weight:300;margin-bottom:8px}
+.login-sub{text-transform:uppercase;letter-spacing:.3em;color:var(--w50);font-size:11px;margin-bottom:40px}
+.input-wrap{margin-bottom:16px;text-align:left}
+.input-label{text-transform:uppercase;letter-spacing:.25em;color:var(--w50);font-size:10px;margin-bottom:8px;display:block}
+.input-base{width:100%;background:var(--neutral-900);border:1px solid var(--w10);border-radius:16px;padding:16px 20px;font-size:14px;transition:border-color .3s}
+.input-base:focus{border-color:#fff}
+.input-base::placeholder{color:var(--w40)}
+.btn-primary{background:#fff;color:#000;padding:18px;border-radius:16px;text-transform:uppercase;letter-spacing:.25em;font-size:12px;font-weight:500;width:100%;transition:all .3s;font-family:inherit;margin-top:8px}
+.btn-primary:hover{background:#e5e5e5}
+.btn-primary:disabled{opacity:.5;pointer-events:none}
+.login-error{color:var(--danger);font-size:13px;margin-top:16px;display:none}
+.login-error.show{display:block}
+.login-hint{margin-top:32px;padding-top:24px;border-top:1px solid var(--w10);color:var(--w40);font-size:11px;text-transform:uppercase;letter-spacing:.2em}
+
+/* APP LAYOUT */
+#app{display:none;min-height:100vh}
+#app.show{display:flex}
+.sidebar{width:260px;background:var(--neutral-950);border-right:1px solid var(--w10);padding:32px 20px;position:fixed;left:0;top:0;height:100vh;overflow-y:auto;display:flex;flex-direction:column;gap:8px;z-index:30}
+.side-logo{font-size:18px;letter-spacing:.4em;font-weight:300;text-align:center;padding:12px 0 32px}
+.side-link{display:flex;align-items:center;gap:14px;padding:14px 18px;border-radius:14px;text-transform:uppercase;letter-spacing:.18em;font-size:11px;color:var(--w60);transition:all .25s;cursor:pointer;border:1px solid transparent}
+.side-link:hover{background:var(--w05);color:#fff}
+.side-link.active{background:#fff;color:#000;border-color:#fff}
+.side-link svg{width:16px;height:16px;fill:currentColor;flex-shrink:0}
+.side-badge{margin-left:auto;background:var(--danger);color:#fff;font-size:10px;padding:2px 8px;border-radius:9999px;letter-spacing:.05em;font-weight:500}
+.side-link.active .side-badge{background:#000;color:#fff}
+.side-bottom{margin-top:auto;padding-top:24px;border-top:1px solid var(--w10);display:flex;flex-direction:column;gap:6px}
+.main{margin-left:260px;flex:1;padding:32px 40px;width:calc(100% - 260px);min-height:100vh}
+.topbar{display:flex;align-items:center;justify-content:space-between;margin-bottom:32px;flex-wrap:wrap;gap:16px}
+.page-title{font-size:32px;font-weight:300;letter-spacing:-.01em}
+.page-sub{text-transform:uppercase;letter-spacing:.3em;color:var(--w40);font-size:11px;margin-top:6px}
+.topbar-actions{display:flex;gap:10px;flex-wrap:wrap}
+.btn{padding:12px 24px;border-radius:9999px;font-family:inherit;font-size:11px;text-transform:uppercase;letter-spacing:.2em;font-weight:400;transition:all .3s;display:inline-flex;align-items:center;gap:8px;white-space:nowrap}
+.btn-fill{background:#fff;color:#000}
+.btn-fill:hover{background:#e5e5e5;transform:translateY(-1px)}
+.btn-outline{border:1px solid var(--w20);color:var(--w70)}
+.btn-outline:hover{background:#fff;color:#000;border-color:#fff}
+.btn-danger{border:1px solid rgba(255,68,68,.4);color:#ff8080}
+.btn-danger:hover{background:var(--danger);color:#fff;border-color:var(--danger)}
+.btn-sm{padding:8px 16px;font-size:10px}
+.btn:disabled{opacity:.5;pointer-events:none}
+
+.page{display:none}
+.page.active{display:block;animation:fadeIn .3s var(--ease)}
+
+/* STAT CARDS */
+.stat-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:20px;margin-bottom:40px}
+.stat-card{background:var(--neutral-950);border:1px solid var(--w10);border-radius:24px;padding:28px}
+.stat-label{text-transform:uppercase;letter-spacing:.25em;color:var(--w40);font-size:10px;margin-bottom:14px}
+.stat-num{font-size:42px;font-weight:200;line-height:1;letter-spacing:-.02em}
+
+/* PANEL */
+.panel{background:var(--neutral-950);border:1px solid var(--w10);border-radius:24px;padding:32px;margin-bottom:24px}
+.panel-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:24px;flex-wrap:wrap;gap:12px}
+.panel-title{font-size:20px;font-weight:300;letter-spacing:-.01em}
+.panel-sub{text-transform:uppercase;letter-spacing:.25em;color:var(--w40);font-size:10px;margin-top:6px}
+
+/* TABLE */
+.tbl{width:100%;border-collapse:collapse}
+.tbl th{text-align:left;padding:14px 12px;font-size:10px;text-transform:uppercase;letter-spacing:.25em;color:var(--w40);font-weight:400;border-bottom:1px solid var(--w10)}
+.tbl td{padding:18px 12px;border-bottom:1px solid var(--w05);font-size:13px;font-weight:300}
+.tbl tr:last-child td{border-bottom:none}
+.tbl tr:hover td{background:var(--w05)}
+.tbl-empty{text-align:center;padding:60px 20px;color:var(--w30);font-size:12px;text-transform:uppercase;letter-spacing:.3em}
+
+/* INPUTS */
+.field{margin-bottom:18px}
+.field-row{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.field-row-3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:14px}
+.field label{display:block;text-transform:uppercase;letter-spacing:.25em;color:var(--w50);font-size:10px;margin-bottom:8px}
+.field input,.field textarea,.field select{width:100%;background:var(--neutral-900);border:1px solid var(--w10);border-radius:14px;padding:14px 18px;font-size:14px;transition:border-color .3s;font-weight:300}
+.field input:focus,.field textarea:focus,.field select:focus{border-color:#fff;background:var(--neutral-800)}
+.field textarea{resize:vertical;min-height:90px;font-family:inherit}
+.field select{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='10' viewBox='0 0 10 10'%3E%3Cpath d='M5 7L1 3h8z' fill='%23999'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 18px center}
+.field select option{background:var(--neutral-900)}
+
+.cb{display:flex;align-items:center;gap:10px;padding:12px 0;cursor:pointer;font-size:12px;text-transform:uppercase;letter-spacing:.18em;color:var(--w70)}
+.cb input{display:none}
+.cb-box{width:18px;height:18px;border:1px solid var(--w30);border-radius:6px;display:flex;align-items:center;justify-content:center;transition:all .3s;flex-shrink:0}
+.cb input:checked + .cb-box{background:#fff;border-color:#fff}
+.cb input:checked + .cb-box::after{content:'';width:8px;height:8px;background:#000;border-radius:2px}
+
+/* SESSION CARDS (admin) */
+.sessions-admin-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:20px}
+.session-admin-card{position:relative;border-radius:20px;overflow:hidden;border:1px solid var(--w10);background:var(--neutral-900);aspect-ratio:4/5;cursor:pointer;transition:transform .3s}
+.session-admin-card:hover{transform:translateY(-4px)}
+.session-admin-card img{width:100%;height:100%;object-fit:cover;transition:opacity .3s}
+.session-admin-card:hover img{opacity:.6}
+.session-admin-card.empty{background:var(--neutral-900);display:flex;align-items:center;justify-content:center;color:var(--w30);font-size:11px;text-transform:uppercase;letter-spacing:.3em;text-align:center;padding:24px}
+.session-admin-tags{position:absolute;top:14px;left:14px;display:flex;gap:6px;flex-wrap:wrap;z-index:2}
+.session-admin-info{position:absolute;bottom:0;left:0;right:0;padding:20px;background:linear-gradient(to top,rgba(0,0,0,.95) 30%,transparent);z-index:2}
+.session-admin-cat{font-size:10px;text-transform:uppercase;letter-spacing:.3em;color:var(--w50);margin-bottom:8px}
+.session-admin-title{font-size:18px;font-weight:300;line-height:1.2;margin-bottom:6px}
+.session-admin-count{font-size:11px;color:var(--w50);text-transform:uppercase;letter-spacing:.2em;margin-top:8px}
+.tag{padding:4px 10px;border-radius:9999px;background:rgba(0,0,0,.7);backdrop-filter:blur(10px);font-size:9px;text-transform:uppercase;letter-spacing:.18em;color:#fff;border:1px solid var(--w20)}
+.tag.hero{background:#fff;color:#000;border-color:#fff}
+
+/* SESSION EDIT VIEW */
+.session-edit-section{background:var(--neutral-950);border:1px solid var(--w10);border-radius:24px;padding:32px;margin-bottom:20px}
+.section-num{display:inline-block;font-size:11px;text-transform:uppercase;letter-spacing:.3em;color:var(--w40);margin-bottom:8px}
+.section-h{font-size:20px;font-weight:300;margin-bottom:8px}
+.section-d{font-size:13px;color:var(--w50);margin-bottom:24px}
+
+/* COVER PICKER */
+.cover-current{display:flex;gap:24px;align-items:center;margin-bottom:24px;flex-wrap:wrap}
+.cover-preview{width:160px;height:200px;border-radius:16px;background:var(--neutral-900);border:1px solid var(--w10);display:flex;align-items:center;justify-content:center;overflow:hidden;flex-shrink:0;position:relative}
+.cover-preview img{width:100%;height:100%;object-fit:cover}
+.cover-preview.empty{color:var(--w30);font-size:11px;text-transform:uppercase;letter-spacing:.25em;text-align:center;padding:20px}
+.cover-actions{flex:1;min-width:200px;display:flex;flex-direction:column;gap:8px}
+.cover-options-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(110px,1fr));gap:10px;max-height:280px;overflow-y:auto;padding:8px;background:var(--neutral-900);border-radius:12px;border:1px solid var(--w10)}
+.cover-opt{aspect-ratio:1;border-radius:10px;overflow:hidden;cursor:pointer;border:2px solid transparent;transition:all .25s;position:relative}
+.cover-opt:hover{transform:scale(1.04)}
+.cover-opt.selected{border-color:#fff;box-shadow:0 0 0 2px rgba(255,255,255,.2)}
+.cover-opt img{width:100%;height:100%;object-fit:cover}
+.cover-opt .sel-mark{position:absolute;top:6px;right:6px;width:20px;height:20px;border-radius:9999px;background:#fff;color:#000;display:none;align-items:center;justify-content:center;font-size:12px;font-weight:bold}
+.cover-opt.selected .sel-mark{display:flex}
+
+/* PHOTO GRID (inside session) */
+.photo-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(170px,1fr));gap:14px}
+.photo-item{position:relative;border-radius:14px;overflow:hidden;border:1px solid var(--w10);background:var(--neutral-900);aspect-ratio:1;cursor:pointer;transition:transform .3s}
+.photo-item:hover{transform:translateY(-2px)}
+.photo-item img{width:100%;height:100%;object-fit:cover;transition:opacity .3s}
+.photo-item:hover img{opacity:.7}
+.photo-item.is-cover{outline:2px solid #fff;outline-offset:-2px}
+.photo-item-tags{position:absolute;top:10px;left:10px;display:flex;gap:4px;flex-wrap:wrap;z-index:2}
+.photo-item-actions{position:absolute;top:10px;right:10px;display:flex;gap:6px;z-index:3;opacity:0;transition:opacity .3s}
+.photo-item:hover .photo-item-actions{opacity:1}
+.icon-btn{width:30px;height:30px;border-radius:9999px;background:rgba(0,0,0,.7);backdrop-filter:blur(10px);border:1px solid var(--w20);color:#fff;display:flex;align-items:center;justify-content:center;font-size:12px;transition:all .2s}
+.icon-btn:hover{background:#fff;color:#000}
+.icon-btn.danger:hover{background:var(--danger);color:#fff;border-color:var(--danger)}
+
+/* DROPZONE */
+.dropzone{border:2px dashed var(--w20);border-radius:18px;padding:40px 24px;text-align:center;cursor:pointer;transition:all .3s}
+.dropzone:hover,.dropzone.drag{border-color:#fff;background:var(--w05)}
+.dz-icon{font-size:32px;color:var(--w50);margin-bottom:12px;font-weight:200}
+.dz-text{text-transform:uppercase;letter-spacing:.25em;font-size:11px;color:var(--w60);margin-bottom:6px}
+.dz-hint{font-size:11px;color:var(--w30);text-transform:uppercase;letter-spacing:.2em}
+.dropzone.small{padding:24px 18px}
+.dropzone.small .dz-icon{font-size:24px;margin-bottom:8px}
+.upload-list{display:flex;flex-direction:column;gap:8px;max-height:240px;overflow-y:auto;margin-top:14px}
+.upload-row{display:flex;align-items:center;gap:12px;padding:10px 14px;background:var(--neutral-900);border:1px solid var(--w10);border-radius:12px;font-size:12px;flex-wrap:wrap}
+.upload-row .pname{flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-weight:300;min-width:0}
+.upload-row .pstat{font-size:10px;text-transform:uppercase;letter-spacing:.2em;flex-shrink:0}
+.pstat.ok{color:var(--success)}
+.pstat.err{color:var(--danger)}
+.pstat.up{color:var(--w60)}
+.upload-err-msg{flex-basis:100%;font-size:11px;color:#ff8080;padding:6px 4px 0;word-break:break-word}
+
+/* MODAL */
+.modal-bg{position:fixed;inset:0;background:rgba(0,0,0,.85);backdrop-filter:blur(10px);z-index:200;display:none;align-items:center;justify-content:center;padding:24px;opacity:0;transition:opacity .3s}
+.modal-bg.open{display:flex;opacity:1}
+.modal-box{width:100%;max-width:560px;max-height:90vh;overflow-y:auto;background:var(--neutral-950);border:1px solid var(--w20);border-radius:24px;padding:32px;animation:modalIn .4s var(--ease)}
+.modal-box.lg{max-width:760px}
+.modal-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:24px;padding-bottom:20px;border-bottom:1px solid var(--w10)}
+.modal-title{font-size:20px;font-weight:300}
+.modal-close{width:32px;height:32px;border-radius:9999px;border:1px solid var(--w20);display:flex;align-items:center;justify-content:center;font-size:14px;color:var(--w70);transition:all .3s;cursor:pointer}
+.modal-close:hover{background:#fff;color:#000;border-color:#fff}
+.modal-foot{display:flex;justify-content:flex-end;gap:10px;margin-top:24px;padding-top:20px;border-top:1px solid var(--w10);flex-wrap:wrap}
+
+/* TOAST */
+#toasts{position:fixed;top:24px;right:24px;z-index:300;display:flex;flex-direction:column;gap:10px;max-width:360px}
+.toast{background:var(--neutral-900);border:1px solid var(--w20);border-radius:16px;padding:14px 20px;font-size:13px;animation:slideIn .4s var(--ease);font-weight:300}
+.toast.success{border-color:var(--success);color:var(--success)}
+.toast.error{border-color:var(--danger);color:#ff8080}
+
+/* BADGE */
+.badge{display:inline-block;padding:3px 10px;border-radius:9999px;font-size:10px;text-transform:uppercase;letter-spacing:.2em;border:1px solid var(--w20);color:var(--w70)}
+.badge.unread{background:#fff;color:#000;border-color:#fff}
+.badge.active{border-color:var(--success);color:var(--success)}
+.badge.inactive{color:var(--w40)}
+.star{color:#fff;font-size:12px}
+.star.empty{color:var(--w20)}
+
+/* MOBILE */
+.mobile-toggle{display:none;position:fixed;top:16px;left:16px;z-index:40;width:40px;height:40px;background:var(--neutral-900);border:1px solid var(--w20);border-radius:12px;align-items:center;justify-content:center;flex-direction:column;gap:4px}
+.mobile-toggle span{width:18px;height:1px;background:#fff}
+
+/* ANIMATIONS */
+@keyframes fadeIn{from{opacity:0}to{opacity:1}}
+@keyframes modalIn{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:none}}
+@keyframes slideIn{from{opacity:0;transform:translateX(20px)}to{opacity:1;transform:none}}
+
+/* RESPONSIVE */
+@media(max-width:900px){
+  .sidebar{transform:translateX(-100%);transition:transform .3s var(--ease);width:240px}
+  .sidebar.open{transform:translateX(0)}
+  .main{margin-left:0;width:100%;padding:80px 20px 40px}
+  .mobile-toggle{display:flex}
+  .field-row,.field-row-3{grid-template-columns:1fr}
+  .stat-grid{grid-template-columns:repeat(2,1fr)}
+}
+@media(max-width:560px){
+  .stat-grid{grid-template-columns:1fr}
+  .photo-grid{grid-template-columns:repeat(2,1fr)}
+  .topbar{flex-direction:column;align-items:flex-start}
+  .session-edit-section,.panel{padding:24px 20px}
+}
+</style>
+</head>
+<body>
+
+<!-- LOGIN -->
+<div id="login">
+  <div class="login-bg"></div>
+  <div class="login-card">
+    <div class="login-logo">SHUTTERLITE</div>
+    <div class="login-sub">Admin Panel</div>
+    <form onsubmit="doLogin(event)">
+      <div class="input-wrap">
+        <label class="input-label">Username</label>
+        <input class="input-base" type="text" id="loginUser" placeholder="admin" required autocomplete="username">
+      </div>
+      <div class="input-wrap">
+        <label class="input-label">Password</label>
+        <input class="input-base" type="password" id="loginPass" placeholder="••••••••" required autocomplete="current-password">
+      </div>
+      <button type="submit" class="btn-primary" id="loginBtn">Sign In</button>
+      <div class="login-error" id="loginErr">Invalid credentials</div>
+    </form>
+    <!-- <div class="login-hint">Default: admin / admin123</div> -->
+  </div>
+</div>
+
+<button class="mobile-toggle" onclick="toggleSidebar()" aria-label="Menu">
+  <span></span><span></span><span></span>
+</button>
+
+<!-- APP -->
+<div id="app">
+  <aside class="sidebar" id="sidebar">
+    <div class="side-logo">SHUTTERLITE</div>
+    <a class="side-link active" data-page="dashboard" onclick="goPage('dashboard')">
+      <svg viewBox="0 0 24 24"><path d="M3 13h8V3H3v10zm0 8h8v-6H3v6zm10 0h8V11h-8v10zm0-18v6h8V3h-8z"/></svg>
+      Dashboard
+    </a>
+    <a class="side-link" data-page="sessions" onclick="goPage('sessions')">
+      <svg viewBox="0 0 24 24"><path d="M21 19V5c0-1.1-.9-2-2-2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2zM8.5 13.5l2.5 3.01L14.5 12l4.5 6H5l3.5-4.5z"/></svg>
+      Sessions
+    </a>
+    <a class="side-link" data-page="categories" onclick="goPage('categories')">
+      <svg viewBox="0 0 24 24"><path d="M10 4H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V8c0-1.1-.9-2-2-2h-8l-2-2z"/></svg>
+      Categories
+    </a>
+    <a class="side-link" data-page="services" onclick="goPage('services')">
+      <svg viewBox="0 0 24 24"><path d="M19.43 12.98c.04-.32.07-.64.07-.98 0-.34-.03-.66-.07-.98l2.11-1.65c.19-.15.24-.42.12-.64l-2-3.46c-.12-.22-.39-.3-.61-.22l-2.49 1c-.52-.4-1.08-.73-1.69-.98l-.38-2.65C14.46 2.18 14.25 2 14 2h-4c-.25 0-.46.18-.49.42l-.38 2.65c-.61.25-1.17.59-1.69.98l-2.49-1c-.23-.09-.49 0-.61.22l-2 3.46c-.13.22-.07.49.12.64l2.11 1.65c-.04.32-.07.65-.07.98 0 .33.03.66.07.98l-2.11 1.65c-.19.15-.24.42-.12.64l2 3.46c.12.22.39.3.61.22l2.49-1c.52.4 1.08.73 1.69.98l.38 2.65c.03.24.24.42.49.42h4c.25 0 .46-.18.49-.42l.38-2.65c.61-.25 1.17-.59 1.69-.98l2.49 1c.23.09.49 0 .61-.22l2-3.46c.12-.22.07-.49-.12-.64l-2.11-1.65zM12 15.5c-1.93 0-3.5-1.57-3.5-3.5s1.57-3.5 3.5-3.5 3.5 1.57 3.5 3.5-1.57 3.5-3.5 3.5z"/></svg>
+      Services
+    </a>
+    <a class="side-link" data-page="testimonials" onclick="goPage('testimonials')">
+      <svg viewBox="0 0 24 24"><path d="M21.99 4c0-1.1-.89-2-1.99-2H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h14l4 4-.01-18zM18 14H6v-2h12v2zm0-3H6V9h12v2zm0-3H6V6h12v2z"/></svg>
+      Testimonials
+    </a>
+    <a class="side-link" data-page="messages" onclick="goPage('messages')">
+      <svg viewBox="0 0 24 24"><path d="M20 4H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 4l-8 5-8-5V6l8 5 8-5v2z"/></svg>
+      Messages
+      <span class="side-badge" id="msgBadge" style="display:none">0</span>
+    </a>
+    <a class="side-link" data-page="settings" onclick="goPage('settings')">
+      <svg viewBox="0 0 24 24"><path d="M12 8c-2.21 0-4 1.79-4 4s1.79 4 4 4 4-1.79 4-4-1.79-4-4-4zm8.94 3A8.994 8.994 0 0013 3.06V1h-2v2.06A8.994 8.994 0 003.06 11H1v2h2.06A8.994 8.994 0 0011 20.94V23h2v-2.06A8.994 8.994 0 0020.94 13H23v-2h-2.06zM12 19c-3.87 0-7-3.13-7-7s3.13-7 7-7 7 3.13 7 7-3.13 7-7 7z"/></svg>
+      Settings
+    </a>
+    <a class="side-link" data-page="social" onclick="goPage('social')">
+      <svg viewBox="0 0 24 24"><path d="M18 16.08c-.76 0-1.44.3-1.96.77L8.91 12.7c.05-.23.09-.46.09-.7s-.04-.47-.09-.7l7.05-4.11c.54.5 1.25.81 2.04.81 1.66 0 3-1.34 3-3s-1.34-3-3-3-3 1.34-3 3c0 .24.04.47.09.7L8.04 9.81C7.5 9.31 6.79 9 6 9c-1.66 0-3 1.34-3 3s1.34 3 3 3c.79 0 1.5-.31 2.04-.81l7.12 4.16c-.05.21-.08.43-.08.65 0 1.61 1.31 2.92 2.92 2.92 1.61 0 2.92-1.31 2.92-2.92s-1.31-2.92-2.92-2.92z"/></svg>
+      Social Links
+    </a>
+    <div class="side-bottom">
+      <a class="side-link" href="index.html" target="_blank">
+        <svg viewBox="0 0 24 24"><path d="M19 19H5V5h7V3H5c-1.11 0-2 .9-2 2v14c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2v-7h-2v7zM14 3v2h3.59l-9.83 9.83 1.41 1.41L19 6.41V10h2V3h-7z"/></svg>
+        View Site
+      </a>
+      <a class="side-link" onclick="doLogout()">
+        <svg viewBox="0 0 24 24"><path d="M17 7l-1.41 1.41L18.17 11H8v2h10.17l-2.58 2.58L17 17l5-5-5-5zM4 5h8V3H4c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h8v-2H4V5z"/></svg>
+        Sign Out
+      </a>
+    </div>
+  </aside>
+
+  <main class="main">
+    <!-- DASHBOARD -->
+    <div class="page active" id="page-dashboard">
+      <div class="topbar">
+        <div>
+          <div class="page-sub">Overview</div>
+          <h2 class="page-title">Dashboard</h2>
+        </div>
+      </div>
+      <div class="stat-grid">
+        <div class="stat-card"><div class="stat-label">Sessions</div><div class="stat-num" id="kSessions">—</div></div>
+        <div class="stat-card"><div class="stat-label">Photos</div><div class="stat-num" id="kPhotos">—</div></div>
+        <div class="stat-card"><div class="stat-label">Services</div><div class="stat-num" id="kSvcs">—</div></div>
+        <div class="stat-card"><div class="stat-label">Unread Messages</div><div class="stat-num" id="kMsgs">—</div></div>
+      </div>
+      <div class="panel">
+        <div class="panel-head">
+          <div>
+            <div class="panel-sub">Recent</div>
+            <div class="panel-title">Latest Messages</div>
+          </div>
+          <button class="btn btn-outline btn-sm" onclick="goPage('messages')">View All →</button>
+        </div>
+        <table class="tbl"><thead><tr><th>Name</th><th>Email</th><th>Service</th><th>Date</th><th>Status</th></tr></thead><tbody id="recentMsgs"></tbody></table>
+      </div>
+    </div>
+
+    <!-- SESSIONS LIST -->
+    <div class="page" id="page-sessions">
+      <div class="topbar">
+        <div>
+          <div class="page-sub">Manage</div>
+          <h2 class="page-title">Sessions</h2>
+        </div>
+        <div class="topbar-actions">
+          <button class="btn btn-fill" onclick="openNewSession()">+ New Session</button>
+        </div>
+      </div>
+      <div class="panel">
+        <div class="sessions-admin-grid" id="sessionsAdminGrid"></div>
+      </div>
+    </div>
+
+    <!-- SESSION EDIT -->
+    <div class="page" id="page-session-edit">
+      <div class="topbar">
+        <div>
+          <div class="page-sub" id="seSub">Editing Session</div>
+          <h2 class="page-title" id="seTitle">—</h2>
+        </div>
+        <div class="topbar-actions">
+          <button class="btn btn-outline" onclick="goPage('sessions')">← Back to sessions</button>
+          <button class="btn btn-danger" onclick="deleteCurrentSession()">Delete Session</button>
+        </div>
+      </div>
+
+      <!-- 1. INFO -->
+      <div class="session-edit-section">
+        <div class="section-num">Section 01</div>
+        <h3 class="section-h">Session Information</h3>
+        <p class="section-d">Basic details that appear on the public portfolio card.</p>
+        <div class="field"><label>Title *</label><input id="seTitleIn" oninput="markDirty()"></div>
+        <div class="field-row">
+          <div class="field"><label>Category</label><select id="seCat" onchange="markDirty()"></select></div>
+          <div class="field"><label>Sort Order</label><input type="number" id="seOrder" value="0" oninput="markDirty()"></div>
+        </div>
+        <div class="field-row">
+          <div class="field"><label>Event Date</label><input type="date" id="seDate" oninput="markDirty()"></div>
+          <div class="field"><label>Location</label><input id="seLoc" placeholder="e.g. Lisbon, Portugal" oninput="markDirty()"></div>
+        </div>
+        <div class="field"><label>Description</label><textarea id="seDesc" rows="3" placeholder="Optional — short description shown in the session modal" oninput="markDirty()"></textarea></div>
+        <div style="display:flex;justify-content:flex-end">
+          <button class="btn btn-fill" id="seInfoSave" onclick="saveSessionInfo()">Save Info</button>
+        </div>
+      </div>
+
+      <!-- 2. COVER -->
+      <div class="session-edit-section">
+        <div class="section-num">Section 02 — Optional</div>
+        <h3 class="section-h">Cover Photo</h3>
+        <p class="section-d">Choose which photo represents this session on the portfolio card and (optionally) in the hero slider.</p>
+        <div class="cover-current">
+          <div class="cover-preview" id="coverPreview">
+            <span class="empty">No cover<br>selected</span>
+          </div>
+          <div class="cover-actions">
+            <label class="cb"><input type="checkbox" id="seHero" onchange="saveSessionInfo(true)"><span class="cb-box"></span>Use as hero slide on home page</label>
+            <p style="font-size:11px;color:var(--w40);line-height:1.5;margin-top:4px">If enabled, this cover will rotate in the hero section of the public website.</p>
+          </div>
+        </div>
+        <div style="margin-top:24px">
+          <div class="section-num" style="margin-bottom:14px">Pick from session photos</div>
+          <div class="cover-options-grid" id="coverGrid">
+            <div style="grid-column:1/-1;text-align:center;padding:30px;color:var(--w30);font-size:11px;text-transform:uppercase;letter-spacing:.25em">Upload photos below first</div>
+          </div>
+        </div>
+        <div style="margin-top:24px">
+          <div class="section-num" style="margin-bottom:14px">Or upload a dedicated cover</div>
+          <div class="dropzone small" id="coverDz" onclick="document.getElementById('coverFileInput').click()">
+            <div class="dz-icon">+</div>
+            <div class="dz-text">Drop image here or click to browse</div>
+            <input type="file" id="coverFileInput" accept="image/*" style="display:none">
+          </div>
+          <div class="upload-list" id="coverUploadList"></div>
+        </div>
+      </div>
+
+      <!-- 3. GALLERY -->
+      <div class="session-edit-section">
+        <div class="section-num">Section 03</div>
+        <h3 class="section-h">Gallery Photos</h3>
+        <p class="section-d">All photos shown when a visitor opens this session. Add multiple at once.</p>
+        <div class="dropzone" id="galleryDz" onclick="document.getElementById('galleryFileInput').click()">
+          <div class="dz-icon">+</div>
+          <div class="dz-text">Drop files here or click to browse</div>
+          <div class="dz-hint">JPG / PNG / WEBP — Multiple files supported</div>
+          <input type="file" id="galleryFileInput" multiple accept="image/*" style="display:none">
+        </div>
+        <div class="upload-list" id="galleryUploadList"></div>
+        <div style="margin-top:24px">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;flex-wrap:wrap;gap:12px">
+            <div class="section-num" style="margin:0" id="galleryCount">0 photos in this session</div>
+          </div>
+          <div class="photo-grid" id="sessionPhotoGrid">
+            <div style="grid-column:1/-1;text-align:center;padding:60px;color:var(--w30);font-size:12px;text-transform:uppercase;letter-spacing:.3em">No photos yet</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- CATEGORIES -->
+    <div class="page" id="page-categories">
+      <div class="topbar">
+        <div><div class="page-sub">Manage</div><h2 class="page-title">Categories</h2></div>
+        <div class="topbar-actions"><button class="btn btn-fill" onclick="openCatModal()">+ New Category</button></div>
+      </div>
+      <div class="panel">
+        <table class="tbl"><thead><tr><th>Name</th><th>Slug</th><th>Sessions</th><th>Order</th><th>Actions</th></tr></thead><tbody id="catTable"></tbody></table>
+      </div>
+    </div>
+
+    <!-- SERVICES -->
+    <div class="page" id="page-services">
+      <div class="topbar">
+        <div><div class="page-sub">Manage</div><h2 class="page-title">Services</h2></div>
+        <div class="topbar-actions"><button class="btn btn-fill" onclick="openSvcModal()">+ New Service</button></div>
+      </div>
+      <div class="panel">
+        <table class="tbl"><thead><tr><th>Title</th><th>Price From</th><th>Order</th><th>Status</th><th>Actions</th></tr></thead><tbody id="svcTable"></tbody></table>
+      </div>
+    </div>
+
+    <!-- TESTIMONIALS -->
+    <div class="page" id="page-testimonials">
+      <div class="topbar">
+        <div><div class="page-sub">Manage</div><h2 class="page-title">Testimonials</h2></div>
+        <div class="topbar-actions"><button class="btn btn-fill" onclick="openTestiModal()">+ New Testimonial</button></div>
+      </div>
+      <div class="panel">
+        <table class="tbl"><thead><tr><th>Client</th><th>Content</th><th>Rating</th><th>Featured</th><th>Actions</th></tr></thead><tbody id="testiTable"></tbody></table>
+      </div>
+    </div>
+
+    <!-- MESSAGES -->
+    <div class="page" id="page-messages">
+      <div class="topbar">
+        <div><div class="page-sub">Inbox</div><h2 class="page-title">Messages</h2></div>
+      </div>
+      <div class="panel">
+        <table class="tbl"><thead><tr><th>Name</th><th>Email</th><th>Phone</th><th>Service</th><th>Date</th><th>Status</th><th>Actions</th></tr></thead><tbody id="msgTable"></tbody></table>
+      </div>
+    </div>
+
+    <!-- SETTINGS -->
+    <div class="page" id="page-settings">
+      <div class="topbar">
+        <div><div class="page-sub">Configure</div><h2 class="page-title">Settings</h2></div>
+        <div class="topbar-actions"><button class="btn btn-fill" onclick="saveSettings()">Save All</button></div>
+      </div>
+      <div class="panel">
+        <div class="panel-head"><div class="panel-title">General</div></div>
+        <div class="field"><label>Photographer Name</label><input id="setPhotographer"></div>
+        <div class="field"><label>Tagline</label><input id="setTagline"></div>
+        <div class="field"><label>About Text</label><textarea id="setAbout" rows="4"></textarea></div>
+        <div class="field"><label>Working Since (year)</label><input id="setSince" type="number" min="1900" max="2100"></div>
+      </div>
+      <div class="panel">
+        <div class="panel-head"><div class="panel-title">Hero Section</div></div>
+        <div class="field"><label>Hero Title (use \n for line breaks)</label><textarea id="setHeroTitle" rows="3" placeholder="Capturing&#10;Timeless&#10;Moments"></textarea></div>
+        <div class="field"><label>Hero Eyebrow</label><input id="setHeroSub" placeholder="Premium Photography Experience"></div>
+      </div>
+      <div class="panel">
+        <div class="panel-head"><div class="panel-title">Contact Information</div></div>
+        <div class="field-row">
+          <div class="field"><label>Email</label><input id="setEmail" type="email"></div>
+          <div class="field"><label>Phone</label><input id="setPhone"></div>
+        </div>
+        <div class="field"><label>Location</label><input id="setLocation"></div>
+      </div>
+    </div>
+
+    <!-- SOCIAL -->
+    <div class="page" id="page-social">
+      <div class="topbar">
+        <div><div class="page-sub">Manage</div><h2 class="page-title">Social Links</h2></div>
+        <div class="topbar-actions"><button class="btn btn-fill" onclick="openSocialModal()">+ New Link</button></div>
+      </div>
+      <div class="panel">
+        <table class="tbl"><thead><tr><th>Platform</th><th>URL</th><th>Order</th><th>Status</th><th>Actions</th></tr></thead><tbody id="socialTable"></tbody></table>
+      </div>
+    </div>
+  </main>
+</div>
+
+<!-- ══ MODALS ══ -->
+
+<!-- NEW SESSION -->
+<div class="modal-bg" id="modalNewSession">
+  <div class="modal-box">
+    <div class="modal-head">
+      <div class="modal-title">New Session</div>
+      <button class="modal-close" onclick="closeModal('modalNewSession')">✕</button>
+    </div>
+    <div class="field"><label>Title *</label><input id="newSessionTitle" placeholder="e.g. Ana & Miguel Wedding"></div>
+    <div class="field"><label>Category</label><select id="newSessionCat"></select></div>
+    <p style="font-size:12px;color:var(--w50);line-height:1.6;text-transform:uppercase;letter-spacing:.15em">After creating, you'll be taken to the editor where you can add cover and gallery photos.</p>
+    <div class="modal-foot">
+      <button class="btn btn-outline" onclick="closeModal('modalNewSession')">Cancel</button>
+      <button class="btn btn-fill" onclick="createSession()">Create & Edit</button>
+    </div>
+  </div>
+</div>
+
+<!-- CATEGORY -->
+<div class="modal-bg" id="modalCat">
+  <div class="modal-box">
+    <div class="modal-head">
+      <div class="modal-title" id="catModalTitle">New Category</div>
+      <button class="modal-close" onclick="closeModal('modalCat')">✕</button>
+    </div>
+    <input type="hidden" id="catId">
+    <div class="field"><label>Name</label><input id="catName" oninput="updateSlug()"></div>
+    <div class="field"><label>Slug</label><input id="catSlug"></div>
+    <div class="field"><label>Description</label><textarea id="catDesc" rows="3"></textarea></div>
+    <div class="field"><label>Sort Order</label><input type="number" id="catOrder" value="0"></div>
+    <div class="modal-foot">
+      <button class="btn btn-outline" onclick="closeModal('modalCat')">Cancel</button>
+      <button class="btn btn-fill" onclick="saveCat()">Save</button>
+    </div>
+  </div>
+</div>
+
+<!-- SERVICE -->
+<div class="modal-bg" id="modalSvc">
+  <div class="modal-box">
+    <div class="modal-head">
+      <div class="modal-title" id="svcModalTitle">New Service</div>
+      <button class="modal-close" onclick="closeModal('modalSvc')">✕</button>
+    </div>
+    <input type="hidden" id="svcId">
+    <div class="field"><label>Title</label><input id="svcTitle"></div>
+    <div class="field"><label>Description</label><textarea id="svcDesc" rows="3"></textarea></div>
+    <div class="field-row">
+      <div class="field"><label>Price From</label><input id="svcPrice" placeholder="From €500"></div>
+      <div class="field"><label>Sort Order</label><input type="number" id="svcOrder" value="0"></div>
+    </div>
+    <div class="field"><label>Features (one per line)</label><textarea id="svcFeatures" rows="4"></textarea></div>
+    <div class="field"><label class="cb"><input type="checkbox" id="svcActive" checked><span class="cb-box"></span>Active</label></div>
+    <div class="modal-foot">
+      <button class="btn btn-outline" onclick="closeModal('modalSvc')">Cancel</button>
+      <button class="btn btn-fill" onclick="saveSvc()">Save</button>
+    </div>
+  </div>
+</div>
+
+<!-- TESTIMONIAL -->
+<div class="modal-bg" id="modalTesti">
+  <div class="modal-box">
+    <div class="modal-head">
+      <div class="modal-title" id="testiModalTitle">New Testimonial</div>
+      <button class="modal-close" onclick="closeModal('modalTesti')">✕</button>
+    </div>
+    <input type="hidden" id="testiId">
+    <div class="field-row">
+      <div class="field"><label>Client Name</label><input id="testiName"></div>
+      <div class="field"><label>Role / Event</label><input id="testiRole" placeholder="Wedding, June 2025"></div>
+    </div>
+    <div class="field"><label>Content</label><textarea id="testiContent" rows="5"></textarea></div>
+    <div class="field-row">
+      <div class="field"><label>Rating (1-5)</label><input type="number" id="testiRating" min="1" max="5" value="5"></div>
+      <div class="field" style="display:flex;align-items:flex-end"><label class="cb"><input type="checkbox" id="testiFeatured" checked><span class="cb-box"></span>Featured</label></div>
+    </div>
+    <div class="modal-foot">
+      <button class="btn btn-outline" onclick="closeModal('modalTesti')">Cancel</button>
+      <button class="btn btn-fill" onclick="saveTesti()">Save</button>
+    </div>
+  </div>
+</div>
+
+<!-- MESSAGE -->
+<div class="modal-bg" id="modalMsg">
+  <div class="modal-box">
+    <div class="modal-head">
+      <div class="modal-title">Message Details</div>
+      <button class="modal-close" onclick="closeModal('modalMsg')">✕</button>
+    </div>
+    <input type="hidden" id="msgId">
+    <div class="field"><label>From</label><div id="msgFrom" style="padding:14px 0;font-size:14px"></div></div>
+    <div class="field"><label>Email</label><div id="msgEmail" style="padding:14px 0;font-size:14px"></div></div>
+    <div class="field"><label>Phone</label><div id="msgPhone" style="padding:14px 0;font-size:14px"></div></div>
+    <div class="field"><label>Service</label><div id="msgSvc" style="padding:14px 0;font-size:14px"></div></div>
+    <div class="field"><label>Date</label><div id="msgDate" style="padding:14px 0;font-size:14px"></div></div>
+    <div class="field"><label>Message</label><div id="msgContent" style="padding:18px;background:var(--neutral-900);border:1px solid var(--w10);border-radius:14px;font-size:14px;line-height:1.7;white-space:pre-wrap"></div></div>
+    <div class="modal-foot">
+      <button class="btn btn-danger" onclick="deleteMsg()">Delete</button>
+      <button class="btn btn-outline" id="msgReply">Reply via Email</button>
+      <button class="btn btn-fill" onclick="closeModal('modalMsg')">Close</button>
+    </div>
+  </div>
+</div>
+
+<!-- SOCIAL -->
+<div class="modal-bg" id="modalSocial">
+  <div class="modal-box">
+    <div class="modal-head">
+      <div class="modal-title" id="socialModalTitle">New Social Link</div>
+      <button class="modal-close" onclick="closeModal('modalSocial')">✕</button>
+    </div>
+    <input type="hidden" id="socialId">
+    <div class="field"><label>Platform</label>
+      <select id="socialPlatform">
+        <option>Instagram</option><option>Facebook</option><option>Pinterest</option>
+        <option>LinkedIn</option><option>YouTube</option><option>Twitter</option><option>TikTok</option>
+      </select>
+    </div>
+    <div class="field"><label>URL</label><input id="socialUrl" placeholder="https://..."></div>
+    <div class="field-row">
+      <div class="field"><label>Sort Order</label><input type="number" id="socialOrder" value="0"></div>
+      <div class="field" style="display:flex;align-items:flex-end"><label class="cb"><input type="checkbox" id="socialActive" checked><span class="cb-box"></span>Active</label></div>
+    </div>
+    <div class="modal-foot">
+      <button class="btn btn-outline" onclick="closeModal('modalSocial')">Cancel</button>
+      <button class="btn btn-fill" onclick="saveSocial()">Save</button>
+    </div>
+  </div>
+</div>
+
+<div id="toasts"></div>
+
+<script>
+/* ════════════════════════════════════════════
+   SUPABASE CONFIG
+════════════════════════════════════════════ */
+const SUPABASE_URL  = 'https://waezzmkentsbgphzqpzd.supabase.co';
+const SUPABASE_ANON = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6IndhZXp6bWtlbnRzYmdwaHpxcHpkIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzg0MzQ2ODUsImV4cCI6MjA5NDAxMDY4NX0.pklWc5Hfox9nxn7FdlRc5dIH4uVsM4vznlDCKLiv0YA';
+const REST = `${SUPABASE_URL}/rest/v1`;
+const STORAGE_BUCKET = 'portfolio-media';
+const SESSION_KEY = 'sl_admin_session';
+const SESSION_DAYS = 7;
+
+function H(extra={}){return{'apikey':SUPABASE_ANON,'Authorization':`Bearer ${SUPABASE_ANON}`,'Content-Type':'application/json',...extra}}
+async function api(url,opts={}){const r=await fetch(url,{...opts,headers:{...H(),...(opts.headers||{})}});if(!r.ok&&r.status!==201&&r.status!==204){const t=await r.text();throw new Error(`HTTP ${r.status}: ${t||r.statusText}`)}const t=await r.text();return t?JSON.parse(t):null}
+const db={
+  select:(t,p='')=>api(`${REST}/${t}${p?'?'+p:''}`),
+  insert:(t,b)=>api(`${REST}/${t}`,{method:'POST',headers:{'Prefer':'return=representation'},body:JSON.stringify(b)}),
+  update:(t,q,b)=>api(`${REST}/${t}?${q}`,{method:'PATCH',headers:{'Prefer':'return=representation'},body:JSON.stringify(b)}),
+  delete:(t,q)=>api(`${REST}/${t}?${q}`,{method:'DELETE'}),
+  upsert:(t,b,k)=>api(`${REST}/${t}?on_conflict=${k}`,{method:'POST',headers:{'Prefer':'resolution=merge-duplicates,return=representation'},body:JSON.stringify(b)})
+};
+
+/* ════════════════════════════════════════════
+   AUTH
+════════════════════════════════════════════ */
+async function sha256(text){const buf=new TextEncoder().encode(text);const h=await crypto.subtle.digest('SHA-256',buf);return Array.from(new Uint8Array(h)).map(b=>b.toString(16).padStart(2,'0')).join('')}
+function getSession(){try{const s=JSON.parse(localStorage.getItem(SESSION_KEY));if(!s||!s.exp||Date.now()>s.exp)return null;return s}catch{return null}}
+function setSession(u){localStorage.setItem(SESSION_KEY,JSON.stringify({u,exp:Date.now()+SESSION_DAYS*86400000}))}
+function clearSession(){localStorage.removeItem(SESSION_KEY)}
+
+async function doLogin(e){
+  e.preventDefault();
+  const u=document.getElementById('loginUser').value.trim();
+  const p=document.getElementById('loginPass').value;
+  const btn=document.getElementById('loginBtn');
+  const err=document.getElementById('loginErr');
+  btn.disabled=true;btn.textContent='Authenticating...';err.classList.remove('show');
+  try{
+    const hash=await sha256(p);
+    const rows=await db.select('sl_admins',`username=eq.${encodeURIComponent(u)}`);
+    const admin=rows&&rows[0];
+    if(!admin||admin.password_hash!==hash){err.textContent='Invalid credentials';err.classList.add('show');btn.disabled=false;btn.textContent='Sign In';return}
+    setSession(u);
+    showApp();
+  }catch(ex){
+    err.textContent='Connection error: '+(ex.message||'check Supabase setup');
+    err.classList.add('show');btn.disabled=false;btn.textContent='Sign In';
+  }
+}
+function doLogout(){clearSession();location.reload()}
+function showApp(){document.getElementById('login').style.display='none';document.getElementById('app').classList.add('show');initApp()}
+
+document.addEventListener('DOMContentLoaded',()=>{ if(getSession())showApp() });
+
+/* ════════════════════════════════════════════
+   STATE
+════════════════════════════════════════════ */
+let categories=[],sessions=[],photos=[],services=[],testimonials=[],messages=[],settings={},social=[];
+let editing={};
+let currentSessionId=null;
+let dirty=false;
+
+async function initApp(){
+  await Promise.all([loadCats(),loadSessions(),loadPhotos(),loadSvcs(),loadTestis(),loadMsgs(),loadSettings(),loadSocial()]);
+  updateDashboard();
+}
+
+/* ════════════════════════════════════════════
+   NAVIGATION
+════════════════════════════════════════════ */
+function goPage(p){
+  if(p==='session-edit'){return}
+  document.querySelectorAll('.page').forEach(el=>el.classList.remove('active'));
+  document.querySelectorAll('.side-link[data-page]').forEach(el=>el.classList.remove('active'));
+  document.getElementById('page-'+p).classList.add('active');
+  document.querySelector(`.side-link[data-page="${p}"]`)?.classList.add('active');
+  document.getElementById('sidebar').classList.remove('open');
+  if(p==='sessions')     renderSessionsList();
+  if(p==='categories')   renderCats();
+  if(p==='services')     renderSvcs();
+  if(p==='testimonials') renderTestis();
+  if(p==='messages')     renderMsgs();
+  if(p==='settings')     renderSettings();
+  if(p==='social')       renderSocial();
+  if(p==='dashboard')    updateDashboard();
+}
+function toggleSidebar(){document.getElementById('sidebar').classList.toggle('open')}
+
+/* ════════════════════════════════════════════
+   LOADERS
+════════════════════════════════════════════ */
+async function loadCats(){categories=await db.select('sl_categories','order=sort_order.asc')||[]}
+async function loadSessions(){sessions=await db.select('sl_sessions','order=sort_order.asc,created_at.desc')||[]}
+async function loadPhotos(){photos=await db.select('sl_photos','order=sort_order.asc,uploaded_at.desc')||[]}
+async function loadSvcs(){services=await db.select('sl_services','order=sort_order.asc')||[]}
+async function loadTestis(){testimonials=await db.select('sl_testimonials','order=created_at.desc')||[]}
+async function loadMsgs(){messages=await db.select('sl_messages','order=created_at.desc')||[];const u=messages.filter(m=>!m.is_read).length;const b=document.getElementById('msgBadge');if(u>0){b.textContent=u;b.style.display='inline-block'}else b.style.display='none'}
+async function loadSettings(){const rows=await db.select('sl_settings')||[];settings={};rows.forEach(r=>settings[r.key]=r.value)}
+async function loadSocial(){social=await db.select('sl_social','order=sort_order.asc')||[]}
+
+/* ════════════════════════════════════════════
+   DASHBOARD
+════════════════════════════════════════════ */
+function updateDashboard(){
+  document.getElementById('kSessions').textContent=sessions.length;
+  document.getElementById('kPhotos').textContent=photos.length;
+  document.getElementById('kSvcs').textContent=services.filter(s=>s.is_active).length;
+  document.getElementById('kMsgs').textContent=messages.filter(m=>!m.is_read).length;
+  const recent=messages.slice(0,5);
+  const tbody=document.getElementById('recentMsgs');
+  if(!recent.length){tbody.innerHTML='<tr><td colspan="5" class="tbl-empty">No messages yet</td></tr>';return}
+  tbody.innerHTML=recent.map(m=>`<tr style="cursor:pointer" onclick="goPage('messages');setTimeout(()=>viewMsg(${m.id}),100)">
+    <td>${esc(m.name)}</td><td>${esc(m.email)}</td><td>${esc(m.service_interest||'—')}</td>
+    <td>${new Date(m.created_at).toLocaleDateString()}</td>
+    <td><span class="badge ${m.is_read?'':'unread'}">${m.is_read?'Read':'Unread'}</span></td>
+  </tr>`).join('');
+}
+
+/* ════════════════════════════════════════════
+   SESSIONS — LIST
+════════════════════════════════════════════ */
+function getSessionCover(s){
+  if(s.cover_photo_id){const p=photos.find(x=>x.id===s.cover_photo_id);if(p)return p}
+  const cv=photos.find(p=>p.session_id===s.id&&p.is_cover);
+  if(cv)return cv;
+  return photos.find(p=>p.session_id===s.id)||null;
+}
+function getSessionPhotos(sid){return photos.filter(p=>p.session_id===sid).sort((a,b)=>(a.sort_order-b.sort_order)||(a.id-b.id))}
+
+function renderSessionsList(){
+  const grid=document.getElementById('sessionsAdminGrid');
+  if(!sessions.length){grid.innerHTML='<div style="grid-column:1/-1;text-align:center;padding:80px;color:var(--w30);font-size:12px;text-transform:uppercase;letter-spacing:.3em">No sessions yet — click + New Session to start</div>';return}
+  grid.innerHTML=sessions.map(s=>{
+    const cover=getSessionCover(s);
+    const cat=categories.find(c=>c.id===s.category_id);
+    const cnt=getSessionPhotos(s.id).length;
+    return `<div class="session-admin-card ${cover?'':'empty'}" onclick="openSessionEdit(${s.id})">
+      ${cover?`<img src="${cover.public_url}" alt="" loading="lazy">`:'<span>No cover photo yet</span>'}
+      <div class="session-admin-tags">
+        ${s.cover_in_hero?'<span class="tag hero">In Hero</span>':''}
+      </div>
+      <div class="session-admin-info">
+        ${cat?`<div class="session-admin-cat">${esc(cat.name)}</div>`:''}
+        <div class="session-admin-title">${esc(s.title)}</div>
+        <div class="session-admin-count">${cnt} ${cnt===1?'photo':'photos'}</div>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function openNewSession(){
+  document.getElementById('newSessionTitle').value='';
+  const sel=document.getElementById('newSessionCat');
+  sel.innerHTML='<option value="">— No category —</option>'+categories.map(c=>`<option value="${c.id}">${esc(c.name)}</option>`).join('');
+  openModal('modalNewSession');
+}
+async function createSession(){
+  const title=document.getElementById('newSessionTitle').value.trim();
+  if(!title){toast('Title is required','error');return}
+  const catId=document.getElementById('newSessionCat').value||null;
+  try{
+    const slug=title.toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'')+'-'+Math.random().toString(36).slice(2,6);
+    const rows=await db.insert('sl_sessions',{title,slug,category_id:catId,sort_order:0});
+    const newId=rows[0].id;
+    closeModal('modalNewSession');
+    await loadSessions();
+    openSessionEdit(newId);
+    toast('Session created. Now add a cover and gallery photos.','success');
+  }catch(e){toast('Error: '+e.message,'error')}
+}
+
+/* ════════════════════════════════════════════
+   SESSION EDIT VIEW
+════════════════════════════════════════════ */
+function openSessionEdit(id){
+  const s=sessions.find(x=>x.id===id);if(!s)return;
+  currentSessionId=id;
+  dirty=false;
+  document.querySelectorAll('.page').forEach(el=>el.classList.remove('active'));
+  document.getElementById('page-session-edit').classList.add('active');
+  document.querySelectorAll('.side-link[data-page]').forEach(el=>el.classList.remove('active'));
+  document.querySelector('.side-link[data-page="sessions"]')?.classList.add('active');
+
+  document.getElementById('seTitle').textContent=s.title;
+  document.getElementById('seTitleIn').value=s.title||'';
+  document.getElementById('seOrder').value=s.sort_order||0;
+  document.getElementById('seDate').value=s.event_date||'';
+  document.getElementById('seLoc').value=s.location||'';
+  document.getElementById('seDesc').value=s.description||'';
+  document.getElementById('seHero').checked=!!s.cover_in_hero;
+
+  const catSel=document.getElementById('seCat');
+  catSel.innerHTML='<option value="">— No category —</option>'+categories.map(c=>`<option value="${c.id}" ${s.category_id===c.id?'selected':''}>${esc(c.name)}</option>`).join('');
+
+  renderSessionCoverArea();
+  renderSessionPhotoGrid();
+}
+
+function markDirty(){
+  dirty=true;
+  const btn=document.getElementById('seInfoSave');
+  if(btn){btn.textContent='Save Info *';btn.classList.add('btn-fill')}
+}
+
+async function saveSessionInfo(silent=false){
+  if(!currentSessionId)return;
+  const data={
+    title:document.getElementById('seTitleIn').value.trim(),
+    category_id:document.getElementById('seCat').value||null,
+    sort_order:parseInt(document.getElementById('seOrder').value)||0,
+    event_date:document.getElementById('seDate').value||null,
+    location:document.getElementById('seLoc').value||null,
+    description:document.getElementById('seDesc').value||null,
+    cover_in_hero:document.getElementById('seHero').checked
+  };
+  if(!data.title){toast('Title cannot be empty','error');return}
+  try{
+    await db.update('sl_sessions',`id=eq.${currentSessionId}`,data);
+    await loadSessions();
+    dirty=false;
+    document.getElementById('seTitle').textContent=data.title;
+    document.getElementById('seInfoSave').textContent='Save Info';
+    if(!silent)toast('Saved','success');
+  }catch(e){toast('Error: '+e.message,'error')}
+}
+
+async function deleteCurrentSession(){
+  if(!currentSessionId)return;
+  if(!confirm('Delete this entire session and all its photos? This cannot be undone.'))return;
+  try{
+    const sp=getSessionPhotos(currentSessionId);
+    for(const p of sp){
+      if(p.storage_path){
+        try{await fetch(`${SUPABASE_URL}/storage/v1/object/${STORAGE_BUCKET}/${p.storage_path}`,{method:'DELETE',headers:{'apikey':SUPABASE_ANON,'Authorization':`Bearer ${SUPABASE_ANON}`}})}catch{}
+      }
+    }
+    await db.delete('sl_sessions',`id=eq.${currentSessionId}`);
+    await Promise.all([loadSessions(),loadPhotos()]);
+    toast('Session deleted','success');
+    currentSessionId=null;
+    goPage('sessions');
+  }catch(e){toast('Error: '+e.message,'error')}
+}
+
+/* ════════════════════════════════════════════
+   COVER PHOTO
+════════════════════════════════════════════ */
+function renderSessionCoverArea(){
+  const s=sessions.find(x=>x.id===currentSessionId);
+  if(!s)return;
+  const cover=getSessionCover(s);
+  const prev=document.getElementById('coverPreview');
+  if(cover){
+    prev.innerHTML=`<img src="${cover.public_url}" alt="">`;
+  }else{
+    prev.innerHTML='<span class="empty">No cover<br>selected</span>';
+  }
+
+  const grid=document.getElementById('coverGrid');
+  const sp=getSessionPhotos(currentSessionId);
+  if(!sp.length){
+    grid.innerHTML='<div style="grid-column:1/-1;text-align:center;padding:30px;color:var(--w30);font-size:11px;text-transform:uppercase;letter-spacing:.25em">Upload photos in the gallery section first</div>';
+    return;
+  }
+  grid.innerHTML=sp.map(p=>{
+    const sel=s.cover_photo_id===p.id||(!s.cover_photo_id&&p.is_cover);
+    return `<div class="cover-opt ${sel?'selected':''}" onclick="setCover(${p.id})">
+      <img src="${p.public_url}" alt="">
+      <div class="sel-mark">✓</div>
+    </div>`;
+  }).join('');
+}
+async function setCover(photoId){
+  if(!currentSessionId)return;
+  try{
+    // Clear is_cover from other photos
+    const sp=getSessionPhotos(currentSessionId);
+    for(const p of sp){
+      if(p.is_cover&&p.id!==photoId){
+        try{await db.update('sl_photos',`id=eq.${p.id}`,{is_cover:false})}catch{}
+      }
+    }
+    await db.update('sl_photos',`id=eq.${photoId}`,{is_cover:true});
+    await db.update('sl_sessions',`id=eq.${currentSessionId}`,{cover_photo_id:photoId});
+    await Promise.all([loadPhotos(),loadSessions()]);
+    renderSessionCoverArea();
+    renderSessionPhotoGrid();
+    toast('Cover photo set','success');
+  }catch(e){toast('Error: '+e.message,'error')}
+}
+
+/* ════════════════════════════════════════════
+   UPLOAD — Cover & Gallery
+════════════════════════════════════════════ */
+let coverUploads=[],galleryUploads=[];
+
+document.addEventListener('DOMContentLoaded',()=>{
+  // Cover input
+  const cfi=document.getElementById('coverFileInput');
+  if(cfi)cfi.addEventListener('change',e=>{
+    const files=Array.from(e.target.files);
+    if(!files.length)return;
+    coverUploads=files.slice(0,1).map(f=>({file:f,status:'pending'}));
+    renderUploadList('cover');
+    startCoverUpload();
+    cfi.value='';
+  });
+  setupDz('coverDz',files=>{
+    coverUploads=files.slice(0,1).map(f=>({file:f,status:'pending'}));
+    renderUploadList('cover');
+    startCoverUpload();
+  });
+
+  // Gallery input
+  const gfi=document.getElementById('galleryFileInput');
+  if(gfi)gfi.addEventListener('change',e=>{
+    const files=Array.from(e.target.files);
+    if(!files.length)return;
+    galleryUploads=files.map(f=>({file:f,status:'pending'}));
+    renderUploadList('gallery');
+    startGalleryUpload();
+    gfi.value='';
+  });
+  setupDz('galleryDz',files=>{
+    galleryUploads=files.map(f=>({file:f,status:'pending'}));
+    renderUploadList('gallery');
+    startGalleryUpload();
+  });
+});
+
+function setupDz(id,cb){
+  const dz=document.getElementById(id);if(!dz)return;
+  ['dragenter','dragover'].forEach(ev=>dz.addEventListener(ev,e=>{e.preventDefault();dz.classList.add('drag')}));
+  ['dragleave','drop'].forEach(ev=>dz.addEventListener(ev,e=>{e.preventDefault();dz.classList.remove('drag')}));
+  dz.addEventListener('drop',e=>{
+    const files=Array.from(e.dataTransfer.files).filter(f=>f.type.startsWith('image/'));
+    if(files.length)cb(files);
+  });
+}
+
+function renderUploadList(which){
+  const list=which==='cover'?coverUploads:galleryUploads;
+  const el=document.getElementById(which==='cover'?'coverUploadList':'galleryUploadList');
+  if(!list.length){el.innerHTML='';return}
+  el.innerHTML=list.map((p,i)=>`<div class="upload-row">
+    <div class="pname">${esc(p.file.name)}</div>
+    <div class="pstat ${p.status==='ok'?'ok':p.status==='err'?'err':'up'}">${p.status==='ok'?'Done':p.status==='err'?'Failed':p.status==='uploading'?'Uploading...':'Ready'}</div>
+    ${p.status==='err'&&p.errorMsg?`<div class="upload-err-msg">${esc(p.errorMsg.slice(0,300))}</div>`:''}
+  </div>`).join('');
+}
+
+async function uploadOne(file){
+  const ext=(file.name.split('.').pop()||'jpg').toLowerCase();
+  const path=`sessions/${currentSessionId}/${Date.now()}_${Math.random().toString(36).slice(2,8)}.${ext}`;
+  const up=await fetch(`${SUPABASE_URL}/storage/v1/object/${STORAGE_BUCKET}/${path}`,{
+    method:'POST',
+    headers:{'apikey':SUPABASE_ANON,'Authorization':`Bearer ${SUPABASE_ANON}`,'Content-Type':file.type||'image/jpeg','x-upsert':'true'},
+    body:file
+  });
+  if(!up.ok){const t=await up.text();throw new Error(`Storage ${up.status}: ${t}`)}
+  const publicUrl=`${SUPABASE_URL}/storage/v1/object/public/${STORAGE_BUCKET}/${path}`;
+  return {path,publicUrl};
+}
+
+async function startCoverUpload(){
+  if(!currentSessionId){toast('Save session first','error');return}
+  for(const item of coverUploads){
+    if(item.status==='ok')continue;
+    item.status='uploading';renderUploadList('cover');
+    try{
+      const {path,publicUrl}=await uploadOne(item.file);
+      const rows=await db.insert('sl_photos',{
+        session_id:currentSessionId,
+        title:item.file.name.replace(/\.[^.]+$/,''),
+        storage_path:path,public_url:publicUrl,
+        is_cover:true,sort_order:0
+      });
+      const newId=rows[0].id;
+      // Unset other covers + set cover_photo_id
+      const sp=photos.filter(p=>p.session_id===currentSessionId&&p.id!==newId&&p.is_cover);
+      for(const p of sp){try{await db.update('sl_photos',`id=eq.${p.id}`,{is_cover:false})}catch{}}
+      await db.update('sl_sessions',`id=eq.${currentSessionId}`,{cover_photo_id:newId});
+      item.status='ok';
+    }catch(e){console.error(e);item.status='err';item.errorMsg=e.message||String(e);toast('Cover upload failed','error')}
+    renderUploadList('cover');
+  }
+  await Promise.all([loadPhotos(),loadSessions()]);
+  renderSessionCoverArea();
+  renderSessionPhotoGrid();
+  setTimeout(()=>{coverUploads=[];renderUploadList('cover')},2000);
+}
+
+async function startGalleryUpload(){
+  if(!currentSessionId){toast('Save session first','error');return}
+  let ok=0;
+  for(const item of galleryUploads){
+    if(item.status==='ok')continue;
+    item.status='uploading';renderUploadList('gallery');
+    try{
+      const {path,publicUrl}=await uploadOne(item.file);
+      await db.insert('sl_photos',{
+        session_id:currentSessionId,
+        title:item.file.name.replace(/\.[^.]+$/,''),
+        storage_path:path,public_url:publicUrl,
+        is_cover:false,sort_order:0
+      });
+      item.status='ok';ok++;
+    }catch(e){console.error(e);item.status='err';item.errorMsg=e.message||String(e)}
+    renderUploadList('gallery');
+  }
+  if(ok)toast(`${ok} photo${ok>1?'s':''} uploaded`,'success');
+  await loadPhotos();
+  renderSessionCoverArea();
+  renderSessionPhotoGrid();
+  setTimeout(()=>{galleryUploads=[];renderUploadList('gallery')},2500);
+}
+
+/* ════════════════════════════════════════════
+   GALLERY PHOTO GRID (session edit)
+════════════════════════════════════════════ */
+function renderSessionPhotoGrid(){
+  const s=sessions.find(x=>x.id===currentSessionId);
+  const sp=getSessionPhotos(currentSessionId);
+  document.getElementById('galleryCount').textContent=`${sp.length} ${sp.length===1?'photo':'photos'} in this session`;
+  const grid=document.getElementById('sessionPhotoGrid');
+  if(!sp.length){
+    grid.innerHTML='<div style="grid-column:1/-1;text-align:center;padding:60px;color:var(--w30);font-size:12px;text-transform:uppercase;letter-spacing:.3em">No photos yet — drag images above to start</div>';
+    return;
+  }
+  grid.innerHTML=sp.map(p=>{
+    const isCover=s?.cover_photo_id===p.id||p.is_cover;
+    return `<div class="photo-item ${isCover?'is-cover':''}">
+      <img src="${p.public_url}" loading="lazy" alt="">
+      <div class="photo-item-tags">${isCover?'<span class="tag hero">Cover</span>':''}</div>
+      <div class="photo-item-actions">
+        ${!isCover?`<button class="icon-btn" title="Set as cover" onclick="event.stopPropagation();setCover(${p.id})">★</button>`:''}
+        <button class="icon-btn danger" title="Delete" onclick="event.stopPropagation();deletePhoto(${p.id})">✕</button>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+async function deletePhoto(photoId){
+  if(!confirm('Delete this photo? It will be removed from storage and the session.'))return;
+  const p=photos.find(x=>x.id===photoId);if(!p)return;
+  try{
+    if(p.storage_path){
+      try{await fetch(`${SUPABASE_URL}/storage/v1/object/${STORAGE_BUCKET}/${p.storage_path}`,{method:'DELETE',headers:{'apikey':SUPABASE_ANON,'Authorization':`Bearer ${SUPABASE_ANON}`}})}catch{}
+    }
+    // If this was the cover, clear cover_photo_id from session
+    const s=sessions.find(x=>x.id===p.session_id);
+    if(s&&s.cover_photo_id===photoId){
+      await db.update('sl_sessions',`id=eq.${s.id}`,{cover_photo_id:null});
+    }
+    await db.delete('sl_photos',`id=eq.${photoId}`);
+    await Promise.all([loadPhotos(),loadSessions()]);
+    renderSessionCoverArea();
+    renderSessionPhotoGrid();
+    toast('Photo deleted','success');
+  }catch(e){toast('Error: '+e.message,'error')}
+}
+
+/* ════════════════════════════════════════════
+   CATEGORIES
+════════════════════════════════════════════ */
+function renderCats(){
+  const tb=document.getElementById('catTable');
+  if(!categories.length){tb.innerHTML='<tr><td colspan="5" class="tbl-empty">No categories yet</td></tr>';return}
+  tb.innerHTML=categories.map(c=>{
+    const cnt=sessions.filter(s=>s.category_id===c.id).length;
+    return `<tr>
+      <td style="font-weight:400">${esc(c.name)}</td>
+      <td><span class="badge">${esc(c.slug)}</span></td>
+      <td>${cnt}</td>
+      <td>${c.sort_order}</td>
+      <td>
+        <button class="btn btn-outline btn-sm" onclick="editCat(${c.id})">Edit</button>
+        <button class="btn btn-danger btn-sm" onclick="delCat(${c.id})">Delete</button>
+      </td>
+    </tr>`;
+  }).join('');
+}
+function openCatModal(){
+  document.getElementById('catModalTitle').textContent='New Category';
+  ['catId','catName','catSlug','catDesc'].forEach(id=>document.getElementById(id).value='');
+  document.getElementById('catOrder').value='0';
+  openModal('modalCat');
+}
+function editCat(id){
+  const c=categories.find(x=>x.id===id);if(!c)return;
+  document.getElementById('catModalTitle').textContent='Edit Category';
+  document.getElementById('catId').value=c.id;
+  document.getElementById('catName').value=c.name;
+  document.getElementById('catSlug').value=c.slug;
+  document.getElementById('catDesc').value=c.description||'';
+  document.getElementById('catOrder').value=c.sort_order;
+  openModal('modalCat');
+}
+function updateSlug(){
+  const slugIn=document.getElementById('catSlug');
+  if(!document.getElementById('catId').value){
+    slugIn.value=document.getElementById('catName').value.toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'');
+  }
+}
+async function saveCat(){
+  const id=document.getElementById('catId').value;
+  const data={
+    name:document.getElementById('catName').value,
+    slug:document.getElementById('catSlug').value,
+    description:document.getElementById('catDesc').value||null,
+    sort_order:parseInt(document.getElementById('catOrder').value)||0
+  };
+  try{
+    if(id)await db.update('sl_categories',`id=eq.${id}`,data);
+    else await db.insert('sl_categories',data);
+    toast('Saved','success');closeModal('modalCat');await loadCats();renderCats();
+  }catch(e){toast('Error: '+e.message,'error')}
+}
+async function delCat(id){
+  if(!confirm('Delete this category? Sessions will become uncategorized.'))return;
+  try{await db.delete('sl_categories',`id=eq.${id}`);toast('Deleted','success');await loadCats();await loadSessions();renderCats()}
+  catch(e){toast('Error: '+e.message,'error')}
+}
+
+/* ════════════════════════════════════════════
+   SERVICES
+════════════════════════════════════════════ */
+function renderSvcs(){
+  const tb=document.getElementById('svcTable');
+  if(!services.length){tb.innerHTML='<tr><td colspan="5" class="tbl-empty">No services yet</td></tr>';return}
+  tb.innerHTML=services.map(s=>`<tr>
+    <td style="font-weight:400">${esc(s.title)}</td>
+    <td>${esc(s.price_from||'—')}</td>
+    <td>${s.sort_order}</td>
+    <td><span class="badge ${s.is_active?'active':'inactive'}">${s.is_active?'Active':'Inactive'}</span></td>
+    <td>
+      <button class="btn btn-outline btn-sm" onclick="editSvc(${s.id})">Edit</button>
+      <button class="btn btn-danger btn-sm" onclick="delSvc(${s.id})">Delete</button>
+    </td>
+  </tr>`).join('');
+}
+function openSvcModal(){
+  document.getElementById('svcModalTitle').textContent='New Service';
+  ['svcId','svcTitle','svcDesc','svcPrice','svcFeatures'].forEach(id=>document.getElementById(id).value='');
+  document.getElementById('svcOrder').value='0';
+  document.getElementById('svcActive').checked=true;
+  openModal('modalSvc');
+}
+function editSvc(id){
+  const s=services.find(x=>x.id===id);if(!s)return;
+  document.getElementById('svcModalTitle').textContent='Edit Service';
+  document.getElementById('svcId').value=s.id;
+  document.getElementById('svcTitle').value=s.title;
+  document.getElementById('svcDesc').value=s.description||'';
+  document.getElementById('svcPrice').value=s.price_from||'';
+  document.getElementById('svcOrder').value=s.sort_order;
+  document.getElementById('svcFeatures').value=(s.features||[]).join('\n');
+  document.getElementById('svcActive').checked=!!s.is_active;
+  openModal('modalSvc');
+}
+async function saveSvc(){
+  const id=document.getElementById('svcId').value;
+  const features=document.getElementById('svcFeatures').value.split('\n').map(x=>x.trim()).filter(Boolean);
+  const data={
+    title:document.getElementById('svcTitle').value,
+    description:document.getElementById('svcDesc').value||null,
+    price_from:document.getElementById('svcPrice').value||null,
+    sort_order:parseInt(document.getElementById('svcOrder').value)||0,
+    features,is_active:document.getElementById('svcActive').checked
+  };
+  try{
+    if(id)await db.update('sl_services',`id=eq.${id}`,data);
+    else await db.insert('sl_services',data);
+    toast('Saved','success');closeModal('modalSvc');await loadSvcs();renderSvcs();
+  }catch(e){toast('Error: '+e.message,'error')}
+}
+async function delSvc(id){
+  if(!confirm('Delete this service?'))return;
+  try{await db.delete('sl_services',`id=eq.${id}`);toast('Deleted','success');await loadSvcs();renderSvcs()}
+  catch(e){toast('Error: '+e.message,'error')}
+}
+
+/* ════════════════════════════════════════════
+   TESTIMONIALS
+════════════════════════════════════════════ */
+function renderTestis(){
+  const tb=document.getElementById('testiTable');
+  if(!testimonials.length){tb.innerHTML='<tr><td colspan="5" class="tbl-empty">No testimonials yet</td></tr>';return}
+  tb.innerHTML=testimonials.map(t=>{
+    const filled='★'.repeat(t.rating||5).split('').map(()=>'<span class="star">★</span>').join('');
+    const empty='☆'.repeat(5-(t.rating||5)).split('').map(()=>'<span class="star empty">★</span>').join('');
+    return `<tr>
+      <td style="font-weight:400">${esc(t.client_name)}<br><small style="color:var(--w40);font-size:11px">${esc(t.client_role||'')}</small></td>
+      <td style="max-width:300px;color:var(--w60)">${esc((t.content||'').slice(0,80))}${t.content&&t.content.length>80?'...':''}</td>
+      <td>${filled}${empty}</td>
+      <td><span class="badge ${t.is_featured?'active':'inactive'}">${t.is_featured?'Yes':'No'}</span></td>
+      <td>
+        <button class="btn btn-outline btn-sm" onclick="editTesti(${t.id})">Edit</button>
+        <button class="btn btn-danger btn-sm" onclick="delTesti(${t.id})">Delete</button>
+      </td>
+    </tr>`;
+  }).join('');
+}
+function openTestiModal(){
+  document.getElementById('testiModalTitle').textContent='New Testimonial';
+  ['testiId','testiName','testiRole','testiContent'].forEach(id=>document.getElementById(id).value='');
+  document.getElementById('testiRating').value='5';
+  document.getElementById('testiFeatured').checked=true;
+  openModal('modalTesti');
+}
+function editTesti(id){
+  const t=testimonials.find(x=>x.id===id);if(!t)return;
+  document.getElementById('testiModalTitle').textContent='Edit Testimonial';
+  document.getElementById('testiId').value=t.id;
+  document.getElementById('testiName').value=t.client_name;
+  document.getElementById('testiRole').value=t.client_role||'';
+  document.getElementById('testiContent').value=t.content;
+  document.getElementById('testiRating').value=t.rating||5;
+  document.getElementById('testiFeatured').checked=!!t.is_featured;
+  openModal('modalTesti');
+}
+async function saveTesti(){
+  const id=document.getElementById('testiId').value;
+  const data={
+    client_name:document.getElementById('testiName').value,
+    client_role:document.getElementById('testiRole').value||null,
+    content:document.getElementById('testiContent').value,
+    rating:parseInt(document.getElementById('testiRating').value)||5,
+    is_featured:document.getElementById('testiFeatured').checked
+  };
+  try{
+    if(id)await db.update('sl_testimonials',`id=eq.${id}`,data);
+    else await db.insert('sl_testimonials',data);
+    toast('Saved','success');closeModal('modalTesti');await loadTestis();renderTestis();
+  }catch(e){toast('Error: '+e.message,'error')}
+}
+async function delTesti(id){
+  if(!confirm('Delete this testimonial?'))return;
+  try{await db.delete('sl_testimonials',`id=eq.${id}`);toast('Deleted','success');await loadTestis();renderTestis()}
+  catch(e){toast('Error: '+e.message,'error')}
+}
+
+/* ════════════════════════════════════════════
+   MESSAGES
+════════════════════════════════════════════ */
+function renderMsgs(){
+  const tb=document.getElementById('msgTable');
+  if(!messages.length){tb.innerHTML='<tr><td colspan="7" class="tbl-empty">No messages yet</td></tr>';return}
+  tb.innerHTML=messages.map(m=>`<tr>
+    <td style="font-weight:${m.is_read?'300':'400'}">${esc(m.name)}</td>
+    <td>${esc(m.email)}</td>
+    <td>${esc(m.phone||'—')}</td>
+    <td>${esc(m.service_interest||'—')}</td>
+    <td>${new Date(m.created_at).toLocaleDateString()}</td>
+    <td><span class="badge ${m.is_read?'':'unread'}">${m.is_read?'Read':'Unread'}</span></td>
+    <td>
+      <button class="btn btn-outline btn-sm" onclick="viewMsg(${m.id})">View</button>
+      <button class="btn btn-danger btn-sm" onclick="delMsg(${m.id})">Delete</button>
+    </td>
+  </tr>`).join('');
+}
+async function viewMsg(id){
+  const m=messages.find(x=>x.id===id);if(!m)return;
+  document.getElementById('msgId').value=m.id;
+  document.getElementById('msgFrom').textContent=m.name;
+  document.getElementById('msgEmail').textContent=m.email;
+  document.getElementById('msgPhone').textContent=m.phone||'—';
+  document.getElementById('msgSvc').textContent=m.service_interest||'—';
+  document.getElementById('msgDate').textContent=new Date(m.created_at).toLocaleString();
+  document.getElementById('msgContent').textContent=m.message;
+  document.getElementById('msgReply').onclick=()=>window.location.href=`mailto:${m.email}?subject=Re: Your message to SHUTTERLITE`;
+  openModal('modalMsg');
+  if(!m.is_read){try{await db.update('sl_messages',`id=eq.${id}`,{is_read:true});m.is_read=true;await loadMsgs();renderMsgs()}catch{}}
+}
+async function delMsg(id){
+  if(!confirm('Delete this message?'))return;
+  try{await db.delete('sl_messages',`id=eq.${id}`);toast('Deleted','success');await loadMsgs();renderMsgs();updateDashboard()}
+  catch(e){toast('Error: '+e.message,'error')}
+}
+async function deleteMsg(){
+  const id=document.getElementById('msgId').value;
+  if(!confirm('Delete this message?'))return;
+  try{await db.delete('sl_messages',`id=eq.${id}`);toast('Deleted','success');closeModal('modalMsg');await loadMsgs();renderMsgs();updateDashboard()}
+  catch(e){toast('Error: '+e.message,'error')}
+}
+
+/* ════════════════════════════════════════════
+   SETTINGS
+════════════════════════════════════════════ */
+function renderSettings(){
+  document.getElementById('setPhotographer').value=settings.photographer||'';
+  document.getElementById('setTagline').value=settings.tagline||'';
+  document.getElementById('setAbout').value=settings.about_text||'';
+  document.getElementById('setSince').value=settings.about_since||'';
+  document.getElementById('setHeroTitle').value=(settings.hero_title||'').replace(/\\n/g,'\n');
+  document.getElementById('setHeroSub').value=settings.hero_sub||'';
+  document.getElementById('setEmail').value=settings.contact_email||'';
+  document.getElementById('setPhone').value=settings.contact_phone||'';
+  document.getElementById('setLocation').value=settings.contact_location||'';
+}
+async function saveSettings(){
+  const map={
+    photographer:document.getElementById('setPhotographer').value,
+    tagline:document.getElementById('setTagline').value,
+    about_text:document.getElementById('setAbout').value,
+    about_since:document.getElementById('setSince').value,
+    hero_title:document.getElementById('setHeroTitle').value,
+    hero_sub:document.getElementById('setHeroSub').value,
+    contact_email:document.getElementById('setEmail').value,
+    contact_phone:document.getElementById('setPhone').value,
+    contact_location:document.getElementById('setLocation').value
+  };
+  try{
+    const rows=Object.entries(map).map(([key,value])=>({key,value}));
+    await db.upsert('sl_settings',rows,'key');
+    toast('Settings saved','success');await loadSettings();
+  }catch(e){toast('Error: '+e.message,'error')}
+}
+
+/* ════════════════════════════════════════════
+   SOCIAL
+════════════════════════════════════════════ */
+function renderSocial(){
+  const tb=document.getElementById('socialTable');
+  if(!social.length){tb.innerHTML='<tr><td colspan="5" class="tbl-empty">No social links yet</td></tr>';return}
+  tb.innerHTML=social.map(s=>`<tr>
+    <td style="font-weight:400">${esc(s.platform)}</td>
+    <td><a href="${s.url}" target="_blank" style="color:var(--w70);text-decoration:underline">${esc(s.url)}</a></td>
+    <td>${s.sort_order}</td>
+    <td><span class="badge ${s.is_active?'active':'inactive'}">${s.is_active?'Active':'Inactive'}</span></td>
+    <td>
+      <button class="btn btn-outline btn-sm" onclick="editSocial(${s.id})">Edit</button>
+      <button class="btn btn-danger btn-sm" onclick="delSocial(${s.id})">Delete</button>
+    </td>
+  </tr>`).join('');
+}
+function openSocialModal(){
+  document.getElementById('socialModalTitle').textContent='New Social Link';
+  document.getElementById('socialId').value='';
+  document.getElementById('socialUrl').value='';
+  document.getElementById('socialOrder').value='0';
+  document.getElementById('socialActive').checked=true;
+  document.getElementById('socialPlatform').value='Instagram';
+  openModal('modalSocial');
+}
+function editSocial(id){
+  const s=social.find(x=>x.id===id);if(!s)return;
+  document.getElementById('socialModalTitle').textContent='Edit Social Link';
+  document.getElementById('socialId').value=s.id;
+  document.getElementById('socialPlatform').value=s.platform;
+  document.getElementById('socialUrl').value=s.url;
+  document.getElementById('socialOrder').value=s.sort_order;
+  document.getElementById('socialActive').checked=!!s.is_active;
+  openModal('modalSocial');
+}
+async function saveSocial(){
+  const id=document.getElementById('socialId').value;
+  const data={
+    platform:document.getElementById('socialPlatform').value,
+    url:document.getElementById('socialUrl').value,
+    sort_order:parseInt(document.getElementById('socialOrder').value)||0,
+    is_active:document.getElementById('socialActive').checked
+  };
+  try{
+    if(id)await db.update('sl_social',`id=eq.${id}`,data);
+    else await db.insert('sl_social',data);
+    toast('Saved','success');closeModal('modalSocial');await loadSocial();renderSocial();
+  }catch(e){toast('Error: '+e.message,'error')}
+}
+async function delSocial(id){
+  if(!confirm('Delete this social link?'))return;
+  try{await db.delete('sl_social',`id=eq.${id}`);toast('Deleted','success');await loadSocial();renderSocial()}
+  catch(e){toast('Error: '+e.message,'error')}
+}
+
+/* ════════════════════════════════════════════
+   UTILS
+════════════════════════════════════════════ */
+function openModal(id){document.getElementById(id).classList.add('open');document.body.style.overflow='hidden'}
+function closeModal(id){document.getElementById(id).classList.remove('open');document.body.style.overflow=''}
+document.addEventListener('keydown',e=>{if(e.key==='Escape')document.querySelectorAll('.modal-bg.open').forEach(m=>{m.classList.remove('open');document.body.style.overflow=''})});
+document.querySelectorAll('.modal-bg').forEach(m=>m.addEventListener('click',e=>{if(e.target===m){m.classList.remove('open');document.body.style.overflow=''}}));
+
+function esc(s){if(s==null)return'';return String(s).replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]))}
+
+function toast(msg,type=''){
+  const wrap=document.getElementById('toasts');
+  const el=document.createElement('div');
+  el.className='toast '+(type||'');
+  el.textContent=msg;
+  wrap.appendChild(el);
+  setTimeout(()=>{el.style.opacity='0';setTimeout(()=>el.remove(),300)},3500);
+}
+</script>
+</body>
+</html>
