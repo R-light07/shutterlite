@@ -807,7 +807,7 @@ select {
   margin-top:4px
 }
 .about-title {
-  font-size:clamp(36px,5vw,64px);
+  font-size:clamp(30px,4vw,56px);
   font-weight:300;
   line-height:1.15;
   letter-spacing:-.01em;
@@ -841,6 +841,34 @@ select {
   position:relative;
   overflow:hidden
 }
+
+#servicesGrid{
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 24px;
+  align-items: stretch;
+}
+
+.service-card{
+  min-height: 365px;
+  display: flex;
+  flex-direction: column;
+}
+
+.service-name{
+  min-height: 55px;
+}
+
+.service-desc{
+  min-height: 84px;
+}
+
+.service-price{
+  margin-top: auto;
+  padding-top: 22px;
+  border-top: 1px solid rgba(255,255,255,.35);
+}
+
 .service-card:hover {
   background:#fff;
   color:#000;
