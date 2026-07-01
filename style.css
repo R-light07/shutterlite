@@ -174,17 +174,69 @@ select {
   padding:8px;
   cursor:pointer
 }
+
 .nav-mobile span {
   width:24px;
   height:1px;
   background:#fff;
-  transition:all .3s
+  transition:all .3s;
+  z-index: 100;
 }
+
+/*  */
+    /* From Uiverse.io by JulanDeAlb */ 
+.hamburger {
+  cursor: pointer;
+}
+
+.hamburger input {
+  display: none;
+}
+
+.hamburger svg {
+  /* The size of the SVG defines the overall size */
+  height: 3em;
+  /* Define the transition for transforming the SVG */
+  transition: transform 600ms cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.line {
+  fill: none;
+  stroke: white;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  stroke-width: 3;
+  /* Define the transition for transforming the Stroke */
+  transition: stroke-dasharray 600ms cubic-bezier(0.4, 0, 0.2, 1),
+              stroke-dashoffset 600ms cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.line-top-bottom {
+  stroke-dasharray: 12 63;
+}
+
+.hamburger input:checked + svg {
+  transform: rotate(-45deg);
+}
+
+.hamburger input:checked + svg .line-top-bottom {
+  stroke-dasharray: 20 300;
+  stroke-dashoffset: -32.42;
+}
+
+.hamburger{
+    display:none;
+    cursor:pointer;
+    z-index: 1;
+}
+
+/*  */
+
 #mobileMenu {
   display:none;
   position:fixed;
   inset:0;
-  z-index:60;
+  z-index: 40;
   background:#000;
   padding:100px 32px 32px;
   flex-direction:column;
@@ -288,21 +340,79 @@ select {
   flex-direction:row;
   gap:16px;
   justify-content:center;
+  align-content: center;
   flex-wrap:wrap;
   opacity:0;
   animation:fadeUp .8s .9s var(--ease) forwards
 }
 .btn-pill {
-  padding:16px 40px;
-  text-transform:uppercase;
-  letter-spacing:.2em;
-  font-size:13px;
-  border-radius:9999px;
-  transition:all .4s var(--ease);
-  display:inline-block;
-  white-space:nowrap;
-  font-family:inherit
+    display: flex;
+    letter-spacing:.2em;
+    height: 50px;
+    width: 240px;
+    justify-content: center;
+    align-items: center;
+    text-transform:uppercase;
+    font-size:13px;
+    border-radius:9999px;
+    transition:all .4s var(--ease);
+    display:flex;
+    white-space:nowrap;
+    font-family:inherit
 }
+
+/*  */
+.button {
+    display: flex;
+    letter-spacing:.2em;
+    height: 50px;
+    width: 240px;
+    justify-content: center;
+    align-content: center;
+    position: relative;
+    background-color: transparent;
+    cursor: pointer;
+    border: 1px solid #ffffff;
+    overflow: hidden;
+    border-radius: 30px;
+    color: #fff;
+    transition: all 0.5s ease-in-out;
+    font-size:13px;
+}
+
+.btn-pill.outline {
+  z-index: 1;
+  letter-spacing: .2em;
+}
+
+.type1::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 0;
+  transition: all 0.5s ease-in-out;
+  background-color: #ffffff;
+  color: #333;
+  border-radius: 30px;
+  visibility: hidden;
+  height: 10px;
+  width: 10px;
+  z-index: -1;
+}
+
+.button:hover {
+  box-shadow: 1px 1px 200px #252525;
+  color: #333;
+  border: none;
+}
+
+.type1:hover::after {
+  visibility: visible;
+  transform: scale(100) translateX(2px);
+}
+
+/*  */
+
 .btn-pill.primary {
   background:#fff;
   color:#000
@@ -311,15 +421,7 @@ select {
   background:#e5e5e5;
   transform:translateY(-2px)
 }
-.btn-pill.outline {
-  border:1px solid var(--w20);
-  color:#fff
-}
-.btn-pill.outline:hover {
-  background:#fff;
-  color:#000;
-  border-color:#fff
-}
+
 .hero-dots {
   position:absolute;
   bottom:32px;
@@ -402,7 +504,7 @@ select {
 }
 .sessions-grid {
   display:grid;
-  grid-template-columns:repeat(2,1fr);
+  grid-template-columns:repeat(3,1fr);
   gap:32px
 }
 .session-card {
@@ -1251,8 +1353,26 @@ to {
 .sm-grid {
     gap:12px
   }
+    
+  .nav-links {
+    display: none;
+  }
+
+  .hamburger {
+    display: block;
+    z-index: 100;
+  }
+
+  #mobileMenu {
+    display: none;
+  }
+
+  #mobileMenu.open {
+    display: flex;
+  }
 
 }
+
 @media(max-width:600px) {
   .services-grid {
     grid-template-columns:1fr
