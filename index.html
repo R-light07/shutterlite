@@ -30,6 +30,10 @@
       <a href="#about">Acerca</a>
       <a href="#services">Serviços</a>
       <a href="#contact">Contactos</a>
+      <button id="themeToggle" class="theme-toggle" onclick="toggleTheme()">☀️</button>
+      <button class="nav-mobile" onclick="toggleMobileMenu()" aria-label="Menu">
+  ...
+</button>
     </nav>
     <button class="nav-mobile" onclick="toggleMobileMenu()" aria-label="Menu">
       <!-- <span></span><span></span><span></span> -->
@@ -731,6 +735,38 @@ function escapeHtml(s) {
       mobileMenu.classList.remove("open");
     });
   });
+
+  function toggleTheme(){
+
+    const body = document.body;
+
+    body.classList.toggle("light-theme");
+
+    const light = body.classList.contains("light-theme");
+
+    localStorage.setItem("theme", light ? "light" : "dark");
+
+    document.getElementById("themeToggle").textContent =
+        light ? "🌙" : "☀️";
+}
+
+(function(){
+
+    const saved = localStorage.getItem("theme");
+
+    if(saved === "light"){
+
+        document.body.classList.add("light-theme");
+
+        window.addEventListener("load",()=>{
+
+            document.getElementById("themeToggle").textContent="🌙";
+
+        });
+
+    }
+
+})();
 
 </script>
 </body>

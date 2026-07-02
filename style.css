@@ -32,6 +32,101 @@ body {
     font-weight:300;overflow-x:hidden;-webkit-font-smoothing:antialiased;line-height:1.6
 }
 
+/* =========================
+   LIGHT THEME
+========================= */
+
+body.light-theme{
+    --bg:#ffffff;
+    --neutral-950:#ffffff;
+    --neutral-900:#f6f6f6;
+
+    --w05:rgba(0,0,0,.05);
+    --w10:rgba(0,0,0,.08);
+    --w20:rgba(0,0,0,.12);
+    --w30:rgba(0,0,0,.25);
+    --w40:rgba(0,0,0,.40);
+    --w50:rgba(0,0,0,.55);
+    --w60:rgba(0,0,0,.65);
+    --w70:rgba(0,0,0,.75);
+
+    background:#fff;
+    color:#111;
+}
+
+body.light-theme #loader{
+    background:#fff;
+}
+
+body.light-theme .loader-text{
+    color:#111;
+}
+
+body.light-theme #nav{
+    background:rgba(255,255,255,.8);
+    border-bottom:1px solid rgba(0,0,0,.08);
+}
+
+body.light-theme #nav.scrolled{
+    background:rgba(255,255,255,.95);
+}
+
+body.light-theme .hero-overlay{
+    background:linear-gradient(
+        to bottom,
+        rgba(255,255,255,.15),
+        rgba(255,255,255,.45),
+        rgba(255,255,255,.92)
+    );
+}
+
+body.light-theme .line{
+    stroke:#111;
+}
+
+body.light-theme .nav-links a:hover,
+body.light-theme .nav-logo{
+    color:#111;
+}
+
+body.light-theme .btn-pill.primary{
+    background:#111;
+    color:#fff;
+}
+
+body.light-theme .button{
+    border-color:#111;
+    color:#111;
+}
+
+body.light-theme .type1::after{
+    background:#111;
+}
+
+body.light-theme .button:hover{
+    color:#fff;
+}
+
+.theme-toggle{
+    width:42px;
+    height:42px;
+    border-radius:50%;
+    border:1px solid var(--w20);
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    font-size:18px;
+    transition:.3s;
+}
+
+.theme-toggle:hover{
+    transform:rotate(20deg);
+}
+
+/* =========================
+   end LIGHT THEME
+========================= */
+
 img {
     display:block;
     max-width:100%
@@ -1282,6 +1377,10 @@ footer {
   transition-delay:.4s
 }
 
+.theme-toggle{
+  display:flex;
+}
+
 /* ════ KEYFRAMES ════ */
 @keyframes fadeUp {
   from {
@@ -1418,6 +1517,25 @@ to {
   }
 .sm-grid {
     grid-template-columns:1fr
+  }
+
+  .theme-toggle{
+    display:flex;
+    position:fixed;
+    top:18px;
+    right:70px;
+    z-index:80;
+    background:var(--neutral-950);
+    color:inherit;
+  }
+
+  .nav-mobile{
+    display:flex;
+    z-index:90;
+  }
+
+  .hamburger{
+    display:block;
   }
 
 }
