@@ -1312,13 +1312,13 @@ to {
 
 /* ════ RESPONSIVE ════ */
 @media(max-width:1024px) {
-  .about-grid {
-    grid-template-columns:1fr;
-    gap:48px
-  }
-.services-grid {
-    grid-template-columns:repeat(2,1fr)
-  }
+.about-grid {
+  grid-template-columns:1fr;
+  gap:48px
+}
+#servicesGrid {
+  grid-template-columns:repeat(1fr)
+}
 .sm-grid {
     grid-template-columns:repeat(2,1fr)
   }
@@ -1402,8 +1402,8 @@ to {
 }
 
 @media(max-width:600px) {
-  .services-grid {
-    grid-template-columns:1fr
+  #servicesGrid {
+    grid-template-columns: 1fr;
   }
 .hero-actions {
     flex-direction:column;

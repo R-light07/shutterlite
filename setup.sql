@@ -181,10 +181,6 @@ CREATE POLICY "sl_buckets_view" ON storage.buckets FOR SELECT TO anon, authentic
 --  SEED DATA
 -- ══════════════════════════════════════════════════════════════
 
--- Admin default — username: admin, password: admin123
-INSERT INTO sl_admins (username, password_hash) VALUES
-  ('admin', '240be518fabd2724ddb6f04eeb1da5967448d7e831c08c8fa822809f74c720a9');
-
 -- Categorias (tags opcionais)
 INSERT INTO sl_categories (name, slug, sort_order) VALUES
   ('Wedding',    'wedding',    1),
