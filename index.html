@@ -31,17 +31,24 @@
       <a href="#services">Serviços</a>
       <a href="#contact">Contactos</a>
     </nav>
-    <button id="themeToggle" class="theme-toggle" onclick="toggleTheme()">☀️</button>
-    <button class="nav-mobile" onclick="toggleMobileMenu()" aria-label="Menu">
-      <!-- <span></span><span></span><span></span> -->
-      <label class="hamburger" for="menuToggle" aria-label="Menu">
-        <input type="checkbox" id="menuToggle">
-        <svg viewBox="0 0 32 32">
-          <path class="line line-top-bottom" d="M27 10 13 10C10.8 10 9 8.2 9 6 9 3.5 10.8 2 13 2 15.2 2 17 3.8 17 6L17 26C17 28.2 18.8 30 21 30 23.2 30 25 28.2 25 26 25 23.8 23.2 22 21 22L7 22"></path>
-          <path class="line" d="M7 16 27 16"></path>
-        </svg>
+    <div class="nav-btn">
+      <label class="switch">
+        <input
+            type="checkbox"
+            id="themeToggle"
+            onchange="toggleTheme()">
+        <span class="slider"></span>
       </label>
-    </button>
+      <button class="nav-mobile" onclick="toggleMobileMenu()" aria-label="Menu">
+        <label class="hamburger" for="menuToggle" aria-label="Menu">
+          <input type="checkbox" id="menuToggle">
+          <svg viewBox="0 0 32 32">
+            <path class="line line-top-bottom" d="M27 10 13 10C10.8 10 9 8.2 9 6 9 3.5 10.8 2 13 2 15.2 2 17 3.8 17 6L17 26C17 28.2 18.8 30 21 30 23.2 30 25 28.2 25 26 25 23.8 23.2 22 21 22L7 22"></path>
+            <path class="line" d="M7 16 27 16"></path>
+          </svg>
+        </label>
+      </button>
+    </div>
   </div>
 </header>
 
@@ -733,8 +740,7 @@ function escapeHtml(s) {
     });
   });
 
-  function toggleTheme(){
-
+  function toggleTheme() {
     const body = document.body;
 
     body.classList.toggle("light-theme");
@@ -743,27 +749,21 @@ function escapeHtml(s) {
 
     localStorage.setItem("theme", light ? "light" : "dark");
 
-    document.getElementById("themeToggle").textContent =
-        light ? "🌙" : "☀️";
-}
+    document.getElementById("themeToggle").checked = light;
+  }
 
-(function(){
+  (function () {
+      const saved = localStorage.getItem("theme");
 
-    const saved = localStorage.getItem("theme");
+      if (saved === "light") {
+          document.body.classList.add("light-theme");
+      }
 
-    if(saved === "light"){
-
-        document.body.classList.add("light-theme");
-
-        window.addEventListener("load",()=>{
-
-            document.getElementById("themeToggle").textContent="🌙";
-
-        });
-
-    }
-
-})();
+      window.addEventListener("DOMContentLoaded", () => {
+          document.getElementById("themeToggle").checked =
+              document.body.classList.contains("light-theme");
+      });
+  })();
 
 </script>
 </body>
