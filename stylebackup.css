@@ -487,8 +487,7 @@ input:checked + .slider:before {
   opacity:0;
   animation:fadeUp .8s .9s var(--ease) forwards
 }
-.btn-pill,
-.btnPill {
+.btn-pill {
     display: flex;
     letter-spacing:.2em;
     height: 50px;
@@ -523,12 +522,9 @@ input:checked + .slider:before {
     font-size:13px;
 }
 
-.btnPill.outline {
-    z-index: 1;
-    letter-spacing: .2em;
-    background: #fff;
-    color: #000;
-    border: 1px solid #000;
+.btn-pill.outline {
+  z-index: 1;
+  letter-spacing: .2em;
 }
 
 .type1::after {
@@ -1475,13 +1471,6 @@ to {
   align-items: center;
 }
 
-#about-sec {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-  }
-
 }
 
 @media(max-width:768px) {
@@ -1559,13 +1548,6 @@ to {
     display: flex;
   }
 
-  #about-sec {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-  }
-
 }
 
 @media(max-width:600px) {
@@ -1596,250 +1578,4 @@ to {
     display:block;
   }
 
-  #about-sec {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-  }
-
-}
-
-/* =====================================================
-   LIGHT MODE CONTRAST FIXES - minimal overrides
-   Mantém overlays e elementos sobre imagens legíveis
-===================================================== */
-
-body.light-theme {
-  background:#fff;
-  color:#111;
-}
-
-body.light-theme .section,
-body.light-theme footer {
-  background:#fff;
-  color:#111;
-}
-
-body.light-theme .section-title,
-body.light-theme .about-title,
-body.light-theme .footer-logo,
-body.light-theme .footer-bottom,
-body.light-theme .contact-info-item {
-  color:#111;
-}
-
-body.light-theme .section-eyebrow,
-body.light-theme .hero-eyebrow,
-body.light-theme .testi-author,
-body.light-theme .contact-info-label,
-body.light-theme .footer-social,
-body.light-theme .footer-bottom,
-body.light-theme .about-p2 {
-  color:rgba(0,0,0,.55);
-}
-
-body.light-theme .about-p1,
-body.light-theme .hero-desc,
-body.light-theme .sm-description {
-  color:rgba(0,0,0,.72);
-}
-
-/* Navbar */
-body.light-theme .nav-links a {
-  color:rgba(0,0,0,.65);
-}
-
-body.light-theme .nav-links a:hover {
-  color:#111;
-}
-
-body.light-theme .nav-links a::after {
-  background:#111;
-}
-
-/* Mobile menu in light mode */
-body.light-theme #mobileMenu {
-  background:#fff;
-}
-
-body.light-theme #mobileMenu a,
-body.light-theme .mm-close {
-  color:#111;
-}
-
-body.light-theme #mobileMenu a:hover {
-  color:rgba(0,0,0,.55);
-}
-
-/* Hero keeps readable over photo */
-body.light-theme .hero-title {
-  color:#111;
-}
-
-body.light-theme .hero-dot.active,
-body.light-theme .testi-dot.active {
-  background:#111;
-}
-
-/* Portfolio cards: text is always over photo overlay, so keep it light */
-body.light-theme .session-overlay {
-  background:linear-gradient(to top, rgba(0,0,0,.92) 0%, rgba(0,0,0,.35) 55%, transparent 100%);
-}
-
-body.light-theme .session-info,
-body.light-theme .session-title {
-  color:#fff;
-}
-
-body.light-theme .session-meta,
-body.light-theme .session-photo-count {
-  color:rgba(255,255,255,.72);
-}
-
-body.light-theme .session-meta-dot {
-  background:rgba(255,255,255,.35);
-}
-
-body.light-theme .filter-btn {
-  color:rgba(0,0,0,.65);
-  border-color:rgba(0,0,0,.15);
-}
-
-body.light-theme .filter-btn:hover {
-  color:#111;
-  border-color:rgba(0,0,0,.45);
-}
-
-body.light-theme .filter-btn.active {
-  background:#111;
-  color:#fff;
-  border-color:#111;
-}
-
-/* About stats stays dark because it sits over an image */
-body.light-theme .about-stats {
-  background:rgba(0,0,0,.72);
-  border-color:rgba(255,255,255,.12);
-}
-
-body.light-theme .about-stat-num {
-  color:#fff;
-}
-
-body.light-theme .about-stat-label {
-  color:rgba(255,255,255,.62);
-}
-
-/* Services */
-body.light-theme .service-card {
-  background:#fff;
-  color:#111;
-  border-color:rgba(0,0,0,.13);
-}
-
-body.light-theme .service-desc {
-  color:rgba(0,0,0,.65);
-  opacity:1;
-}
-
-body.light-theme .service-price {
-  color:rgba(0,0,0,.48);
-  border-top-color:rgba(0,0,0,.18);
-  opacity:1;
-}
-
-body.light-theme .service-card:hover {
-  background:#111;
-  color:#fff;
-  border-color:#111;
-}
-
-body.light-theme .service-card:hover .service-desc,
-body.light-theme .service-card:hover .service-price {
-  color:rgba(255,255,255,.75);
-  border-top-color:rgba(255,255,255,.28);
-}
-
-/* Testimonials */
-body.light-theme #testimonials {
-  background:#f7f7f7;
-  color:#111;
-  border-color:rgba(0,0,0,.1);
-}
-
-/* Contact form */
-body.light-theme .contact-input,
-body.light-theme .contact-textarea,
-body.light-theme .contact-select {
-  background:#fff;
-  color:#111;
-  border-color:rgba(0,0,0,.14);
-}
-
-body.light-theme .contact-input::placeholder,
-body.light-theme .contact-textarea::placeholder {
-  color:rgba(0,0,0,.45);
-}
-
-body.light-theme .contact-input:focus,
-body.light-theme .contact-textarea:focus,
-body.light-theme .contact-select:focus {
-  background:#f8f8f8;
-  border-color:#111;
-}
-
-body.light-theme .contact-select option {
-  background:#fff;
-  color:#111;
-}
-
-body.light-theme .contact-submit {
-  background:#111;
-  color:#fff;
-}
-
-body.light-theme .contact-submit:hover {
-  background:#333;
-}
-
-body.light-theme .contact-social a:hover,
-body.light-theme .footer-social a:hover,
-body.light-theme .footer-bottom a:hover {
-  color:#111;
-}
-
-/* Modal and lightbox keep dark UI for photo viewing */
-body.light-theme #sessionModal,
-body.light-theme #lightbox {
-  background:#000;
-  color:#fff;
-}
-
-body.light-theme .sm-header {
-  background:rgba(0,0,0,.85);
-  border-bottom-color:rgba(255,255,255,.1);
-}
-
-body.light-theme .sm-eyebrow,
-body.light-theme .sm-meta,
-body.light-theme .lb-meta,
-body.light-theme .lb-counter {
-  color:rgba(255,255,255,.6);
-}
-
-body.light-theme .sm-title,
-body.light-theme .lb-title {
-  color:#fff;
-}
-
-body.light-theme .sm-description {
-  color:rgba(255,255,255,.7);
-}
-
-body.light-theme .sm-close,
-body.light-theme .lb-btn,
-body.light-theme .lb-nav {
-  color:rgba(255,255,255,.75);
-  border-color:rgba(255,255,255,.2);
 }
