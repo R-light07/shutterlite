@@ -1629,6 +1629,14 @@ body.light-theme .contact-info-item {
   color:#111;
 }
 
+body.light-theme .loader-bar{
+    background: rgba(0,0,0,.12);
+}
+
+body.light-theme .loader-bar::after{
+    background:#111;
+}
+
 body.light-theme .section-eyebrow,
 body.light-theme .hero-eyebrow,
 body.light-theme .testi-author,
