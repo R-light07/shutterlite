@@ -461,7 +461,93 @@ img{display:block;max-width:100%}
         <div class="topbar-actions"><button class="btn btn-fill" onclick="openSvcModal()">+ New Service</button></div>
       </div>
       <div class="panel">
-        <table class="tbl"><thead><tr><th>Title</th><th>Price From</th><th>Order</th><th>Status</th><th>Actions</th></tr></thead><tbody id="svcTable"></tbody></table>
+        <table class="tbl"><thead><tr><th>Title</th><th>Slug</th><th>Price From</th><th>Photos</th><th>Order</th><th>Status</th><th>Actions</th></tr></thead><tbody id="svcTable"></tbody></table>
+      </div>
+    </div>
+
+    <!-- SERVICE EDIT -->
+    <div class="page" id="page-service-edit">
+      <div class="topbar">
+        <div>
+          <div class="page-sub" id="svcEditSub">Editing Service</div>
+          <h2 class="page-title" id="svcEditTitle">—</h2>
+        </div>
+        <div class="topbar-actions">
+          <button class="btn btn-outline" onclick="goPage('services')">← Back to services</button>
+          <button class="btn btn-danger" onclick="deleteCurrentSvc()">Delete Service</button>
+        </div>
+      </div>
+
+      <!-- 1. INFO -->
+      <div class="session-edit-section">
+        <div class="section-num">Section 01</div>
+        <h3 class="section-h">Service Information</h3>
+        <p class="section-d">Title, pricing and description shown on the public services section and on this service's own page.</p>
+        <div class="field"><label>Title *</label><input id="svcEditTitleIn" oninput="autoSvcSlug();markSvcDirty()"></div>
+        <div class="field"><label>Slug (URL) *</label><input id="svcEditSlug" oninput="markSvcDirty()"></div>
+        <p style="font-size:11px;color:var(--w40);margin:-10px 0 18px;text-transform:uppercase;letter-spacing:.15em">Public page: <span id="svcSlugPreview">—</span></p>
+        <div class="field-row">
+          <div class="field"><label>Price From</label><input id="svcEditPrice" placeholder="From €500" oninput="markSvcDirty()"></div>
+          <div class="field"><label>Sort Order</label><input type="number" id="svcEditOrder" value="0" oninput="markSvcDirty()"></div>
+        </div>
+        <div class="field"><label>Description</label><textarea id="svcEditDesc" rows="3" oninput="markSvcDirty()"></textarea></div>
+        <div class="field"><label>Features (one per line)</label><textarea id="svcEditFeatures" rows="4" oninput="markSvcDirty()"></textarea></div>
+        <div class="field"><label class="cb"><input type="checkbox" id="svcEditActive" onchange="markSvcDirty()"><span class="cb-box"></span>Active (visible on the public site)</label></div>
+        <div style="display:flex;justify-content:flex-end">
+          <button class="btn btn-fill" id="svcInfoSave" onclick="saveSvcInfo()">Save Info</button>
+        </div>
+      </div>
+
+      <!-- 2. COVER -->
+      <div class="session-edit-section">
+        <div class="section-num">Section 02 — Optional</div>
+        <h3 class="section-h">Cover Photo</h3>
+        <p class="section-d">Choose which photo represents this service on the public Services section.</p>
+        <div class="cover-current">
+          <div class="cover-preview" id="svcCoverPreview">
+            <span class="empty">No cover<br>selected</span>
+          </div>
+          <div class="cover-actions">
+            <p style="font-size:11px;color:var(--w40);line-height:1.5">Pick any photo below, or upload a dedicated cover image.</p>
+          </div>
+        </div>
+        <div style="margin-top:24px">
+          <div class="section-num" style="margin-bottom:14px">Pick from service photos</div>
+          <div class="cover-options-grid" id="svcCoverGrid">
+            <div style="grid-column:1/-1;text-align:center;padding:30px;color:var(--w30);font-size:11px;text-transform:uppercase;letter-spacing:.25em">Upload photos below first</div>
+          </div>
+        </div>
+        <div style="margin-top:24px">
+          <div class="section-num" style="margin-bottom:14px">Or upload a dedicated cover</div>
+          <div class="dropzone small" id="svcCoverDz" onclick="document.getElementById('svcCoverFileInput').click()">
+            <div class="dz-icon">+</div>
+            <div class="dz-text">Drop image here or click to browse</div>
+            <input type="file" id="svcCoverFileInput" accept="image/*" style="display:none">
+          </div>
+          <div class="upload-list" id="svcCoverUploadList"></div>
+        </div>
+      </div>
+
+      <!-- 3. GALLERY -->
+      <div class="session-edit-section">
+        <div class="section-num">Section 03</div>
+        <h3 class="section-h">Service Photos</h3>
+        <p class="section-d">These are exactly the images shown on this service's public page — add, reorder relevance, or remove them here, with no code changes required.</p>
+        <div class="dropzone" id="svcGalleryDz" onclick="document.getElementById('svcGalleryFileInput').click()">
+          <div class="dz-icon">+</div>
+          <div class="dz-text">Drop files here or click to browse</div>
+          <div class="dz-hint">JPG / PNG / WEBP — Multiple files supported</div>
+          <input type="file" id="svcGalleryFileInput" multiple accept="image/*" style="display:none">
+        </div>
+        <div class="upload-list" id="svcGalleryUploadList"></div>
+        <div style="margin-top:24px">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;flex-wrap:wrap;gap:12px">
+            <div class="section-num" style="margin:0" id="svcGalleryCount">0 photos for this service</div>
+          </div>
+          <div class="photo-grid" id="svcPhotoGrid">
+            <div style="grid-column:1/-1;text-align:center;padding:60px;color:var(--w30);font-size:12px;text-transform:uppercase;letter-spacing:.3em">No photos yet</div>
+          </div>
+        </div>
       </div>
     </div>
 
@@ -565,25 +651,19 @@ img{display:block;max-width:100%}
   </div>
 </div>
 
-<!-- SERVICE -->
+<!-- NEW SERVICE -->
 <div class="modal-bg" id="modalSvc">
   <div class="modal-box">
     <div class="modal-head">
-      <div class="modal-title" id="svcModalTitle">New Service</div>
+      <div class="modal-title">New Service</div>
       <button class="modal-close" onclick="closeModal('modalSvc')">✕</button>
     </div>
-    <input type="hidden" id="svcId">
-    <div class="field"><label>Title</label><input id="svcTitle"></div>
-    <div class="field"><label>Description</label><textarea id="svcDesc" rows="3"></textarea></div>
-    <div class="field-row">
-      <div class="field"><label>Price From</label><input id="svcPrice" placeholder="From €500"></div>
-      <div class="field"><label>Sort Order</label><input type="number" id="svcOrder" value="0"></div>
-    </div>
-    <div class="field"><label>Features (one per line)</label><textarea id="svcFeatures" rows="4"></textarea></div>
-    <div class="field"><label class="cb"><input type="checkbox" id="svcActive" checked><span class="cb-box"></span>Active</label></div>
+    <div class="field"><label>Title *</label><input id="newSvcTitle" oninput="autoNewSvcSlug()" placeholder="e.g. Wedding Photography"></div>
+    <div class="field"><label>Slug (URL)</label><input id="newSvcSlug" placeholder="wedding-photography"></div>
+    <p style="font-size:12px;color:var(--w50);line-height:1.6;text-transform:uppercase;letter-spacing:.15em">After creating, you'll be taken to the editor where you can add pricing, description and photos.</p>
     <div class="modal-foot">
       <button class="btn btn-outline" onclick="closeModal('modalSvc')">Cancel</button>
-      <button class="btn btn-fill" onclick="saveSvc()">Save</button>
+      <button class="btn btn-fill" onclick="createSvc()">Create & Edit</button>
     </div>
   </div>
 </div>
@@ -718,13 +798,15 @@ document.addEventListener('DOMContentLoaded',()=>{ if(getSession())showApp() });
 /* ════════════════════════════════════════════
    STATE
 ════════════════════════════════════════════ */
-let categories=[],sessions=[],photos=[],services=[],testimonials=[],messages=[],settings={},social=[];
+let categories=[],sessions=[],photos=[],services=[],servicePhotos=[],testimonials=[],messages=[],settings={},social=[];
 let editing={};
 let currentSessionId=null;
+let currentServiceId=null;
 let dirty=false;
+let svcDirty=false;
 
 async function initApp(){
-  await Promise.all([loadCats(),loadSessions(),loadPhotos(),loadSvcs(),loadTestis(),loadMsgs(),loadSettings(),loadSocial()]);
+  await Promise.all([loadCats(),loadSessions(),loadPhotos(),loadSvcs(),loadSvcPhotos(),loadTestis(),loadMsgs(),loadSettings(),loadSocial()]);
   updateDashboard();
 }
 
@@ -732,7 +814,7 @@ async function initApp(){
    NAVIGATION
 ════════════════════════════════════════════ */
 function goPage(p){
-  if(p==='session-edit'){return}
+  if(p==='session-edit'||p==='service-edit'){return}
   document.querySelectorAll('.page').forEach(el=>el.classList.remove('active'));
   document.querySelectorAll('.side-link[data-page]').forEach(el=>el.classList.remove('active'));
   document.getElementById('page-'+p).classList.add('active');
@@ -740,7 +822,7 @@ function goPage(p){
   document.getElementById('sidebar').classList.remove('open');
   if(p==='sessions')     renderSessionsList();
   if(p==='categories')   renderCats();
-  if(p==='services')     renderSvcs();
+  if(p==='services'){    currentServiceId=null; renderSvcs(); }
   if(p==='testimonials') renderTestis();
   if(p==='messages')     renderMsgs();
   if(p==='settings')     renderSettings();
@@ -756,6 +838,7 @@ async function loadCats(){categories=await db.select('sl_categories','order=sort
 async function loadSessions(){sessions=await db.select('sl_sessions','order=sort_order.asc,created_at.desc')||[]}
 async function loadPhotos(){photos=await db.select('sl_photos','order=sort_order.asc,uploaded_at.desc')||[]}
 async function loadSvcs(){services=await db.select('sl_services','order=sort_order.asc')||[]}
+async function loadSvcPhotos(){servicePhotos=await db.select('sl_service_photos','order=sort_order.asc,uploaded_at.asc')||[]}
 async function loadTestis(){testimonials=await db.select('sl_testimonials','order=created_at.desc')||[]}
 async function loadMsgs(){messages=await db.select('sl_messages','order=created_at.desc')||[];const u=messages.filter(m=>!m.is_read).length;const b=document.getElementById('msgBadge');if(u>0){b.textContent=u;b.style.display='inline-block'}else b.style.display='none'}
 async function loadSettings(){const rows=await db.select('sl_settings')||[];settings={};rows.forEach(r=>settings[r.key]=r.value)}
@@ -1186,61 +1269,335 @@ async function delCat(id){
 }
 
 /* ════════════════════════════════════════════
-   SERVICES
+   SERVICES — LIST
 ════════════════════════════════════════════ */
+function slugify(s){return String(s||'').trim().toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/[^a-z0-9]+/g,'-').replace(/^-+|-+$/g,'')}
+function getServicePhotos(sid){return servicePhotos.filter(p=>p.service_id===sid).sort((a,b)=>(a.sort_order-b.sort_order)||(a.id-b.id))}
+function getServiceCover(s){
+  if(s.cover_photo_id){const p=servicePhotos.find(x=>x.id===s.cover_photo_id);if(p)return p}
+  const cv=servicePhotos.find(p=>p.service_id===s.id&&p.is_cover);if(cv)return cv;
+  return servicePhotos.find(p=>p.service_id===s.id)||null;
+}
 function renderSvcs(){
   const tb=document.getElementById('svcTable');
-  if(!services.length){tb.innerHTML='<tr><td colspan="5" class="tbl-empty">No services yet</td></tr>';return}
-  tb.innerHTML=services.map(s=>`<tr>
+  if(!services.length){tb.innerHTML='<tr><td colspan="7" class="tbl-empty">No services yet</td></tr>';return}
+  tb.innerHTML=services.map(s=>`<tr style="cursor:pointer" onclick="openServiceEdit(${s.id})">
     <td style="font-weight:400">${esc(s.title)}</td>
+    <td style="color:var(--w50)">${esc(s.slug||'—')}</td>
     <td>${esc(s.price_from||'—')}</td>
+    <td>${getServicePhotos(s.id).length}</td>
     <td>${s.sort_order}</td>
     <td><span class="badge ${s.is_active?'active':'inactive'}">${s.is_active?'Active':'Inactive'}</span></td>
-    <td>
-      <button class="btn btn-outline btn-sm" onclick="editSvc(${s.id})">Edit</button>
+    <td onclick="event.stopPropagation()">
+      <button class="btn btn-outline btn-sm" onclick="openServiceEdit(${s.id})">Edit</button>
       <button class="btn btn-danger btn-sm" onclick="delSvc(${s.id})">Delete</button>
     </td>
   </tr>`).join('');
 }
 function openSvcModal(){
-  document.getElementById('svcModalTitle').textContent='New Service';
-  ['svcId','svcTitle','svcDesc','svcPrice','svcFeatures'].forEach(id=>document.getElementById(id).value='');
-  document.getElementById('svcOrder').value='0';
-  document.getElementById('svcActive').checked=true;
+  document.getElementById('newSvcTitle').value='';
+  document.getElementById('newSvcSlug').value='';
   openModal('modalSvc');
 }
-function editSvc(id){
-  const s=services.find(x=>x.id===id);if(!s)return;
-  document.getElementById('svcModalTitle').textContent='Edit Service';
-  document.getElementById('svcId').value=s.id;
-  document.getElementById('svcTitle').value=s.title;
-  document.getElementById('svcDesc').value=s.description||'';
-  document.getElementById('svcPrice').value=s.price_from||'';
-  document.getElementById('svcOrder').value=s.sort_order;
-  document.getElementById('svcFeatures').value=(s.features||[]).join('\n');
-  document.getElementById('svcActive').checked=!!s.is_active;
-  openModal('modalSvc');
+function autoNewSvcSlug(){
+  document.getElementById('newSvcSlug').value=slugify(document.getElementById('newSvcTitle').value);
 }
-async function saveSvc(){
-  const id=document.getElementById('svcId').value;
-  const features=document.getElementById('svcFeatures').value.split('\n').map(x=>x.trim()).filter(Boolean);
-  const data={
-    title:document.getElementById('svcTitle').value,
-    description:document.getElementById('svcDesc').value||null,
-    price_from:document.getElementById('svcPrice').value||null,
-    sort_order:parseInt(document.getElementById('svcOrder').value)||0,
-    features,is_active:document.getElementById('svcActive').checked
-  };
+async function createSvc(){
+  const title=document.getElementById('newSvcTitle').value.trim();
+  let slug=document.getElementById('newSvcSlug').value.trim()||slugify(title);
+  if(!title){toast('Title is required','error');return}
+  if(!slug){toast('Slug is required','error');return}
+  if(services.some(s=>s.slug===slug)){toast('That slug is already in use — pick another','error');return}
   try{
-    if(id)await db.update('sl_services',`id=eq.${id}`,data);
-    else await db.insert('sl_services',data);
-    toast('Saved','success');closeModal('modalSvc');await loadSvcs();renderSvcs();
+    const rows=await db.insert('sl_services',{title,slug,sort_order:services.length,is_active:true});
+    await loadSvcs();
+    closeModal('modalSvc');
+    openServiceEdit(rows[0].id);
   }catch(e){toast('Error: '+e.message,'error')}
 }
 async function delSvc(id){
-  if(!confirm('Delete this service?'))return;
-  try{await db.delete('sl_services',`id=eq.${id}`);toast('Deleted','success');await loadSvcs();renderSvcs()}
-  catch(e){toast('Error: '+e.message,'error')}
+  if(!confirm('Delete this service and all its photos? This cannot be undone.'))return;
+  try{
+    const sp=getServicePhotos(id);
+    for(const p of sp){
+      if(p.storage_path){
+        try{await fetch(`${SUPABASE_URL}/storage/v1/object/${STORAGE_BUCKET}/${p.storage_path}`,{method:'DELETE',headers:{'apikey':SUPABASE_ANON,'Authorization':`Bearer ${SUPABASE_ANON}`}})}catch{}
+      }
+    }
+    await db.delete('sl_services',`id=eq.${id}`);
+    toast('Deleted','success');
+    await Promise.all([loadSvcs(),loadSvcPhotos()]);
+    renderSvcs();
+  }catch(e){toast('Error: '+e.message,'error')}
+}
+
+/* ════════════════════════════════════════════
+   SERVICES — EDITOR (info, cover, gallery)
+════════════════════════════════════════════ */
+function openServiceEdit(id){
+  const s=services.find(x=>x.id===id);if(!s)return;
+  currentServiceId=id;
+  svcDirty=false;
+  document.querySelectorAll('.page').forEach(el=>el.classList.remove('active'));
+  document.getElementById('page-service-edit').classList.add('active');
+  document.querySelectorAll('.side-link[data-page]').forEach(el=>el.classList.remove('active'));
+  document.querySelector('.side-link[data-page="services"]')?.classList.add('active');
+
+  document.getElementById('svcEditTitle').textContent=s.title;
+  document.getElementById('svcEditTitleIn').value=s.title||'';
+  document.getElementById('svcEditSlug').value=s.slug||'';
+  document.getElementById('svcSlugPreview').textContent=`service.html?slug=${s.slug||''}`;
+  document.getElementById('svcEditPrice').value=s.price_from||'';
+  document.getElementById('svcEditOrder').value=s.sort_order||0;
+  document.getElementById('svcEditDesc').value=s.description||'';
+  document.getElementById('svcEditFeatures').value=(s.features||[]).join('\n');
+  document.getElementById('svcEditActive').checked=!!s.is_active;
+
+  renderSvcCoverArea();
+  renderSvcPhotoGrid();
+}
+function autoSvcSlug(){
+  // Only auto-fill slug while it hasn't been hand-edited away from the auto value
+  const s=services.find(x=>x.id===currentServiceId);
+  const current=document.getElementById('svcEditSlug').value;
+  if(!current||(s&&current===slugify(s.title))){
+    document.getElementById('svcEditSlug').value=slugify(document.getElementById('svcEditTitleIn').value);
+  }
+  document.getElementById('svcSlugPreview').textContent=`service.html?slug=${document.getElementById('svcEditSlug').value}`;
+}
+function markSvcDirty(){
+  svcDirty=true;
+  const btn=document.getElementById('svcInfoSave');
+  if(btn){btn.textContent='Save Info *';btn.classList.add('btn-fill')}
+  document.getElementById('svcSlugPreview').textContent=`service.html?slug=${document.getElementById('svcEditSlug').value}`;
+}
+async function saveSvcInfo(){
+  if(!currentServiceId)return;
+  const title=document.getElementById('svcEditTitleIn').value.trim();
+  const slug=slugify(document.getElementById('svcEditSlug').value);
+  if(!title){toast('Title cannot be empty','error');return}
+  if(!slug){toast('Slug cannot be empty','error');return}
+  if(services.some(s=>s.slug===slug&&s.id!==currentServiceId)){toast('That slug is already in use — pick another','error');return}
+  const features=document.getElementById('svcEditFeatures').value.split('\n').map(x=>x.trim()).filter(Boolean);
+  const data={
+    title,slug,
+    price_from:document.getElementById('svcEditPrice').value||null,
+    sort_order:parseInt(document.getElementById('svcEditOrder').value)||0,
+    description:document.getElementById('svcEditDesc').value||null,
+    features,
+    is_active:document.getElementById('svcEditActive').checked
+  };
+  try{
+    await db.update('sl_services',`id=eq.${currentServiceId}`,data);
+    await loadSvcs();
+    svcDirty=false;
+    document.getElementById('svcEditTitle').textContent=data.title;
+    document.getElementById('svcEditSlug').value=data.slug;
+    document.getElementById('svcSlugPreview').textContent=`service.html?slug=${data.slug}`;
+    document.getElementById('svcInfoSave').textContent='Save Info';
+    toast('Saved','success');
+  }catch(e){toast('Error: '+e.message,'error')}
+}
+async function deleteCurrentSvc(){
+  if(!currentServiceId)return;
+  await delSvc(currentServiceId);
+  if(!services.find(s=>s.id===currentServiceId)){
+    currentServiceId=null;
+    goPage('services');
+  }
+}
+
+/* ── Cover photo ── */
+function renderSvcCoverArea(){
+  const s=services.find(x=>x.id===currentServiceId);
+  if(!s)return;
+  const cover=getServiceCover(s);
+  const prev=document.getElementById('svcCoverPreview');
+  prev.innerHTML=cover?`<img src="${cover.public_url}" alt="">`:'<span class="empty">No cover<br>selected</span>';
+
+  const grid=document.getElementById('svcCoverGrid');
+  const sp=getServicePhotos(currentServiceId);
+  if(!sp.length){
+    grid.innerHTML='<div style="grid-column:1/-1;text-align:center;padding:30px;color:var(--w30);font-size:11px;text-transform:uppercase;letter-spacing:.25em">Upload photos in the gallery section first</div>';
+    return;
+  }
+  grid.innerHTML=sp.map(p=>{
+    const sel=s.cover_photo_id===p.id||(!s.cover_photo_id&&p.is_cover);
+    return `<div class="cover-opt ${sel?'selected':''}" onclick="setSvcCover(${p.id})">
+      <img src="${p.public_url}" alt="">
+      <div class="sel-mark">✓</div>
+    </div>`;
+  }).join('');
+}
+async function setSvcCover(photoId){
+  if(!currentServiceId)return;
+  try{
+    const sp=getServicePhotos(currentServiceId);
+    for(const p of sp){
+      if(p.is_cover&&p.id!==photoId){
+        try{await db.update('sl_service_photos',`id=eq.${p.id}`,{is_cover:false})}catch{}
+      }
+    }
+    await db.update('sl_service_photos',`id=eq.${photoId}`,{is_cover:true});
+    await db.update('sl_services',`id=eq.${currentServiceId}`,{cover_photo_id:photoId});
+    await Promise.all([loadSvcPhotos(),loadSvcs()]);
+    renderSvcCoverArea();
+    renderSvcPhotoGrid();
+    toast('Cover photo set','success');
+  }catch(e){toast('Error: '+e.message,'error')}
+}
+
+/* ── Upload — Cover & Gallery ── */
+let svcCoverUploads=[],svcGalleryUploads=[];
+
+document.addEventListener('DOMContentLoaded',()=>{
+  const cfi=document.getElementById('svcCoverFileInput');
+  if(cfi)cfi.addEventListener('change',e=>{
+    const files=Array.from(e.target.files);
+    if(!files.length)return;
+    svcCoverUploads=files.slice(0,1).map(f=>({file:f,status:'pending'}));
+    renderSvcUploadList('cover');
+    startSvcCoverUpload();
+    cfi.value='';
+  });
+  setupDz('svcCoverDz',files=>{
+    svcCoverUploads=files.slice(0,1).map(f=>({file:f,status:'pending'}));
+    renderSvcUploadList('cover');
+    startSvcCoverUpload();
+  });
+
+  const gfi=document.getElementById('svcGalleryFileInput');
+  if(gfi)gfi.addEventListener('change',e=>{
+    const files=Array.from(e.target.files);
+    if(!files.length)return;
+    svcGalleryUploads=files.map(f=>({file:f,status:'pending'}));
+    renderSvcUploadList('gallery');
+    startSvcGalleryUpload();
+    gfi.value='';
+  });
+  setupDz('svcGalleryDz',files=>{
+    svcGalleryUploads=files.map(f=>({file:f,status:'pending'}));
+    renderSvcUploadList('gallery');
+    startSvcGalleryUpload();
+  });
+});
+
+function renderSvcUploadList(which){
+  const list=which==='cover'?svcCoverUploads:svcGalleryUploads;
+  const el=document.getElementById(which==='cover'?'svcCoverUploadList':'svcGalleryUploadList');
+  if(!list.length){el.innerHTML='';return}
+  el.innerHTML=list.map(p=>`<div class="upload-row">
+    <div class="pname">${esc(p.file.name)}</div>
+    <div class="pstat ${p.status==='ok'?'ok':p.status==='err'?'err':'up'}">${p.status==='ok'?'Done':p.status==='err'?'Failed':p.status==='uploading'?'Uploading...':'Ready'}</div>
+    ${p.status==='err'&&p.errorMsg?`<div class="upload-err-msg">${esc(p.errorMsg.slice(0,300))}</div>`:''}
+  </div>`).join('');
+}
+
+async function uploadSvcOne(file){
+  const ext=(file.name.split('.').pop()||'jpg').toLowerCase();
+  const path=`services/${currentServiceId}/${Date.now()}_${Math.random().toString(36).slice(2,8)}.${ext}`;
+  const up=await fetch(`${SUPABASE_URL}/storage/v1/object/${STORAGE_BUCKET}/${path}`,{
+    method:'POST',
+    headers:{'apikey':SUPABASE_ANON,'Authorization':`Bearer ${SUPABASE_ANON}`,'Content-Type':file.type||'image/jpeg','x-upsert':'true'},
+    body:file
+  });
+  if(!up.ok){const t=await up.text();throw new Error(`Storage ${up.status}: ${t}`)}
+  const publicUrl=`${SUPABASE_URL}/storage/v1/object/public/${STORAGE_BUCKET}/${path}`;
+  return {path,publicUrl};
+}
+
+async function startSvcCoverUpload(){
+  if(!currentServiceId){toast('Save service first','error');return}
+  for(const item of svcCoverUploads){
+    if(item.status==='ok')continue;
+    item.status='uploading';renderSvcUploadList('cover');
+    try{
+      const {path,publicUrl}=await uploadSvcOne(item.file);
+      const rows=await db.insert('sl_service_photos',{
+        service_id:currentServiceId,
+        title:item.file.name.replace(/\.[^.]+$/,''),
+        storage_path:path,public_url:publicUrl,
+        is_cover:true,sort_order:0
+      });
+      const newId=rows[0].id;
+      const sp=servicePhotos.filter(p=>p.service_id===currentServiceId&&p.id!==newId&&p.is_cover);
+      for(const p of sp){try{await db.update('sl_service_photos',`id=eq.${p.id}`,{is_cover:false})}catch{}}
+      await db.update('sl_services',`id=eq.${currentServiceId}`,{cover_photo_id:newId});
+      item.status='ok';
+    }catch(e){console.error(e);item.status='err';item.errorMsg=e.message||String(e);toast('Cover upload failed','error')}
+    renderSvcUploadList('cover');
+  }
+  await Promise.all([loadSvcPhotos(),loadSvcs()]);
+  renderSvcCoverArea();
+  renderSvcPhotoGrid();
+  setTimeout(()=>{svcCoverUploads=[];renderSvcUploadList('cover')},2000);
+}
+
+async function startSvcGalleryUpload(){
+  if(!currentServiceId){toast('Save service first','error');return}
+  let ok=0;
+  for(const item of svcGalleryUploads){
+    if(item.status==='ok')continue;
+    item.status='uploading';renderSvcUploadList('gallery');
+    try{
+      const {path,publicUrl}=await uploadSvcOne(item.file);
+      await db.insert('sl_service_photos',{
+        service_id:currentServiceId,
+        title:item.file.name.replace(/\.[^.]+$/,''),
+        storage_path:path,public_url:publicUrl,
+        is_cover:false,sort_order:0
+      });
+      item.status='ok';ok++;
+    }catch(e){console.error(e);item.status='err';item.errorMsg=e.message||String(e)}
+    renderSvcUploadList('gallery');
+  }
+  if(ok)toast(`${ok} photo${ok>1?'s':''} uploaded`,'success');
+  await loadSvcPhotos();
+  renderSvcCoverArea();
+  renderSvcPhotoGrid();
+  setTimeout(()=>{svcGalleryUploads=[];renderSvcUploadList('gallery')},2500);
+}
+
+/* ── Gallery grid (service edit) ── */
+function renderSvcPhotoGrid(){
+  const s=services.find(x=>x.id===currentServiceId);
+  const sp=getServicePhotos(currentServiceId);
+  document.getElementById('svcGalleryCount').textContent=`${sp.length} ${sp.length===1?'photo':'photos'} for this service`;
+  const grid=document.getElementById('svcPhotoGrid');
+  if(!sp.length){
+    grid.innerHTML='<div style="grid-column:1/-1;text-align:center;padding:60px;color:var(--w30);font-size:12px;text-transform:uppercase;letter-spacing:.3em">No photos yet — drag images above to start</div>';
+    return;
+  }
+  grid.innerHTML=sp.map(p=>{
+    const isCover=s?.cover_photo_id===p.id||p.is_cover;
+    return `<div class="photo-item ${isCover?'is-cover':''}">
+      <img src="${p.public_url}" loading="lazy" alt="">
+      <div class="photo-item-tags">${isCover?'<span class="tag hero">Cover</span>':''}</div>
+      <div class="photo-item-actions">
+        ${!isCover?`<button class="icon-btn" title="Set as cover" onclick="event.stopPropagation();setSvcCover(${p.id})">★</button>`:''}
+        <button class="icon-btn danger" title="Delete" onclick="event.stopPropagation();deleteSvcPhoto(${p.id})">✕</button>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+async function deleteSvcPhoto(photoId){
+  if(!confirm('Delete this photo? It will be removed from storage and the public service page.'))return;
+  const p=servicePhotos.find(x=>x.id===photoId);if(!p)return;
+  try{
+    if(p.storage_path){
+      try{await fetch(`${SUPABASE_URL}/storage/v1/object/${STORAGE_BUCKET}/${p.storage_path}`,{method:'DELETE',headers:{'apikey':SUPABASE_ANON,'Authorization':`Bearer ${SUPABASE_ANON}`}})}catch{}
+    }
+    const s=services.find(x=>x.id===p.service_id);
+    if(s&&s.cover_photo_id===photoId){
+      await db.update('sl_services',`id=eq.${s.id}`,{cover_photo_id:null});
+    }
+    await db.delete('sl_service_photos',`id=eq.${photoId}`);
+    await Promise.all([loadSvcPhotos(),loadSvcs()]);
+    renderSvcCoverArea();
+    renderSvcPhotoGrid();
+    toast('Photo deleted','success');
+  }catch(e){toast('Error: '+e.message,'error')}
 }
 
 /* ════════════════════════════════════════════

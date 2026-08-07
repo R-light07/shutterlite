@@ -8,10 +8,11 @@
 -- ══════════════════════════════════════════════════════════════
 
 -- ── 0. LIMPAR ESTRUTURA ANTIGA ────────────────────────────────
-DROP TABLE IF EXISTS sl_photos       CASCADE;
-DROP TABLE IF EXISTS sl_sessions     CASCADE;
-DROP TABLE IF EXISTS sl_categories   CASCADE;
-DROP TABLE IF EXISTS sl_services     CASCADE;
+DROP TABLE IF EXISTS sl_photos         CASCADE;
+DROP TABLE IF EXISTS sl_sessions       CASCADE;
+DROP TABLE IF EXISTS sl_categories     CASCADE;
+DROP TABLE IF EXISTS sl_service_photos CASCADE;
+DROP TABLE IF EXISTS sl_services       CASCADE;
 DROP TABLE IF EXISTS sl_testimonials CASCADE;
 DROP TABLE IF EXISTS sl_messages     CASCADE;
 DROP TABLE IF EXISTS sl_settings     CASCADE;
@@ -71,16 +72,36 @@ ALTER TABLE sl_sessions
 
 -- ── 5. SERVICES ───────────────────────────────────────────────
 CREATE TABLE sl_services (
-  id          BIGSERIAL PRIMARY KEY,
-  title       TEXT NOT NULL,
-  description TEXT,
-  price_from  TEXT,
-  icon        TEXT,
-  features    TEXT[],
-  sort_order  INT DEFAULT 0,
-  is_active   BOOLEAN DEFAULT TRUE,
-  created_at  TIMESTAMPTZ DEFAULT NOW()
+  id             BIGSERIAL PRIMARY KEY,
+  title          TEXT NOT NULL,
+  slug           TEXT UNIQUE NOT NULL,
+  description    TEXT,
+  price_from     TEXT,
+  icon           TEXT,
+  features       TEXT[],
+  cover_photo_id BIGINT, -- FK adicionada após criação de sl_service_photos
+  sort_order     INT DEFAULT 0,
+  is_active      BOOLEAN DEFAULT TRUE,
+  created_at     TIMESTAMPTZ DEFAULT NOW()
 );
+
+-- ── 5b. SERVICE PHOTOS (imagens específicas de cada serviço) ──
+CREATE TABLE sl_service_photos (
+  id           BIGSERIAL PRIMARY KEY,
+  service_id   BIGINT REFERENCES sl_services(id) ON DELETE CASCADE,
+  title        TEXT,
+  description  TEXT,
+  storage_path TEXT NOT NULL,
+  public_url   TEXT NOT NULL,
+  is_cover     BOOLEAN DEFAULT FALSE,
+  sort_order   INT DEFAULT 0,
+  uploaded_at  TIMESTAMPTZ DEFAULT NOW()
+);
+
+-- FK circular: cover_photo_id -> sl_service_photos
+ALTER TABLE sl_services
+  ADD CONSTRAINT fk_service_cover
+  FOREIGN KEY (cover_photo_id) REFERENCES sl_service_photos(id) ON DELETE SET NULL;
 
 -- ── 6. TESTIMONIALS ───────────────────────────────────────────
 CREATE TABLE sl_testimonials (
@@ -128,15 +149,18 @@ CREATE INDEX idx_photos_cover     ON sl_photos(is_cover);
 CREATE INDEX idx_sessions_cat     ON sl_sessions(category_id);
 CREATE INDEX idx_sessions_hero    ON sl_sessions(cover_in_hero);
 CREATE INDEX idx_messages_read    ON sl_messages(is_read);
+CREATE INDEX idx_service_photos_service ON sl_service_photos(service_id);
+CREATE INDEX idx_services_slug    ON sl_services(slug);
 
 -- ══════════════════════════════════════════════════════════════
 --  RLS — public read / anon full access
 -- ══════════════════════════════════════════════════════════════
 ALTER TABLE sl_admins       ENABLE ROW LEVEL SECURITY;
 ALTER TABLE sl_categories   ENABLE ROW LEVEL SECURITY;
-ALTER TABLE sl_sessions     ENABLE ROW LEVEL SECURITY;
-ALTER TABLE sl_photos       ENABLE ROW LEVEL SECURITY;
-ALTER TABLE sl_services     ENABLE ROW LEVEL SECURITY;
+ALTER TABLE sl_sessions       ENABLE ROW LEVEL SECURITY;
+ALTER TABLE sl_photos         ENABLE ROW LEVEL SECURITY;
+ALTER TABLE sl_services       ENABLE ROW LEVEL SECURITY;
+ALTER TABLE sl_service_photos ENABLE ROW LEVEL SECURITY;
 ALTER TABLE sl_testimonials ENABLE ROW LEVEL SECURITY;
 ALTER TABLE sl_messages     ENABLE ROW LEVEL SECURITY;
 ALTER TABLE sl_settings     ENABLE ROW LEVEL SECURITY;
@@ -147,6 +171,7 @@ CREATE POLICY "anon_all_categories"   ON sl_categories   FOR ALL TO anon USING (
 CREATE POLICY "anon_all_sessions"     ON sl_sessions     FOR ALL TO anon USING (true) WITH CHECK (true);
 CREATE POLICY "anon_all_photos"       ON sl_photos       FOR ALL TO anon USING (true) WITH CHECK (true);
 CREATE POLICY "anon_all_services"     ON sl_services     FOR ALL TO anon USING (true) WITH CHECK (true);
+CREATE POLICY "anon_all_service_photos" ON sl_service_photos FOR ALL TO anon USING (true) WITH CHECK (true);
 CREATE POLICY "anon_all_testimonials" ON sl_testimonials FOR ALL TO anon USING (true) WITH CHECK (true);
 CREATE POLICY "anon_all_messages"     ON sl_messages     FOR ALL TO anon USING (true) WITH CHECK (true);
 CREATE POLICY "anon_all_settings"     ON sl_settings     FOR ALL TO anon USING (true) WITH CHECK (true);
@@ -202,11 +227,11 @@ INSERT INTO sl_settings (key, value) VALUES
   ('contact_location', 'Lisbon, Portugal');
 
 -- Serviços
-INSERT INTO sl_services (title, description, price_from, sort_order) VALUES
-  ('Wedding Photography',   'Cinematic coverage of your most important day, from preparations to the final dance.', 'From €1.200', 1),
-  ('Event Coverage',        'Authentic documentation of corporate events, launches and private celebrations.',     'From €450',   2),
-  ('Portrait Sessions',     'Editorial portraits crafted in studio or on location with a refined aesthetic.',      'From €250',   3),
-  ('Commercial Photography','Brand-focused imagery for products, campaigns and visual identity.',                  'From €600',   4);
+INSERT INTO sl_services (title, slug, description, price_from, sort_order) VALUES
+  ('Wedding Photography',    'wedding-photography',    'Cinematic coverage of your most important day, from preparations to the final dance.', 'From €1.200', 1),
+  ('Event Coverage',         'event-coverage',         'Authentic documentation of corporate events, launches and private celebrations.',     'From €450',   2),
+  ('Portrait Sessions',      'portrait-sessions',      'Editorial portraits crafted in studio or on location with a refined aesthetic.',      'From €250',   3),
+  ('Commercial Photography', 'commercial-photography', 'Brand-focused imagery for products, campaigns and visual identity.',                  'From €600',   4);
 
 -- Testemunhos
 INSERT INTO sl_testimonials (client_name, client_role, content, rating, is_featured) VALUES
