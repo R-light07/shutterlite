@@ -2008,6 +2008,53 @@ function toast(msg,type=''){
   wrap.appendChild(el);
   setTimeout(()=>{el.style.opacity='0';setTimeout(()=>el.remove(),300)},3500);
 }
+
+async function loadBookings(){
+  try{
+    console.log('[Bookings] A carregar pedidos...');
+
+    const rows = await db.select(
+      'sl_bookings',
+      'select=*&order=created_at.desc'
+    );
+
+    bookings = Array.isArray(rows) ? rows : [];
+
+    console.log('[Bookings] Pedidos carregados:', bookings);
+
+    const p = bookings.filter(
+      b => String(b.status || '').toLowerCase() === 'pendente'
+    ).length;
+
+    const badge = document.getElementById('bookingBadge');
+
+    if(badge){
+      if(p > 0){
+        badge.textContent = p;
+        badge.style.display = 'inline-block';
+      }else{
+        badge.textContent = '0';
+        badge.style.display = 'none';
+      }
+    }
+
+  }catch(e){
+    console.error('[Bookings] ERRO AO CARREGAR:', e);
+
+    bookings = [];
+
+    const badge = document.getElementById('bookingBadge');
+    if(badge){
+      badge.style.display = 'none';
+    }
+
+    toast(
+      'Não foi possível carregar as marcações: ' + (e.message || e),
+      'error'
+    );
+  }
+}
+
 </script>
 </body>
 </html>
