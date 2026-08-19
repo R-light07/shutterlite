@@ -910,9 +910,32 @@ let dirty=false;
 let svcDirty=false;
 let activeBookingFilter='all';
 
+//async function initApp(){
+//  await Promise.all([loadCats(),loadSessions(),loadPhotos(),loadSvcs(),loadSvcPhotos(),loadTestis(),loadMsgs(),loadBookings(),loadSettings(),loadSocial()]);
+//  updateDashboard();
+//}
+
 async function initApp(){
-  await Promise.all([loadCats(),loadSessions(),loadPhotos(),loadSvcs(),loadSvcPhotos(),loadTestis(),loadMsgs(),loadBookings(),loadSettings(),loadSocial()]);
-  updateDashboard();
+  try{
+    await Promise.all([
+      loadCats(),
+      loadSessions(),
+      loadPhotos(),
+      loadSvcs(),
+      loadSvcPhotos(),
+      loadTestis(),
+      loadMsgs(),
+      loadBookings(),
+      loadSettings(),
+      loadSocial()
+    ]);
+
+    updateDashboard();
+
+  }catch(e){
+    console.error('[Admin] Erro ao inicializar:', e);
+    toast('Erro ao carregar dados do Admin: ' + (e.message || e), 'error');
+  }
 }
 
 /* ════════════════════════════════════════════
