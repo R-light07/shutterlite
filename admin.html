@@ -865,11 +865,6 @@ const STORAGE_BUCKET = 'portfolio-media';
 const SESSION_KEY = 'sl_admin_session';
 const SESSION_DAYS = 7;
 
-const bookingDb = new SupabaseDB(
-  BOOKING_SUPABASE_URL,
-  BOOKING_SUPABASE_ANON
-);
-
 function H(extra={}){return{'apikey':SUPABASE_ANON,'Authorization':`Bearer ${SUPABASE_ANON}`,'Content-Type':'application/json',...extra}}
 async function api(url,opts={}){const r=await fetch(url,{...opts,headers:{...H(),...(opts.headers||{})}});if(!r.ok&&r.status!==201&&r.status!==204){const t=await r.text();throw new Error(`HTTP ${r.status}: ${t||r.statusText}`)}const t=await r.text();return t?JSON.parse(t):null}
 const db={
