@@ -207,6 +207,11 @@ img{display:block;max-width:100%}
 .badge.unread{background:#fff;color:#000;border-color:#fff}
 .badge.active{border-color:var(--success);color:var(--success)}
 .badge.inactive{color:var(--w40)}
+.badge.status-pendente{border-color:#f5a623;color:#f5a623}
+.badge.status-confirmado{border-color:var(--success);color:var(--success)}
+.badge.status-recusado,.badge.status-cancelado{border-color:var(--danger);color:#ff8080}
+.badge.status-concluido{background:#fff;color:#000;border-color:#fff}
+.booking-filter.active{background:#fff;color:#000;border-color:#fff}
 .star{color:#fff;font-size:12px}
 .star.empty{color:var(--w20)}
 
@@ -293,6 +298,11 @@ img{display:block;max-width:100%}
       Messages
       <span class="side-badge" id="msgBadge" style="display:none">0</span>
     </a>
+    <a class="side-link" data-page="bookings" onclick="goPage('bookings')">
+      <svg viewBox="0 0 24 24"><path d="M19 4h-1V2h-2v2H8V2H6v2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 16H5V10h14v10zm0-12H5V6h14v2zm-7 5h5v5h-5v-5z"/></svg>
+      Bookings
+      <span class="side-badge" id="bookingBadge" style="display:none">0</span>
+    </a>
     <a class="side-link" data-page="settings" onclick="goPage('settings')">
       <svg viewBox="0 0 24 24"><path d="M12 8c-2.21 0-4 1.79-4 4s1.79 4 4 4 4-1.79 4-4-1.79-4-4-4zm8.94 3A8.994 8.994 0 0013 3.06V1h-2v2.06A8.994 8.994 0 003.06 11H1v2h2.06A8.994 8.994 0 0011 20.94V23h2v-2.06A8.994 8.994 0 0020.94 13H23v-2h-2.06zM12 19c-3.87 0-7-3.13-7-7s3.13-7 7-7 7 3.13 7 7-3.13 7-7 7z"/></svg>
       Settings
@@ -327,6 +337,17 @@ img{display:block;max-width:100%}
         <div class="stat-card"><div class="stat-label">Photos</div><div class="stat-num" id="kPhotos">—</div></div>
         <div class="stat-card"><div class="stat-label">Services</div><div class="stat-num" id="kSvcs">—</div></div>
         <div class="stat-card"><div class="stat-label">Unread Messages</div><div class="stat-num" id="kMsgs">—</div></div>
+        <div class="stat-card"><div class="stat-label">Pending Bookings</div><div class="stat-num" id="kBookings">—</div></div>
+      </div>
+      <div class="panel">
+        <div class="panel-head">
+          <div>
+            <div class="panel-sub">Recent</div>
+            <div class="panel-title">Latest Booking Requests</div>
+          </div>
+          <button class="btn btn-outline btn-sm" onclick="goPage('bookings')">View All →</button>
+        </div>
+        <table class="tbl"><thead><tr><th>Code</th><th>Client</th><th>Session</th><th>Date</th><th>Status</th></tr></thead><tbody id="recentBookings"></tbody></table>
       </div>
       <div class="panel">
         <div class="panel-head">
@@ -562,6 +583,23 @@ img{display:block;max-width:100%}
       </div>
     </div>
 
+    <!-- BOOKINGS -->
+    <div class="page" id="page-bookings">
+      <div class="topbar">
+        <div><div class="page-sub">Pedidos de Marcação</div><h2 class="page-title">Bookings</h2></div>
+        <div class="topbar-actions" id="bookingFilterTabs">
+          <button class="btn btn-outline btn-sm booking-filter active" data-status="all" onclick="filterBookings('all',this)">Todos</button>
+          <button class="btn btn-outline btn-sm booking-filter" data-status="pendente" onclick="filterBookings('pendente',this)">Pendentes</button>
+          <button class="btn btn-outline btn-sm booking-filter" data-status="confirmado" onclick="filterBookings('confirmado',this)">Confirmados</button>
+          <button class="btn btn-outline btn-sm booking-filter" data-status="recusado" onclick="filterBookings('recusado',this)">Recusados</button>
+          <button class="btn btn-outline btn-sm booking-filter" data-status="concluido" onclick="filterBookings('concluido',this)">Concluídos</button>
+        </div>
+      </div>
+      <div class="panel">
+        <table class="tbl"><thead><tr><th>Código</th><th>Cliente</th><th>Sessão</th><th>Data / Hora</th><th>Local</th><th>Status</th><th>Actions</th></tr></thead><tbody id="bookingTable"></tbody></table>
+      </div>
+    </div>
+
     <!-- MESSAGES -->
     <div class="page" id="page-messages">
       <div class="topbar">
@@ -714,6 +752,72 @@ img{display:block;max-width:100%}
   </div>
 </div>
 
+<!-- BOOKING -->
+<div class="modal-bg" id="modalBooking">
+  <div class="modal-box lg">
+    <div class="modal-head">
+      <div>
+        <div class="modal-title">Detalhes da Marcação</div>
+        <div class="panel-sub" style="margin-top:6px" id="bkModalCode">—</div>
+      </div>
+      <button class="modal-close" onclick="closeModal('modalBooking')">✕</button>
+    </div>
+    <input type="hidden" id="bkModalId">
+
+    <div class="field-row">
+      <div class="field"><label>Nome</label><div style="padding:14px 0;font-size:14px" id="bkModalName"></div></div>
+      <div class="field"><label>Estado atual</label>
+        <select id="bkModalStatus">
+          <option value="pendente">Pendente</option>
+          <option value="confirmado">Confirmado</option>
+          <option value="recusado">Recusado</option>
+          <option value="concluido">Concluído</option>
+          <option value="cancelado">Cancelado</option>
+        </select>
+      </div>
+    </div>
+    <div class="field-row">
+      <div class="field"><label>Telefone / WhatsApp</label><div style="padding:14px 0;font-size:14px" id="bkModalPhone"></div></div>
+      <div class="field"><label>E-mail</label><div style="padding:14px 0;font-size:14px" id="bkModalEmail"></div></div>
+    </div>
+
+    <div class="field-row-3">
+      <div class="field"><label>Tipo de Sessão</label><div style="padding:14px 0;font-size:14px" id="bkModalType"></div></div>
+      <div class="field"><label>Pacote</label><div style="padding:14px 0;font-size:14px" id="bkModalPackage"></div></div>
+      <div class="field"><label>Duração</label><div style="padding:14px 0;font-size:14px" id="bkModalDuration"></div></div>
+    </div>
+    <div class="field-row-3">
+      <div class="field"><label>Data</label><div style="padding:14px 0;font-size:14px" id="bkModalDate"></div></div>
+      <div class="field"><label>Hora</label><div style="padding:14px 0;font-size:14px" id="bkModalTime"></div></div>
+      <div class="field"><label>Nº Pessoas</label><div style="padding:14px 0;font-size:14px" id="bkModalPeople"></div></div>
+    </div>
+
+    <div class="field-row">
+      <div class="field"><label>Local</label><div style="padding:14px 0;font-size:14px" id="bkModalLocation"></div></div>
+      <div class="field"><label>Endereço</label><div style="padding:14px 0;font-size:14px" id="bkModalAddress"></div></div>
+    </div>
+
+    <div class="field"><label>Objetivo / Estilo</label><div style="padding:14px 0;font-size:14px" id="bkModalStyle"></div></div>
+    <div class="field"><label>Método de Pagamento</label><div style="padding:14px 0;font-size:14px" id="bkModalPayment"></div></div>
+    <div class="field"><label>Observações do Cliente</label>
+      <div style="padding:18px;background:var(--neutral-900);border:1px solid var(--w10);border-radius:14px;font-size:14px;line-height:1.7;white-space:pre-wrap" id="bkModalNotes">—</div>
+    </div>
+
+    <div class="field"><label>Notas Internas (não visíveis ao cliente)</label>
+      <textarea id="bkModalAdminNotes" rows="3" placeholder="Ex: cliente pediu para ligar antes das 18h..."></textarea>
+    </div>
+
+    <div class="panel-sub" style="margin-top:6px" id="bkModalMeta"></div>
+
+    <div class="modal-foot">
+      <button class="btn btn-danger" onclick="deleteBooking()">Delete</button>
+      <button class="btn btn-outline" id="bkModalWhatsapp">WhatsApp</button>
+      <button class="btn btn-outline" id="bkModalReply">Reply via Email</button>
+      <button class="btn btn-fill" onclick="saveBookingStatus()">Guardar Alterações</button>
+    </div>
+  </div>
+</div>
+
 <!-- SOCIAL -->
 <div class="modal-bg" id="modalSocial">
   <div class="modal-box">
@@ -798,15 +902,16 @@ document.addEventListener('DOMContentLoaded',()=>{ if(getSession())showApp() });
 /* ════════════════════════════════════════════
    STATE
 ════════════════════════════════════════════ */
-let categories=[],sessions=[],photos=[],services=[],servicePhotos=[],testimonials=[],messages=[],settings={},social=[];
+let categories=[],sessions=[],photos=[],services=[],servicePhotos=[],testimonials=[],messages=[],settings={},social=[],bookings=[];
 let editing={};
 let currentSessionId=null;
 let currentServiceId=null;
 let dirty=false;
 let svcDirty=false;
+let activeBookingFilter='all';
 
 async function initApp(){
-  await Promise.all([loadCats(),loadSessions(),loadPhotos(),loadSvcs(),loadSvcPhotos(),loadTestis(),loadMsgs(),loadSettings(),loadSocial()]);
+  await Promise.all([loadCats(),loadSessions(),loadPhotos(),loadSvcs(),loadSvcPhotos(),loadTestis(),loadMsgs(),loadBookings(),loadSettings(),loadSocial()]);
   updateDashboard();
 }
 
@@ -825,6 +930,7 @@ function goPage(p){
   if(p==='services'){    currentServiceId=null; renderSvcs(); }
   if(p==='testimonials') renderTestis();
   if(p==='messages')     renderMsgs();
+  if(p==='bookings'){    activeBookingFilter='all'; document.querySelectorAll('.booking-filter').forEach(b=>b.classList.toggle('active',b.dataset.status==='all')); renderBookings(); }
   if(p==='settings')     renderSettings();
   if(p==='social')       renderSocial();
   if(p==='dashboard')    updateDashboard();
@@ -841,6 +947,7 @@ async function loadSvcs(){services=await db.select('sl_services','order=sort_ord
 async function loadSvcPhotos(){servicePhotos=await db.select('sl_service_photos','order=sort_order.asc,uploaded_at.asc')||[]}
 async function loadTestis(){testimonials=await db.select('sl_testimonials','order=created_at.desc')||[]}
 async function loadMsgs(){messages=await db.select('sl_messages','order=created_at.desc')||[];const u=messages.filter(m=>!m.is_read).length;const b=document.getElementById('msgBadge');if(u>0){b.textContent=u;b.style.display='inline-block'}else b.style.display='none'}
+async function loadBookings(){bookings=await db.select('sl_bookings','order=created_at.desc')||[];const p=bookings.filter(b=>b.status==='pendente').length;const badge=document.getElementById('bookingBadge');if(p>0){badge.textContent=p;badge.style.display='inline-block'}else badge.style.display='none'}
 async function loadSettings(){const rows=await db.select('sl_settings')||[];settings={};rows.forEach(r=>settings[r.key]=r.value)}
 async function loadSocial(){social=await db.select('sl_social','order=sort_order.asc')||[]}
 
@@ -852,6 +959,17 @@ function updateDashboard(){
   document.getElementById('kPhotos').textContent=photos.length;
   document.getElementById('kSvcs').textContent=services.filter(s=>s.is_active).length;
   document.getElementById('kMsgs').textContent=messages.filter(m=>!m.is_read).length;
+  document.getElementById('kBookings').textContent=bookings.filter(b=>b.status==='pendente').length;
+
+  const recentB=bookings.slice(0,5);
+  const tbodyB=document.getElementById('recentBookings');
+  if(!recentB.length){tbodyB.innerHTML='<tr><td colspan="5" class="tbl-empty">No booking requests yet</td></tr>'}
+  else tbodyB.innerHTML=recentB.map(b=>`<tr style="cursor:pointer" onclick="goPage('bookings');setTimeout(()=>viewBooking(${b.id}),100)">
+    <td>${esc(b.code)}</td><td>${esc(b.name)}</td><td>${esc(b.session_type)}</td>
+    <td>${new Date(b.session_date).toLocaleDateString()}</td>
+    <td><span class="badge status-${b.status}">${bookingStatusLabel(b.status)}</span></td>
+  </tr>`).join('');
+
   const recent=messages.slice(0,5);
   const tbody=document.getElementById('recentMsgs');
   if(!recent.length){tbody.innerHTML='<tr><td colspan="5" class="tbl-empty">No messages yet</td></tr>';return}
@@ -1657,6 +1775,85 @@ async function saveTesti(){
 async function delTesti(id){
   if(!confirm('Delete this testimonial?'))return;
   try{await db.delete('sl_testimonials',`id=eq.${id}`);toast('Deleted','success');await loadTestis();renderTestis()}
+  catch(e){toast('Error: '+e.message,'error')}
+}
+
+/* ════════════════════════════════════════════
+   BOOKINGS
+════════════════════════════════════════════ */
+function bookingStatusLabel(s){
+  return {pendente:'Pendente',confirmado:'Confirmado',recusado:'Recusado',concluido:'Concluído',cancelado:'Cancelado'}[s]||s;
+}
+function filterBookings(status,btn){
+  activeBookingFilter=status;
+  document.querySelectorAll('.booking-filter').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  renderBookings();
+}
+function renderBookings(){
+  const tb=document.getElementById('bookingTable');
+  let list=bookings;
+  if(activeBookingFilter!=='all') list=list.filter(b=>b.status===activeBookingFilter);
+  if(!list.length){tb.innerHTML='<tr><td colspan="7" class="tbl-empty">No booking requests yet</td></tr>';return}
+  tb.innerHTML=list.map(b=>`<tr>
+    <td style="font-family:'Courier New',monospace;font-size:12px">${esc(b.code)}</td>
+    <td>${esc(b.name)}</td>
+    <td>${esc(b.session_type)}<br><span style="color:var(--w40);font-size:11px">${esc(b.package)}</span></td>
+    <td>${new Date(b.session_date).toLocaleDateString()}<br><span style="color:var(--w40);font-size:11px">${esc((b.session_time||'').slice(0,5))}</span></td>
+    <td>${esc(b.location)}</td>
+    <td><span class="badge status-${b.status}">${bookingStatusLabel(b.status)}</span></td>
+    <td>
+      <button class="btn btn-outline btn-sm" onclick="viewBooking(${b.id})">View</button>
+      <button class="btn btn-danger btn-sm" onclick="delBooking(${b.id})">Delete</button>
+    </td>
+  </tr>`).join('');
+}
+function viewBooking(id){
+  const b=bookings.find(x=>x.id===id);if(!b)return;
+  document.getElementById('bkModalId').value=b.id;
+  document.getElementById('bkModalCode').textContent=b.code;
+  document.getElementById('bkModalName').textContent=b.name;
+  document.getElementById('bkModalStatus').value=b.status;
+  document.getElementById('bkModalPhone').textContent=b.phone;
+  document.getElementById('bkModalEmail').textContent=b.email;
+  document.getElementById('bkModalType').textContent=b.session_type;
+  document.getElementById('bkModalPackage').textContent=b.package;
+  document.getElementById('bkModalDuration').textContent=b.duration;
+  document.getElementById('bkModalDate').textContent=new Date(b.session_date).toLocaleDateString();
+  document.getElementById('bkModalTime').textContent=(b.session_time||'').slice(0,5);
+  document.getElementById('bkModalPeople').textContent=b.people;
+  document.getElementById('bkModalLocation').textContent=b.location;
+  document.getElementById('bkModalAddress').textContent=b.address||'—';
+  document.getElementById('bkModalStyle').textContent=b.style;
+  document.getElementById('bkModalPayment').textContent=b.payment_method;
+  document.getElementById('bkModalNotes').textContent=b.notes||'—';
+  document.getElementById('bkModalAdminNotes').value=b.admin_notes||'';
+  document.getElementById('bkModalMeta').textContent=`Pedido recebido em ${new Date(b.created_at).toLocaleString()}`;
+  const phoneDigits=(b.phone||'').replace(/[^\d+]/g,'').replace(/^\+?/,'');
+  document.getElementById('bkModalWhatsapp').onclick=()=>window.open(`https://wa.me/${phoneDigits}`,'_blank');
+  document.getElementById('bkModalReply').onclick=()=>window.location.href=`mailto:${b.email}?subject=Re: A sua marcação ${b.code} — SHUTTERLITE`;
+  openModal('modalBooking');
+}
+async function saveBookingStatus(){
+  const id=document.getElementById('bkModalId').value;
+  const status=document.getElementById('bkModalStatus').value;
+  const admin_notes=document.getElementById('bkModalAdminNotes').value.trim()||null;
+  try{
+    await db.update('sl_bookings',`id=eq.${id}`,{status,admin_notes});
+    toast('Marcação atualizada','success');
+    closeModal('modalBooking');
+    await loadBookings();renderBookings();updateDashboard();
+  }catch(e){toast('Error: '+e.message,'error')}
+}
+async function delBooking(id){
+  if(!confirm('Eliminar este pedido de marcação?'))return;
+  try{await db.delete('sl_bookings',`id=eq.${id}`);toast('Deleted','success');await loadBookings();renderBookings();updateDashboard()}
+  catch(e){toast('Error: '+e.message,'error')}
+}
+async function deleteBooking(){
+  const id=document.getElementById('bkModalId').value;
+  if(!confirm('Eliminar este pedido de marcação?'))return;
+  try{await db.delete('sl_bookings',`id=eq.${id}`);toast('Deleted','success');closeModal('modalBooking');await loadBookings();renderBookings();updateDashboard()}
   catch(e){toast('Error: '+e.message,'error')}
 }
 

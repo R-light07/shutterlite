@@ -1,0 +1,328 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="description" content="SHUTTERLITE — Premium photography services.">
+<title>SHUTTERLITE — Serviço</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@200;300;400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+<link rel="icon" type="image/png" href="assets/favicon.png">
+<link rel="icon" href="favicon.ico">
+<style>
+.svc-hero{padding:180px 24px 80px;text-align:center}
+.svc-back{display:inline-flex;align-items:center;gap:8px;color:var(--w50);text-transform:uppercase;letter-spacing:.25em;font-size:11px;margin-bottom:32px;transition:color .3s}
+.svc-back:hover{color:#fff}
+.svc-back svg{width:14px;height:14px;fill:currentColor}
+.svc-price-tag{display:inline-block;margin-top:24px;padding:10px 24px;border:1px solid var(--w20);border-radius:9999px;text-transform:uppercase;letter-spacing:.2em;font-size:12px;color:var(--w70)}
+.svc-desc{max-width:44rem;margin:24px auto 0;color:var(--w60);font-size:16px;line-height:1.8}
+.svc-features{max-width:44rem;margin:32px auto 0;display:flex;flex-wrap:wrap;gap:10px;justify-content:center}
+.svc-feature{padding:8px 18px;border:1px solid var(--w10);border-radius:9999px;font-size:11px;text-transform:uppercase;letter-spacing:.15em;color:var(--w50)}
+.svc-cta{margin-top:40px}
+.svc-count{margin:0 0 48px;text-align:center;color:var(--w40);font-size:12px;text-transform:uppercase;letter-spacing:.3em}
+.svc-state{grid-column:1/-1;text-align:center;padding:100px 24px;color:var(--w40);font-size:16px;font-weight:300;letter-spacing:.05em}
+body.light-theme .svc-back{color:var(--w50, #666)}
+body.light-theme .svc-price-tag{color:#111;border-color:rgba(0,0,0,.15)}
+body.light-theme .svc-desc{color:#444}
+body.light-theme .svc-feature{color:#555;border-color:rgba(0,0,0,.1)}
+body.light-theme .svc-count{color:#888}
+</style>
+</head>
+<body>
+
+<!-- LOADER -->
+<div id="loader">
+  <div style="text-align:center">
+    <div class="loader-text">SHUTTERLITE</div>
+    <div class="loader-bar"></div>
+  </div>
+</div>
+
+<!-- NAV -->
+<header id="nav" class="scrolled">
+  <div class="nav-inner">
+    <a href="index.html#hero" class="nav-logo">SHUTTERLITE</a>
+    <nav class="nav-links">
+      <a href="index.html#hero">Início</a>
+      <a href="index.html#portfolio">Portfólio</a>
+      <a href="index.html#about">Acerca</a>
+      <a href="index.html#services">Serviços</a>
+      <a href="index.html#contact">Contactos</a>
+    </nav>
+    <div class="nav-btn">
+      <label class="switch">
+        <input type="checkbox" id="themeToggle" onchange="toggleTheme()">
+        <span class="slider"></span>
+      </label>
+      <button class="nav-mobile" onclick="toggleMobileMenu()" aria-label="Menu">
+        <label class="hamburger" for="menuToggle" aria-label="Menu">
+          <input type="checkbox" id="menuToggle">
+          <svg viewBox="0 0 32 32">
+            <path class="line line-top-bottom" d="M27 10 13 10C10.8 10 9 8.2 9 6 9 3.5 10.8 2 13 2 15.2 2 17 3.8 17 6L17 26C17 28.2 18.8 30 21 30 23.2 30 25 28.2 25 26 25 23.8 23.2 22 21 22L7 22"></path>
+            <path class="line" d="M7 16 27 16"></path>
+          </svg>
+        </label>
+      </button>
+    </div>
+  </div>
+</header>
+
+<div id="mobileMenu">
+  <a href="index.html#hero" onclick="toggleMobileMenu()">Início</a>
+  <a href="index.html#portfolio" onclick="toggleMobileMenu()">Portfólio</a>
+  <a href="index.html#about" onclick="toggleMobileMenu()">Acerca</a>
+  <a href="index.html#services" onclick="toggleMobileMenu()">Serviços</a>
+  <a href="index.html#contact" onclick="toggleMobileMenu()">Contactos</a>
+</div>
+
+<!-- SERVICE HERO / INFO -->
+<section class="svc-hero">
+  <div class="section-narrow">
+    <a href="index.html#services" class="svc-back">
+      <svg viewBox="0 0 24 24"><path d="M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20v-2z"/></svg>
+      Voltar aos Serviços
+    </a>
+    <p class="section-eyebrow" id="svcEyebrow">Serviço</p>
+    <h1 class="section-title" id="svcTitle">—</h1>
+    <p class="svc-desc" id="svcDesc"></p>
+    <div class="svc-features" id="svcFeatures"></div>
+    <div id="svcPriceWrap"><span class="svc-price-tag" id="svcPrice"></span></div>
+    <div class="svc-cta">
+      <a href="index.html#contact" class="btn-pill primary">Agendar este Serviço</a>
+    </div>
+  </div>
+</section>
+
+<!-- SERVICE GALLERY -->
+<section class="section" style="padding-top:0">
+  <div class="section-narrow">
+    <p class="svc-count" id="svcCount">A carregar imagens...</p>
+    <div class="sm-grid" id="svcGrid" style="max-width:var(--max-w);margin:0 auto"></div>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <div class="footer-inner">
+    <h2 class="footer-logo">SHUTTERLITE</h2>
+    <div class="footer-social" id="footerSocial">
+      <a href="index.html#">Instagram</a>
+      <a href="index.html#">Facebook</a>
+    </div>
+  </div>
+  <div class="footer-bottom">
+    <span id="footerCopy">© 2026 SHUTTERLITE. Todos os direitos reservados.</span>
+    <a href="admin.html">Admin →</a>
+  </div>
+</footer>
+
+<!-- LIGHTBOX -->
+<div id="lightbox">
+  <div class="lb-bar">
+    <div class="lb-titles">
+      <div class="lb-title" id="lbTitle">—</div>
+      <div class="lb-meta" id="lbMeta"></div>
+    </div>
+    <div class="lb-actions">
+      <button class="lb-btn" onclick="lbDownload()">Download</button>
+      <button class="lb-btn danger" onclick="closeLightbox()">Close</button>
+    </div>
+  </div>
+  <div class="lb-stage">
+    <button class="lb-nav lb-prev" onclick="lbNav(-1)" aria-label="Previous">←</button>
+    <img id="lbImg" src="" alt="">
+    <button class="lb-nav lb-next" onclick="lbNav(1)" aria-label="Next">→</button>
+    <div class="lb-counter" id="lbCounter"></div>
+  </div>
+</div>
+
+<script>
+/* ════════════════════════════════════════════
+   SUPABASE CONFIG
+════════════════════════════════════════════ */
+const SUPABASE_URL  = 'https://utcfzksfipgsktupwusg.supabase.co';
+const SUPABASE_ANON = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InV0Y2Z6a3NmaXBnc2t0dXB3dXNnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODYwMTUwNjgsImV4cCI6MjEwMTU5MTA2OH0.Hp4nBYqZwRtmi50teeH5T-N-APT2y5HWrmylvGV-7n0';
+const REST = `${SUPABASE_URL}/rest/v1`;
+
+function apiH(extra={}){return{'apikey':SUPABASE_ANON,'Authorization':`Bearer ${SUPABASE_ANON}`,'Content-Type':'application/json',...extra}}
+async function apiFetch(url,opts={}){const r=await fetch(url,{...opts,headers:{...apiH(),...(opts.headers||{})}});const t=await r.text();return t?JSON.parse(t):null}
+const db={ select:(t,p='')=>apiFetch(`${REST}/${t}${p?'?'+p:''}`) };
+
+/* ════════════════════════════════════════════
+   STATE
+════════════════════════════════════════════ */
+let service = null;
+let servicePhotos = [];
+let lbIdx = 0;
+
+function escapeHtml(s){ if (s == null) return ''; return String(s).replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m])); }
+function getParam(name){ return new URLSearchParams(window.location.search).get(name); }
+
+/* ════════════════════════════════════════════
+   INIT
+════════════════════════════════════════════ */
+document.addEventListener('DOMContentLoaded', async () => {
+  await loadSocial();
+  await loadService();
+  setTimeout(() => document.getElementById('loader').classList.add('out'), 500);
+});
+
+async function loadService() {
+  const slug = getParam('slug');
+  const id = getParam('id');
+  const grid = document.getElementById('svcGrid');
+  const count = document.getElementById('svcCount');
+
+  if (!slug && !id) {
+    document.getElementById('svcTitle').textContent = 'Serviço não encontrado';
+    count.textContent = '';
+    grid.innerHTML = '<div class="svc-state">Nenhum serviço foi especificado.</div>';
+    return;
+  }
+
+  try {
+    const filter = slug ? `slug=eq.${encodeURIComponent(slug)}` : `id=eq.${encodeURIComponent(id)}`;
+    const rows = await db.select('sl_services', `${filter}&is_active=eq.true&limit=1`);
+    service = rows && rows[0];
+
+    if (!service) {
+      document.getElementById('svcTitle').textContent = 'Serviço não encontrado';
+      count.textContent = '';
+      grid.innerHTML = '<div class="svc-state">Este serviço não existe ou já não está disponível.</div>';
+      return;
+    }
+
+    document.title = `SHUTTERLITE — ${service.title}`;
+    document.getElementById('svcTitle').textContent = service.title;
+    document.getElementById('svcDesc').textContent = service.description || '';
+    document.getElementById('svcDesc').style.display = service.description ? 'block' : 'none';
+
+    if (service.price_from) {
+      document.getElementById('svcPrice').textContent = service.price_from;
+    } else {
+      document.getElementById('svcPriceWrap').style.display = 'none';
+    }
+
+    const featuresEl = document.getElementById('svcFeatures');
+    if (service.features && service.features.length) {
+      featuresEl.innerHTML = service.features.map(f => `<span class="svc-feature">${escapeHtml(f)}</span>`).join('');
+    }
+
+    servicePhotos = await db.select('sl_service_photos', `service_id=eq.${service.id}&order=sort_order.asc,uploaded_at.asc`) || [];
+    renderGallery();
+  } catch (e) {
+    console.warn('Service load error:', e);
+    count.textContent = '';
+    grid.innerHTML = '<div class="svc-state">Erro ao carregar este serviço. Tente novamente mais tarde.</div>';
+  }
+}
+
+function renderGallery() {
+  const grid = document.getElementById('svcGrid');
+  const count = document.getElementById('svcCount');
+  if (!servicePhotos.length) {
+    count.textContent = '';
+    grid.innerHTML = '<div class="svc-state">Ainda não há imagens para este serviço.</div>';
+    return;
+  }
+  count.textContent = `${servicePhotos.length} ${servicePhotos.length === 1 ? 'imagem' : 'imagens'}`;
+  grid.innerHTML = servicePhotos.map((p, i) => `
+    <div class="sm-photo" onclick="openLightbox(${i})">
+      <img src="${p.public_url}" alt="${escapeHtml(p.title || service.title)}" loading="lazy">
+      <div class="sm-photo-num">${String(i+1).padStart(2,'0')}</div>
+    </div>
+  `).join('');
+}
+
+/* ════════════════════════════════════════════
+   LIGHTBOX
+════════════════════════════════════════════ */
+function openLightbox(i) {
+  if (!servicePhotos.length) return;
+  lbIdx = i;
+  renderLb();
+  const lb = document.getElementById('lightbox');
+  lb.style.display = 'flex';
+  setTimeout(() => lb.classList.add('open'), 10);
+}
+function renderLb() {
+  const p = servicePhotos[lbIdx];
+  if (!p) return;
+  const img = document.getElementById('lbImg');
+  img.style.opacity = '0';
+  img.src = p.public_url;
+  img.onload = () => img.style.opacity = '1';
+  document.getElementById('lbTitle').textContent = p.title || service?.title || 'Photograph';
+  document.getElementById('lbMeta').textContent = service?.title || 'Photography';
+  document.getElementById('lbCounter').textContent = `${lbIdx+1} / ${servicePhotos.length}`;
+}
+function lbNav(d) {
+  lbIdx = (lbIdx + d + servicePhotos.length) % servicePhotos.length;
+  renderLb();
+}
+function closeLightbox() {
+  document.getElementById('lightbox').classList.remove('open');
+  setTimeout(() => document.getElementById('lightbox').style.display = 'none', 300);
+}
+function lbDownload() {
+  const p = servicePhotos[lbIdx]; if (!p) return;
+  const a = document.createElement('a');
+  a.href = p.public_url;
+  a.download = (p.storage_path||'photo.jpg').split('/').pop();
+  a.target = '_blank';
+  a.click();
+}
+document.addEventListener('keydown', e => {
+  if (document.getElementById('lightbox').classList.contains('open')) {
+    if (e.key === 'ArrowLeft')  lbNav(-1);
+    if (e.key === 'ArrowRight') lbNav(1);
+    if (e.key === 'Escape')     closeLightbox();
+  }
+});
+
+/* ════════════════════════════════════════════
+   FOOTER SOCIAL
+════════════════════════════════════════════ */
+async function loadSocial() {
+  try {
+    const social = await db.select('sl_social', 'is_active=eq.true&order=sort_order.asc') || [];
+    if (!social.length) return;
+    document.getElementById('footerSocial').innerHTML = social.map(s =>
+      `<a href="${s.url}" target="_blank" rel="noopener">${escapeHtml(s.platform)}</a>`
+    ).join('');
+  } catch(e){ console.warn('Social:', e); }
+}
+
+/* ════════════════════════════════════════════
+   NAV / MOBILE / THEME (shared behaviour with index.html)
+════════════════════════════════════════════ */
+const menuToggle = document.getElementById("menuToggle");
+const mobileMenu = document.getElementById("mobileMenu");
+menuToggle.addEventListener("change", function () {
+  mobileMenu.classList.toggle("open", menuToggle.checked);
+});
+document.querySelectorAll("#mobileMenu a").forEach(function (link) {
+  link.addEventListener("click", function () {
+    menuToggle.checked = false;
+    mobileMenu.classList.remove("open");
+  });
+});
+function toggleTheme() {
+  const body = document.body;
+  body.classList.toggle("light-theme");
+  const light = body.classList.contains("light-theme");
+  localStorage.setItem("theme", light ? "light" : "dark");
+  document.getElementById("themeToggle").checked = light;
+}
+(function () {
+  const saved = localStorage.getItem("theme");
+  if (saved === "light") document.body.classList.add("light-theme");
+  window.addEventListener("DOMContentLoaded", () => {
+    document.getElementById("themeToggle").checked = document.body.classList.contains("light-theme");
+  });
+})();
+</script>
+</body>
+</html>

@@ -1,31 +1,48 @@
 /* ════════════════════════════════════════════════════════════
    SHUTTERLITE — Marcação de Sessões Fotográficas (JS puro)
 
-   Integração com backend:
-   Se existir no site uma instância global `db` com um método
-   `db.insert(tabela, dados)` (tal como é usado no formulário de
-   contacto do site, ex.: db.insert('sl_messages', {...})), este
-   script tenta gravar o pedido em 'sl_bookings' automaticamente.
-   Caso `db` não exista, o pedido fica apenas registado em memória
-   (`window.__shutterliteBookings`) e no console, para que o
-   formulário continue a funcionar de forma independente.
+   Grava cada pedido diretamente na tabela `sl_bookings` do mesmo
+   projeto Supabase usado pelo resto do site (mesmas credenciais
+   anon key que index.html / admin.html), para que os pedidos
+   fiquem visíveis e geríveis a partir do admin.html.
 ════════════════════════════════════════════════════════════ */
 (function () {
   'use strict';
 
+  /* ── Supabase (mesmo projeto do site) ────────────────────── */
+  const SUPABASE_URL  = 'https://ckighonenakuruscgvps.supabase.co';
+  const SUPABASE_ANON = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImNraWdob25lbmFrdXJ1c2NndnBzIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzYyOTE5ODIsImV4cCI6MjA5MTg2Nzk4Mn0.y3O-xbECIrMTj8Qg_9EI7a5BuepzzuhAVZLyKjGw3ow';
+  const REST = `${SUPABASE_URL}/rest/v1`;
+
+  function apiHeaders(extra = {}) {
+    return { 'apikey': SUPABASE_ANON, 'Authorization': `Bearer ${SUPABASE_ANON}`, 'Content-Type': 'application/json', ...extra };
+  }
+  async function apiFetch(url, opts = {}) {
+    const r = await fetch(url, { ...opts, headers: { ...apiHeaders(), ...(opts.headers || {}) } });
+    if (!r.ok) {
+      const t = await r.text();
+      throw new Error(`HTTP ${r.status}: ${t || r.statusText}`);
+    }
+    const t = await r.text();
+    return t ? JSON.parse(t) : null;
+  }
+  const db = {
+    insert: (t, b) => apiFetch(`${REST}/${t}`, { method: 'POST', headers: { 'Prefer': 'return=representation' }, body: JSON.stringify(b) })
+  };
+
   const form = document.getElementById('bookingForm');
-  if (!form) return; // secção não presente nesta página
+  if (!form) return; // secção/página não presente
 
   const submitBtn      = document.getElementById('bookingSubmitBtn');
   const successPanel   = document.getElementById('bookingSuccess');
   const formErrorBox   = document.getElementById('bookingFormError');
-  const codeDisplay     = document.getElementById('bookingCodeDisplay');
-  const copyBtn         = document.getElementById('bookingCopyBtn');
-  const newBookingBtn   = document.getElementById('bookingNewBtn');
-  const addressWrap     = document.getElementById('bkAddressWrap');
-  const addressInput    = document.getElementById('bkAddress');
-  const dateInput       = document.getElementById('bkDate');
-  const locationRadios  = form.querySelectorAll('input[name="bkLocation"]');
+  const codeDisplay    = document.getElementById('bookingCodeDisplay');
+  const copyBtn        = document.getElementById('bookingCopyBtn');
+  const newBookingBtn  = document.getElementById('bookingNewBtn');
+  const addressWrap    = document.getElementById('bkAddressWrap');
+  const addressInput   = document.getElementById('bkAddress');
+  const dateInput      = document.getElementById('bkDate');
+  const locationRadios = form.querySelectorAll('input[name="bkLocation"]');
 
   window.__shutterliteBookings = window.__shutterliteBookings || [];
 
@@ -42,9 +59,7 @@
     const needsAddress = selected && selected.value !== 'Estúdio';
     addressWrap.classList.toggle('open', !!needsAddress);
     addressInput.required = !!needsAddress;
-    if (!needsAddress) {
-      clearFieldError('bkAddress');
-    }
+    if (!needsAddress) clearFieldError('bkAddress');
   }
   locationRadios.forEach(r => r.addEventListener('change', updateAddressVisibility));
   updateAddressVisibility();
@@ -52,19 +67,19 @@
   /* ── Helpers de validação visual ────────────────────────── */
   function fieldWrapperFor(id) {
     const el = document.getElementById(id);
-    return el ? el.closest('.booking-field') : null;
+    return el ? el.closest('.booking-field') : document.querySelector('[data-field="' + id + '"]');
   }
   function showFieldError(id, message) {
-    const wrap = fieldWrapperFor(id) || document.querySelector('[data-field="' + id + '"]');
+    const wrap = fieldWrapperFor(id);
     if (!wrap) return;
     wrap.classList.add('invalid');
     if (message) {
-      const errEl = wrap.querySelector('.booking-error');
+      const errEl = wrap.querySelector('.booking-error-msg');
       if (errEl) errEl.textContent = message;
     }
   }
   function clearFieldError(id) {
-    const wrap = fieldWrapperFor(id) || document.querySelector('[data-field="' + id + '"]');
+    const wrap = fieldWrapperFor(id);
     if (wrap) wrap.classList.remove('invalid');
   }
   function clearAllErrors() {
@@ -165,11 +180,9 @@
   }
 
   function runValidation() {
-    const results = validators().map(fn => fn());
-    return results.every(Boolean);
+    return validators().map(fn => fn()).every(Boolean);
   }
 
-  /* Validação em tempo real ao sair do campo */
   ['bkName', 'bkPhone', 'bkEmail', 'bkType', 'bkPackage', 'bkDate', 'bkTime',
    'bkDuration', 'bkPeople', 'bkStyle', 'bkAddress', 'bkPayment'].forEach(id => {
     const el = document.getElementById(id);
@@ -184,7 +197,6 @@
     const rand = Math.random().toString(36).slice(2, 6).toUpperCase() +
                  Math.random().toString(36).slice(2, 4).toUpperCase();
     const code = `SL-${ymd}-${rand}`;
-    // garante que não colide com um código já emitido nesta sessão
     const used = window.__shutterliteBookings.map(b => b.code);
     return used.includes(code) ? generateBookingCode() : code;
   }
@@ -194,8 +206,7 @@
     e.preventDefault();
     clearAllErrors();
 
-    const valid = runValidation();
-    if (!valid) {
+    if (!runValidation()) {
       formErrorBox.classList.add('show');
       const firstInvalid = form.querySelector('.booking-field.invalid');
       if (firstInvalid) {
@@ -219,8 +230,8 @@
       email: document.getElementById('bkEmail').value.trim(),
       session_type: document.getElementById('bkType').value,
       package: document.getElementById('bkPackage').value,
-      date: dateInput.value,
-      time: document.getElementById('bkTime').value,
+      session_date: dateInput.value,
+      session_time: document.getElementById('bkTime').value,
       duration: document.getElementById('bkDuration').value,
       people: parseInt(document.getElementById('bkPeople').value, 10),
       location: selectedLocation ? selectedLocation.value : '',
@@ -228,23 +239,19 @@
       style: document.getElementById('bkStyle').value.trim(),
       notes: document.getElementById('bkNotes').value.trim() || null,
       payment_method: document.getElementById('bkPayment').value,
-      status: 'pendente', // pedido — aguarda confirmação humana
-      created_at: new Date().toISOString()
+      status: 'pendente'
     };
 
     try {
-      if (typeof db !== 'undefined' && db && typeof db.insert === 'function') {
-        // Integração real com o backend do site (mesma lib usada no form de contacto)
-        await db.insert('sl_bookings', payload);
-      } else {
-        // Fallback autónomo — mantém o formulário funcional sem backend ligado
-        console.info('[Shutterlite Booking] Pedido registado localmente:', payload);
-      }
+      await db.insert('sl_bookings', payload);
       window.__shutterliteBookings.push(payload);
       showSuccess(code);
     } catch (err) {
-      console.error('[Shutterlite Booking] Erro ao enviar pedido:', err);
-      formErrorBox.textContent = 'Não foi possível enviar o pedido. Tente novamente ou contacte-nos diretamente.';
+      console.error('[Shutterlite Booking] ERRO REAL:', err);
+
+      formErrorBox.textContent =
+        `Erro ao guardar a marcação: ${err.message || err}`;
+
       formErrorBox.classList.add('show');
     } finally {
       submitBtn.disabled = false;

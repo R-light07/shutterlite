@@ -1,40 +1,87 @@
-<!--
-  ════════════════════════════════════════════════════════════
-  SHUTTERLITE — Secção "Marcação de Sessões Fotográficas"
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="description" content="SHUTTERLITE — Marque a sua sessão fotográfica. Pedido de reserva sujeito a confirmação.">
+<title>Marcar Sessão — SHUTTERLITE</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@200;300;400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/style.css">
+<link rel="stylesheet" href="/assets/booking/booking.css">
+<link rel="icon" type="image/png" href="/assets/favicon.png">
+<link rel="icon" href="/favicon.ico">
+</head>
+<body>
 
-  COMO INTEGRAR:
-  1. Copie o <link> abaixo para dentro do <head> do index.html.
-  2. Copie o <section id="booking">…</section> para o local desejado
-     do index.html (sugestão: entre as secções #services e #testimonials,
-     ou entre #about e #contact).
-  3. Copie o <script src="booking.js"> para antes do </body>, junto
-     dos restantes scripts do site.
-  4. Coloque booking.css e booking.js na mesma pasta do site
-     (ao lado de style.css e do script principal).
-  5. (Opcional) Adicione um link de navegação para "#booking" no
-     menu principal e no menu mobile, tal como os outros itens.
-  ════════════════════════════════════════════════════════════
--->
+<!-- LOADER -->
+<div id="loader">
+  <div style="text-align:center">
+    <div class="loader-text">SHUTTERLITE</div>
+    <div class="loader-bar"></div>
+  </div>
+</div>
 
-<!-- Colar dentro do <head> -->
-<link rel="stylesheet" href="booking.css">
+<!-- NAV -->
+<header id="nav">
+  <div class="nav-inner">
+    <a href="/index.html" class="nav-logo">SHUTTERLITE</a>
+    <nav class="nav-links">
+      <a href="/index.html#hero">Início</a>
+      <a href="/index.html#portfolio">Portfólio</a>
+      <a href="/index.html#about">Acerca</a>
+      <a href="/index.html#services">Serviços</a>
+      <a href="/index.html#contact">Contactos</a>
+      <!-- <a href="/assets/booking/booking.html" style="color:#fff">Marcações</a> -->
+    </nav>
+    <div class="nav-btn">
+      <label class="switch">
+        <input
+            type="checkbox"
+            id="themeToggle"
+            onchange="toggleTheme()">
+        <span class="slider"></span>
+      </label>
+      <button class="nav-mobile" onclick="toggleMobileMenu()" aria-label="Menu">
+        <label class="hamburger" for="menuToggle" aria-label="Menu">
+          <input type="checkbox" id="menuToggle">
+          <svg viewBox="0 0 32 32">
+            <path class="line line-top-bottom" d="M27 10 13 10C10.8 10 9 8.2 9 6 9 3.5 10.8 2 13 2 15.2 2 17 3.8 17 6L17 26C17 28.2 18.8 30 21 30 23.2 30 25 28.2 25 26 25 23.8 23.2 22 21 22L7 22"></path>
+            <path class="line" d="M7 16 27 16"></path>
+          </svg>
+        </label>
+      </button>
+    </div>
+  </div>
+</header>
 
+<div id="mobileMenu">
+  <a href="/index.html#hero">Início</a>
+  <a href="/index.html#portfolio">Portfólio</a>
+  <a href="/index.html#about">Acerca</a>
+  <a href="/index.html#services">Serviços</a>
+  <a href="/index.html#contact">Contactos</a>
+  <a href="/assets/booking/booking.html">Marcações</a>
+</div>
 
-<!-- Colar no corpo da página, no local pretendido -->
-<section id="booking" class="section booking-section">
-  <div class="section-narrow booking-wrap">
+<div class="booking-hero-spacer"></div>
+
+<!-- BOOKING -->
+<section id="booking" class="section">
+  <div class="section-narrowest">
 
     <div class="section-head">
-      <p class="section-eyebrow reveal">Marcações</p>
-      <h3 class="section-title reveal delay-1">Marque a sua<br>Sessão Fotográfica</h3>
-      <p class="booking-sub reveal delay-1">
+      <p class="section-eyebrow reveal visible">Marcações</p>
+      <h1 class="section-title reveal visible" style="font-size:clamp(34px,5.5vw,64px)">Marque a sua<br>Sessão Fotográfica</h1>
+      <p class="booking-intro reveal visible" style="margin-top:20px">
         Preencha o formulário com os detalhes da sessão pretendida.
         Este é um pedido de reserva — a nossa equipa entrará em contacto
         consigo para confirmar a disponibilidade da data e horário.
       </p>
     </div>
 
-    <form id="bookingForm" class="booking-form reveal delay-2" novalidate autocomplete="on">
+    <form id="bookingForm" class="contact-grid booking-form reveal visible" novalidate autocomplete="on">
 
       <!-- 1. DADOS DE CONTACTO -->
       <div class="booking-group">
@@ -43,24 +90,24 @@
           <span class="booking-group-title">Dados de Contacto</span>
         </div>
 
-        <div class="booking-row">
+        <div class="contact-row">
           <div class="booking-field" data-field="bkName">
-            <label for="bkName">Nome completo <span class="req">*</span></label>
-            <input type="text" id="bkName" name="bkName" placeholder="O seu nome completo" autocomplete="name" required>
-            <span class="booking-error">Indique o seu nome completo.</span>
+            <label class="booking-label" for="bkName">Nome completo <span class="req">*</span></label>
+            <input class="contact-input" type="text" id="bkName" name="bkName" placeholder="O seu nome completo" autocomplete="name" required>
+            <span class="booking-error-msg">Indique o seu nome completo.</span>
           </div>
           <div class="booking-field" data-field="bkPhone">
-            <label for="bkPhone">WhatsApp / Telefone <span class="req">*</span></label>
-            <input type="tel" id="bkPhone" name="bkPhone" placeholder="Ex: 84 123 4567" autocomplete="tel" required>
-            <span class="booking-error">Indique um número de contacto válido.</span>
+            <label class="booking-label" for="bkPhone">WhatsApp / Telefone <span class="req">*</span></label>
+            <input class="contact-input" type="tel" id="bkPhone" name="bkPhone" placeholder="Ex: 84 123 4567" autocomplete="tel" required>
+            <span class="booking-error-msg">Indique um número de contacto válido.</span>
           </div>
         </div>
 
-        <div class="booking-row">
-          <div class="booking-field full" data-field="bkEmail">
-            <label for="bkEmail">E-mail <span class="req">*</span></label>
-            <input type="email" id="bkEmail" name="bkEmail" placeholder="seuemail@exemplo.com" autocomplete="email" required>
-            <span class="booking-error">Indique um e-mail válido.</span>
+        <div class="contact-row" style="margin-top:20px">
+          <div class="booking-field booking-field-full" data-field="bkEmail">
+            <label class="booking-label" for="bkEmail">E-mail</label>
+            <input class="contact-input" type="email" id="bkEmail" name="bkEmail" placeholder="seuemail@exemplo.com" autocomplete="email">
+            <span class="booking-error-msg">Indique um e-mail válido.</span>
           </div>
         </div>
       </div>
@@ -72,10 +119,10 @@
           <span class="booking-group-title">Detalhes da Sessão</span>
         </div>
 
-        <div class="booking-row">
+        <div class="contact-row">
           <div class="booking-field" data-field="bkType">
-            <label for="bkType">Tipo de sessão <span class="req">*</span></label>
-            <select id="bkType" name="bkType" required>
+            <label class="booking-label" for="bkType">Tipo de sessão <span class="req">*</span></label>
+            <select class="contact-select" id="bkType" name="bkType" required>
               <option value="" disabled selected>Selecione o tipo</option>
               <option>Casamento</option>
               <option>Gestante</option>
@@ -88,11 +135,11 @@
               <option>Editorial</option>
               <option>Outro</option>
             </select>
-            <span class="booking-error">Selecione o tipo de sessão.</span>
+            <span class="booking-error-msg">Selecione o tipo de sessão.</span>
           </div>
           <div class="booking-field" data-field="bkPackage">
-            <label for="bkPackage">Pacote pretendido <span class="req">*</span></label>
-            <select id="bkPackage" name="bkPackage" required>
+            <label class="booking-label" for="bkPackage">Pacote pretendido <span class="req">*</span></label>
+            <select class="contact-select" id="bkPackage" name="bkPackage" required>
               <option value="" disabled selected>Selecione o pacote</option>
               <option>Essencial</option>
               <option>Standard</option>
@@ -100,24 +147,24 @@
               <option>Personalizado</option>
               <option>Ainda não sei — pretendo aconselhamento</option>
             </select>
-            <span class="booking-error">Selecione o pacote pretendido.</span>
+            <span class="booking-error-msg">Selecione o pacote pretendido.</span>
           </div>
         </div>
 
-        <div class="booking-row cols-3">
+        <div class="booking-row-3" style="margin-top:20px">
           <div class="booking-field" data-field="bkDate">
-            <label for="bkDate">Data pretendida <span class="req">*</span></label>
-            <input type="date" id="bkDate" name="bkDate" required>
-            <span class="booking-error">Escolha uma data válida (a partir de hoje).</span>
+            <label class="booking-label" for="bkDate">Data pretendida <span class="req">*</span></label>
+            <input class="contact-input" type="date" id="bkDate" name="bkDate" required>
+            <span class="booking-error-msg">Escolha uma data válida (a partir de hoje).</span>
           </div>
           <div class="booking-field" data-field="bkTime">
-            <label for="bkTime">Hora pretendida <span class="req">*</span></label>
-            <input type="time" id="bkTime" name="bkTime" required>
-            <span class="booking-error">Indique a hora pretendida.</span>
+            <label class="booking-label" for="bkTime">Hora pretendida <span class="req">*</span></label>
+            <input class="contact-input" type="time" id="bkTime" name="bkTime" required>
+            <span class="booking-error-msg">Indique a hora pretendida.</span>
           </div>
           <div class="booking-field" data-field="bkDuration">
-            <label for="bkDuration">Duração <span class="req">*</span></label>
-            <select id="bkDuration" name="bkDuration" required>
+            <label class="booking-label" for="bkDuration">Duração <span class="req">*</span></label>
+            <select class="contact-select" id="bkDuration" name="bkDuration" required>
               <option value="" disabled selected>Selecione</option>
               <option>30 minutos</option>
               <option>1 hora</option>
@@ -126,20 +173,20 @@
               <option>Dia inteiro</option>
               <option>A combinar</option>
             </select>
-            <span class="booking-error">Selecione a duração.</span>
+            <span class="booking-error-msg">Selecione a duração.</span>
           </div>
         </div>
 
-        <div class="booking-row">
+        <div class="contact-row" style="margin-top:20px">
           <div class="booking-field" data-field="bkPeople">
-            <label for="bkPeople">Número de pessoas <span class="req">*</span></label>
-            <input type="number" id="bkPeople" name="bkPeople" min="1" max="100" step="1" placeholder="Ex: 2" required>
-            <span class="booking-error">Indique o número de pessoas (mínimo 1).</span>
+            <label class="booking-label" for="bkPeople">Número de pessoas</label>
+            <input class="contact-input" type="number" id="bkPeople" name="bkPeople" min="1" max="100" step="1" placeholder="Ex: 2">
+            <span class="booking-error-msg">Indique o número de pessoas (mínimo 1).</span>
           </div>
           <div class="booking-field" data-field="bkStyle">
-            <label for="bkStyle">Objetivo / estilo da sessão <span class="req">*</span></label>
-            <input type="text" id="bkStyle" name="bkStyle" placeholder="Ex: still clássico, moda urbana, book profissional..." required>
-            <span class="booking-error">Descreva brevemente o objetivo ou estilo pretendido.</span>
+            <label class="booking-label" for="bkStyle">Objetivo / estilo da sessão</label>
+            <input class="contact-input" type="text" id="bkStyle" name="bkStyle" placeholder="Ex: still clássico, moda urbana...">
+            <span class="booking-error-msg">Descreva brevemente o objetivo ou estilo pretendido.</span>
           </div>
         </div>
       </div>
@@ -152,7 +199,7 @@
         </div>
 
         <div class="booking-field" data-field="bkLocation">
-          <label>Local <span class="req">*</span></label>
+          <label class="booking-label">Local <span class="req">*</span></label>
           <div class="booking-pill-group" id="bkLocationGroup">
             <label class="booking-pill">
               <input type="radio" name="bkLocation" value="Estúdio" required>
@@ -168,18 +215,22 @@
             </label>
             <label class="booking-pill">
               <input type="radio" name="bkLocation" value="Outro">
+              <span>Salão de Eventos</span>
+            </label>
+            <label class="booking-pill">
+              <input type="radio" name="bkLocation" value="Outro">
               <span>Outro</span>
             </label>
           </div>
-          <span class="booking-error">Selecione o local da sessão.</span>
+          <span class="booking-error-msg">Selecione o local da sessão.</span>
         </div>
 
         <div class="booking-address-wrap" id="bkAddressWrap">
           <div>
             <div class="booking-field" data-field="bkAddress">
-              <label for="bkAddress">Endereço / localização <span class="req">*</span></label>
-              <input type="text" id="bkAddress" name="bkAddress" placeholder="Indique o endereço ou zona pretendida">
-              <span class="booking-error">Indique o endereço ou localização.</span>
+              <label class="booking-label" for="bkAddress">Endereço / localização <span class="req">*</span></label>
+              <input class="contact-input" type="text" id="bkAddress" name="bkAddress" placeholder="Indique o endereço ou zona pretendida">
+              <span class="booking-error-msg">Indique o endereço ou localização.</span>
               <span class="booking-hint">Necessário para sessões fora do estúdio.</span>
             </div>
           </div>
@@ -193,11 +244,9 @@
           <span class="booking-group-title">Observações</span>
         </div>
 
-        <div class="booking-row">
-          <div class="booking-field full" data-field="bkNotes">
-            <label for="bkNotes">Observações adicionais <span class="opt">Opcional</span></label>
-            <textarea id="bkNotes" name="bkNotes" rows="4" placeholder="Alguma informação adicional que devamos saber? (referências, preferências, restrições, etc.)"></textarea>
-          </div>
+        <div class="booking-field" data-field="bkNotes">
+          <label class="booking-label" for="bkNotes">Observações adicionais <span class="opt">Opcional</span></label>
+          <textarea class="contact-textarea" id="bkNotes" name="bkNotes" rows="4" placeholder="Alguma informação adicional que devamos saber? (referências, preferências, restrições, etc.)"></textarea>
         </div>
       </div>
 
@@ -208,21 +257,19 @@
           <span class="booking-group-title">Pagamento</span>
         </div>
 
-        <div class="booking-row">
-          <div class="booking-field full" data-field="bkPayment">
-            <label for="bkPayment">Método de pagamento pretendido <span class="req">*</span></label>
-            <select id="bkPayment" name="bkPayment" required>
-              <option value="" disabled selected>Selecione o método</option>
-              <option>Transferência Bancária</option>
-              <option>Depósito Bancário</option>
-              <option>Numerário</option>
-              <option>M-Pesa</option>
-              <option>e-Mola</option>
-              <option>Cartão (POS na sessão)</option>
-              <option>A combinar</option>
-            </select>
-            <span class="booking-error">Selecione o método de pagamento.</span>
-          </div>
+        <div class="booking-field" data-field="bkPayment">
+          <label class="booking-label" for="bkPayment">Método de pagamento pretendido <span class="req">*</span></label>
+          <select class="contact-select" id="bkPayment" name="bkPayment" required>
+            <option value="" disabled selected>Selecione o método</option>
+            <option>Transferência Bancária</option>
+            <option>Depósito Bancário</option>
+            <option>Numerário</option>
+            <option>M-Pesa</option>
+            <option>e-Mola</option>
+            <option>Cartão (POS na sessão)</option>
+            <option>A combinar</option>
+          </select>
+          <span class="booking-error-msg">Selecione o método de pagamento.</span>
         </div>
       </div>
 
@@ -235,38 +282,102 @@
         </p>
       </div>
 
-      <div class="booking-form-error" id="bookingFormError">
+      <div class="form-msg booking-form-error" id="bookingFormError">
         Existem campos por preencher ou incorretos. Verifique o formulário e tente novamente.
       </div>
 
-      <button type="submit" class="booking-submit" id="bookingSubmitBtn">
+      <button type="submit" class="contact-submit booking-submit" id="bookingSubmitBtn">
         <span class="booking-spinner"></span>
         <span class="btn-label">Solicitar Marcação</span>
       </button>
     </form>
 
-    <!-- PAINEL DE SUCESSO -->
+    <!-- SUCESSO -->
     <div class="booking-success" id="bookingSuccess" hidden>
       <div class="booking-success-icon">✓</div>
-      <h4>Pedido recebido!</h4>
+      <h3>Pedido recebido!</h3>
       <p>Entraremos em contacto consigo para confirmar a disponibilidade da data e horário.</p>
 
       <div class="booking-code-box">
         <div>
-          <span class="code-label">Código do pedido</span>
-          <span class="code-value" id="bookingCodeDisplay">—</span>
+          <span class="booking-code-label">Código do pedido</span>
+          <span class="booking-code-value" id="bookingCodeDisplay">—</span>
         </div>
         <button type="button" class="booking-copy-btn" id="bookingCopyBtn" title="Copiar código" aria-label="Copiar código">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><rect x="9" y="9" width="12" height="12" rx="2"/><path d="M5 15V5a2 2 0 0 1 2-2h10"/></svg>
         </button>
       </div>
 
-      <button type="button" class="booking-new-btn" id="bookingNewBtn">Fazer nova marcação</button>
+      <div>
+        <button type="button" class="booking-new-btn" id="bookingNewBtn">Fazer nova marcação</button>
+      </div>
     </div>
 
   </div>
 </section>
 
+<!-- FOOTER -->
+<footer>
+  <div class="footer-inner">
+    <h2 class="footer-logo">SHUTTERLITE</h2>
+    <div class="footer-social" id="footerSocial">
+      <a href="/index.html#contact">Contactos</a>
+      <a href="/index.html#portfolio">Portfólio</a>
+    </div>
+  </div>
+  <div class="footer-bottom">
+    <span id="footerCopy">© 2026 SHUTTERLITE. Todos os direitos reservados.</span>
+    <a href="/index.html">← Voltar ao site</a>
+  </div>
+</footer>
 
-<!-- Colar antes de </body>, junto aos restantes scripts -->
-<script src="booking.js"></script>
+<script>
+/* ════════════════════════════════════════════
+   NAV / MOBILE / THEME (idêntico ao index.html)
+════════════════════════════════════════════ */
+function setupNav() {
+  window.addEventListener('scroll', () => {
+    document.getElementById('nav').classList.toggle('scrolled', window.scrollY > 60);
+  });
+}
+setupNav();
+window.addEventListener('load', () => {
+  setTimeout(() => document.getElementById('loader').classList.add('out'), 500);
+});
+
+const menuToggle = document.getElementById("menuToggle");
+const mobileMenu = document.getElementById("mobileMenu");
+
+menuToggle.addEventListener("change", function () {
+  mobileMenu.classList.toggle("open", menuToggle.checked);
+});
+
+document.querySelectorAll("#mobileMenu a").forEach(function (link) {
+  link.addEventListener("click", function () {
+    menuToggle.checked = false;
+    mobileMenu.classList.remove("open");
+  });
+});
+
+function toggleTheme() {
+  const body = document.body;
+  body.classList.toggle("light-theme");
+  const light = body.classList.contains("light-theme");
+  localStorage.setItem("theme", light ? "light" : "dark");
+  document.getElementById("themeToggle").checked = light;
+}
+
+(function () {
+  const saved = localStorage.getItem("theme");
+  if (saved === "light") document.body.classList.add("light-theme");
+  window.addEventListener("DOMContentLoaded", () => {
+    document.getElementById("themeToggle").checked =
+      document.body.classList.contains("light-theme");
+  });
+})();
+</script>
+
+<!-- Lógica do formulário de marcação + gravação no Supabase -->
+<script src="/assets/booking/booking.js"></script>
+</body>
+</html>
