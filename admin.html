@@ -1031,7 +1031,52 @@ async function loadSvcs(){services=await db.select('sl_services','order=sort_ord
 async function loadSvcPhotos(){servicePhotos=await db.select('sl_service_photos','order=sort_order.asc,uploaded_at.asc')||[]}
 async function loadTestis(){testimonials=await db.select('sl_testimonials','order=created_at.desc')||[]}
 async function loadMsgs(){messages=await db.select('sl_messages','order=created_at.desc')||[];const u=messages.filter(m=>!m.is_read).length;const b=document.getElementById('msgBadge');if(u>0){b.textContent=u;b.style.display='inline-block'}else b.style.display='none'}
-async function loadBookings(){bookings=await db.select('sl_bookings','order=created_at.desc')||[];const p=bookings.filter(b=>b.status==='pendente').length;const badge=document.getElementById('bookingBadge');if(p>0){badge.textContent=p;badge.style.display='inline-block'}else badge.style.display='none'}
+async function loadBookings(){
+  try{
+    console.log('[Bookings] A carregar pedidos...');
+
+    const rows = await bookingDb.select(
+      'sl_bookings',
+      'select=*&order=created_at.desc'
+    );
+
+    bookings = Array.isArray(rows) ? rows : [];
+
+    console.log('[Bookings] Pedidos carregados:', bookings);
+
+    const p = bookings.filter(
+      b => String(b.status || '').toLowerCase() === 'pendente'
+    ).length;
+
+    const badge = document.getElementById('bookingBadge');
+
+    if(badge){
+      if(p > 0){
+        badge.textContent = p;
+        badge.style.display = 'inline-block';
+      }else{
+        badge.textContent = '0';
+        badge.style.display = 'none';
+      }
+    }
+
+  }catch(e){
+    console.error('[Bookings] ERRO AO CARREGAR:', e);
+
+    bookings = [];
+
+    const badge = document.getElementById('bookingBadge');
+
+    if(badge){
+      badge.style.display = 'none';
+    }
+
+    toast(
+      'Não foi possível carregar as marcações: ' + (e.message || e),
+      'error'
+    );
+  }
+}
 async function loadSettings(){const rows=await db.select('sl_settings')||[];settings={};rows.forEach(r=>settings[r.key]=r.value)}
 async function loadSocial(){social=await db.select('sl_social','order=sort_order.asc')||[]}
 
@@ -2091,52 +2136,6 @@ function toast(msg,type=''){
   el.textContent=msg;
   wrap.appendChild(el);
   setTimeout(()=>{el.style.opacity='0';setTimeout(()=>el.remove(),300)},3500);
-}
-
-async function loadBookings(){
-  try{
-    console.log('[Bookings] A carregar pedidos...');
-
-    const rows = await db.select(
-      'sl_bookings',
-      'select=*&order=created_at.desc'
-    );
-
-    bookings = Array.isArray(rows) ? rows : [];
-
-    console.log('[Bookings] Pedidos carregados:', bookings);
-
-    const p = bookings.filter(
-      b => String(b.status || '').toLowerCase() === 'pendente'
-    ).length;
-
-    const badge = document.getElementById('bookingBadge');
-
-    if(badge){
-      if(p > 0){
-        badge.textContent = p;
-        badge.style.display = 'inline-block';
-      }else{
-        badge.textContent = '0';
-        badge.style.display = 'none';
-      }
-    }
-
-  }catch(e){
-    console.error('[Bookings] ERRO AO CARREGAR:', e);
-
-    bookings = [];
-
-    const badge = document.getElementById('bookingBadge');
-    if(badge){
-      badge.style.display = 'none';
-    }
-
-    toast(
-      'Não foi possível carregar as marcações: ' + (e.message || e),
-      'error'
-    );
-  }
 }
 
 </script>
