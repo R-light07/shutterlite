@@ -238,6 +238,68 @@ img{display:block;max-width:100%}
   .photo-grid{grid-template-columns:repeat(2,1fr)}
   .topbar{flex-direction:column;align-items:flex-start}
   .session-edit-section,.panel{padding:24px 20px}
+
+  /* RESPONSIVE TABLES — mobile cards */
+  .panel{overflow:visible}
+  .tbl{display:block;width:100%;border-collapse:separate}
+  .tbl thead{display:none}
+  .tbl tbody{display:block;width:100%}
+  .tbl tr{display:block;width:100%;margin:0 0 14px;padding:14px 14px 6px;border:1px solid var(--w10);border-radius:16px;background:var(--neutral-950);overflow:hidden}
+  .tbl tr:last-child{margin-bottom:0}
+  .tbl tr:hover td{background:transparent}
+  .tbl td{display:block;width:100%;padding:9px 0 10px;border-bottom:1px solid var(--w05);font-size:13px;line-height:1.45;min-width:0;overflow-wrap:anywhere}
+  .tbl td:last-child{border-bottom:none;padding-bottom:8px}
+  .tbl td::before{display:block;margin-bottom:5px;color:var(--w35);font-size:9px;line-height:1;text-transform:uppercase;letter-spacing:.22em;font-weight:400}
+
+  /* Services */
+  #svcTable td:nth-child(1)::before{content:'Title'}
+  #svcTable td:nth-child(2)::before{content:'Slug'}
+  #svcTable td:nth-child(3)::before{content:'Price From'}
+  #svcTable td:nth-child(4)::before{content:'Photos'}
+  #svcTable td:nth-child(5)::before{content:'Order'}
+  #svcTable td:nth-child(6)::before{content:'Status'}
+  #svcTable td:nth-child(7)::before{content:'Actions'}
+  #svcTable td:first-child{font-size:15px}
+
+  /* Testimonials */
+  #testiTable td:nth-child(1)::before{content:'Client'}
+  #testiTable td:nth-child(2)::before{content:'Content'}
+  #testiTable td:nth-child(3)::before{content:'Rating'}
+  #testiTable td:nth-child(4)::before{content:'Featured'}
+  #testiTable td:nth-child(5)::before{content:'Actions'}
+  #testiTable td:nth-child(1){font-size:15px}
+  #testiTable td:nth-child(2){color:var(--w60);white-space:normal}
+
+  /* Categories */
+  #catTable td:nth-child(1)::before{content:'Name'}
+  #catTable td:nth-child(2)::before{content:'Slug'}
+  #catTable td:nth-child(3)::before{content:'Sessions'}
+  #catTable td:nth-child(4)::before{content:'Order'}
+  #catTable td:nth-child(5)::before{content:'Actions'}
+
+  /* Other admin tables */
+  #bookingTable td:nth-child(1)::before{content:'Código'}
+  #bookingTable td:nth-child(2)::before{content:'Cliente'}
+  #bookingTable td:nth-child(3)::before{content:'Sessão'}
+  #bookingTable td:nth-child(4)::before{content:'Data / Hora'}
+  #bookingTable td:nth-child(5)::before{content:'Local'}
+  #bookingTable td:nth-child(6)::before{content:'Status'}
+  #bookingTable td:nth-child(7)::before{content:'Actions'}
+  #msgTable td:nth-child(1)::before{content:'Name'}
+  #msgTable td:nth-child(2)::before{content:'Email'}
+  #msgTable td:nth-child(3)::before{content:'Phone'}
+  #msgTable td:nth-child(4)::before{content:'Service'}
+  #msgTable td:nth-child(5)::before{content:'Date'}
+  #msgTable td:nth-child(6)::before{content:'Status'}
+  #msgTable td:nth-child(7)::before{content:'Actions'}
+  #socialTable td:nth-child(1)::before{content:'Platform'}
+  #socialTable td:nth-child(2)::before{content:'URL'}
+  #socialTable td:nth-child(3)::before{content:'Order'}
+  #socialTable td:nth-child(4)::before{content:'Status'}
+  #socialTable td:nth-child(5)::before{content:'Actions'}
+
+  .tbl .btn{margin:3px 5px 3px 0}
+  .tbl-empty{padding:30px 10px}
 }
 </style>
 </head>
