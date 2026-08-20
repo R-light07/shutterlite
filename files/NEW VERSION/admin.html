@@ -238,7 +238,72 @@ img{display:block;max-width:100%}
   .photo-grid{grid-template-columns:repeat(2,1fr)}
   .topbar{flex-direction:column;align-items:flex-start}
   .session-edit-section,.panel{padding:24px 20px}
+
+  /* RESPONSIVE TABLES — mobile cards */
+  .panel{overflow:visible}
+  .tbl{display:block;width:100%;border-collapse:separate}
+  .tbl thead{display:none}
+  .tbl tbody{display:block;width:100%}
+  .tbl tr{display:block;width:100%;margin:0 0 14px;padding:14px 14px 6px;border:1px solid var(--w10);border-radius:16px;background:var(--neutral-950);overflow:hidden}
+  .tbl tr:last-child{margin-bottom:0}
+  .tbl tr:hover td{background:transparent}
+  .tbl td{display:block;width:100%;padding:9px 0 10px;border-bottom:1px solid var(--w05);font-size:13px;line-height:1.45;min-width:0;overflow-wrap:anywhere}
+  .tbl td:last-child{border-bottom:none;padding-bottom:8px}
+  .tbl td::before{display:block;margin-bottom:5px;color:var(--w35);font-size:9px;line-height:1;text-transform:uppercase;letter-spacing:.22em;font-weight:400}
+
+  /* Services */
+  #svcTable td:nth-child(1)::before{content:'Title'}
+  #svcTable td:nth-child(2)::before{content:'Slug'}
+  #svcTable td:nth-child(3)::before{content:'Price From'}
+  #svcTable td:nth-child(4)::before{content:'Photos'}
+  #svcTable td:nth-child(5)::before{content:'Order'}
+  #svcTable td:nth-child(6)::before{content:'Status'}
+  #svcTable td:nth-child(7)::before{content:'Actions'}
+  #svcTable td:first-child{font-size:15px}
+
+  /* Testimonials */
+  #testiTable td:nth-child(1)::before{content:'Client'}
+  #testiTable td:nth-child(2)::before{content:'Content'}
+  #testiTable td:nth-child(3)::before{content:'Rating'}
+  #testiTable td:nth-child(4)::before{content:'Featured'}
+  #testiTable td:nth-child(5)::before{content:'Actions'}
+  #testiTable td:nth-child(1){font-size:15px}
+  #testiTable td:nth-child(2){color:var(--w60);white-space:normal}
+
+  /* Categories */
+  #catTable td:nth-child(1)::before{content:'Name'}
+  #catTable td:nth-child(2)::before{content:'Slug'}
+  #catTable td:nth-child(3)::before{content:'Sessions'}
+  #catTable td:nth-child(4)::before{content:'Order'}
+  #catTable td:nth-child(5)::before{content:'Actions'}
+
+  /* Other admin tables */
+  #bookingTable td:nth-child(1)::before{content:'Código'}
+  #bookingTable td:nth-child(2)::before{content:'Cliente'}
+  #bookingTable td:nth-child(3)::before{content:'Sessão'}
+  #bookingTable td:nth-child(4)::before{content:'Data / Hora'}
+  #bookingTable td:nth-child(5)::before{content:'Local'}
+  #bookingTable td:nth-child(6)::before{content:'Status'}
+  #bookingTable td:nth-child(7)::before{content:'Actions'}
+  #msgTable td:nth-child(1)::before{content:'Name'}
+  #msgTable td:nth-child(2)::before{content:'Email'}
+  #msgTable td:nth-child(3)::before{content:'Phone'}
+  #msgTable td:nth-child(4)::before{content:'Service'}
+  #msgTable td:nth-child(5)::before{content:'Date'}
+  #msgTable td:nth-child(6)::before{content:'Status'}
+  #msgTable td:nth-child(7)::before{content:'Actions'}
+  #socialTable td:nth-child(1)::before{content:'Platform'}
+  #socialTable td:nth-child(2)::before{content:'URL'}
+  #socialTable td:nth-child(3)::before{content:'Order'}
+  #socialTable td:nth-child(4)::before{content:'Status'}
+  #socialTable td:nth-child(5)::before{content:'Actions'}
+
+  .tbl .btn{margin:3px 5px 3px 0}
+  .tbl-empty{padding:30px 10px}
 }
+
+/* ADMIN 2026 UX UPDATE */
+.calendar-title{font-size:18px;font-weight:300;margin:-10px 0 18px}.calendar-grid{display:grid;grid-template-columns:repeat(7,1fr);border-top:1px solid var(--w10);border-left:1px solid var(--w10);background:var(--neutral-950)}.cal-weekday{padding:12px;text-transform:uppercase;letter-spacing:.2em;font-size:9px;color:var(--w40);border-right:1px solid var(--w10);border-bottom:1px solid var(--w10)}.cal-day{min-height:125px;padding:9px;border-right:1px solid var(--w10);border-bottom:1px solid var(--w10);overflow:hidden}.cal-day.empty{background:rgba(255,255,255,.015)}.cal-num{font-size:12px;color:var(--w50);margin-bottom:8px}.cal-event{display:block;width:100%;text-align:left;padding:6px 7px;margin:4px 0;border-radius:7px;font-size:10px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;background:var(--w05);border-left:2px solid var(--w30)}.cal-event.pendente{border-left-color:#f5a623}.cal-event.confirmado{border-left-color:var(--success)}.cal-event.concluido{border-left-color:#fff}.cal-event span{opacity:.55;margin-right:3px}.calendar-legend{display:flex;gap:20px;flex-wrap:wrap;margin-top:15px;color:var(--w50);font-size:10px;text-transform:uppercase;letter-spacing:.12em}.calendar-legend span{display:flex;align-items:center;gap:7px}.dot{width:7px;height:7px;border-radius:50%;background:var(--w30)}.dot.pending{background:#f5a623}.dot.confirmed{background:var(--success)}.dot.done{background:#fff}.muted-small{font-size:10px;color:var(--w40)}@media(max-width:800px){.calendar-grid{min-width:700px}.calendar-grid{overflow-x:auto}.cal-day{min-height:100px}.page#page-calendar{overflow-x:auto}.stat-grid{grid-template-columns:repeat(2,1fr)}}
 </style>
 </head>
 <body>
@@ -277,6 +342,8 @@ img{display:block;max-width:100%}
       <svg viewBox="0 0 24 24"><path d="M3 13h8V3H3v10zm0 8h8v-6H3v6zm10 0h8V11h-8v10zm0-18v6h8V3h-8z"/></svg>
       Dashboard
     </a>
+    <a class="side-link" data-page="calendar" onclick="goPage('calendar')"><svg viewBox="0 0 24 24"><path d="M19 4h-1V2h-2v2H8V2H6v2H5c-1.1 0-2 .9-2 2v13c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 15H5V9h14v10zM7 11h5v5H7v-5z"/></svg>Calendar</a>
+    <a class="side-link" data-page="clients" onclick="goPage('clients')"><svg viewBox="0 0 24 24"><path d="M16 11c1.66 0 2.99-1.34 2.99-3S17.66 5 16 5s-3 1.34-3 3 1.34 3 3 3zm-8 0c1.66 0 3-1.34 3-3S9.66 5 8 5 5 6.34 5 8s1.34 3 3 3zm0 2c-2.33 0-7 1.17-7 3.5V19h14v-2.5C15 14.17 10.33 13 8 13zm8 0c-.29 0-.62.02-.97.05 1.16.84 1.97 1.95 1.97 3.45V19h7v-2.5c0-2.33-4.67-3.5-7-3.5z"/></svg>Clients</a>
     <a class="side-link" data-page="sessions" onclick="goPage('sessions')">
       <svg viewBox="0 0 24 24"><path d="M21 19V5c0-1.1-.9-2-2-2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2zM8.5 13.5l2.5 3.01L14.5 12l4.5 6H5l3.5-4.5z"/></svg>
       Sessions
@@ -338,6 +405,8 @@ img{display:block;max-width:100%}
         <div class="stat-card"><div class="stat-label">Services</div><div class="stat-num" id="kSvcs">—</div></div>
         <div class="stat-card"><div class="stat-label">Unread Messages</div><div class="stat-num" id="kMsgs">—</div></div>
         <div class="stat-card"><div class="stat-label">Pending Bookings</div><div class="stat-num" id="kBookings">—</div></div>
+        <div class="stat-card"><div class="stat-label">Confirmed</div><div class="stat-num" id="kConfirmed">—</div></div>
+        <div class="stat-card"><div class="stat-label">Clients</div><div class="stat-num" id="kClients">—</div></div>
       </div>
       <div class="panel">
         <div class="panel-head">
@@ -852,10 +921,72 @@ img{display:block;max-width:100%}
 ════════════════════════════════════════════ */
 const SUPABASE_URL  = 'https://utcfzksfipgsktupwusg.supabase.co';
 const SUPABASE_ANON = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InV0Y2Z6a3NmaXBnc2t0dXB3dXNnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODYwMTUwNjgsImV4cCI6MjEwMTU5MTA2OH0.Hp4nBYqZwRtmi50teeH5T-N-APT2y5HWrmylvGV-7n0';
+/* ════════════════════════════════════════════
+   SUPABASE — PROJECT 2 / BOOKINGS
+════════════════════════════════════════════ */
+const BOOKING_SUPABASE_URL = 'https://ckighonenakuruscgvps.supabase.co';
+const BOOKING_SUPABASE_ANON = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImNraWdob25lbmFrdXJ1c2NndnBzIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzYyOTE5ODIsImV4cCI6MjA5MTg2Nzk4Mn0.y3O-xbECIrMTj8Qg_9EI7a5BuepzzuhAVZLyKjGw3ow';
+
+const BOOKING_REST = `${BOOKING_SUPABASE_URL}/rest/v1`;
+
 const REST = `${SUPABASE_URL}/rest/v1`;
 const STORAGE_BUCKET = 'portfolio-media';
 const SESSION_KEY = 'sl_admin_session';
 const SESSION_DAYS = 7;
+
+async function bookingApi(url, opts = {}) {
+  const r = await fetch(url, {
+    ...opts,
+    body: opts.body && typeof opts.body !== 'string' ? JSON.stringify(opts.body) : opts.body,
+    headers: {
+      apikey: BOOKING_SUPABASE_ANON,
+      Authorization: `Bearer ${BOOKING_SUPABASE_ANON}`,
+      'Content-Type': 'application/json',
+      ...(opts.headers || {})
+    }
+  });
+
+  const text = await r.text();
+
+  if (!r.ok) {
+    throw new Error(
+      `BOOKING HTTP ${r.status}: ${text}`
+    );
+  }
+
+  return text ? JSON.parse(text) : null;
+}          
+
+const bookingDb = {
+  select: (t, p = '') =>
+    bookingApi(`${BOOKING_REST}/${t}${p ? '?' + p : ''}`),
+
+  insert: (t, b) =>
+    bookingApi(`${BOOKING_REST}/${t}`, {
+      method: 'POST',
+      body: b
+    }),
+
+  update: (t, q, b) =>
+    bookingApi(`${BOOKING_REST}/${t}?${q}`, {
+      method: 'PATCH',
+      body: b
+    }),
+
+  delete: (t, q) =>
+    bookingApi(`${BOOKING_REST}/${t}?${q}`, {
+      method: 'DELETE'
+    }),
+
+  upsert: (t, b, k) =>
+    bookingApi(`${BOOKING_REST}/${t}?on_conflict=${k}`, {
+      method: 'POST',
+      body: b,
+      headers: {
+        Prefer: 'resolution=merge-duplicates'
+      }
+    })
+};
 
 function H(extra={}){return{'apikey':SUPABASE_ANON,'Authorization':`Bearer ${SUPABASE_ANON}`,'Content-Type':'application/json',...extra}}
 async function api(url,opts={}){const r=await fetch(url,{...opts,headers:{...H(),...(opts.headers||{})}});if(!r.ok&&r.status!==201&&r.status!==204){const t=await r.text();throw new Error(`HTTP ${r.status}: ${t||r.statusText}`)}const t=await r.text();return t?JSON.parse(t):null}
@@ -910,9 +1041,32 @@ let dirty=false;
 let svcDirty=false;
 let activeBookingFilter='all';
 
+//async function initApp(){
+//  await Promise.all([loadCats(),loadSessions(),loadPhotos(),loadSvcs(),loadSvcPhotos(),loadTestis(),loadMsgs(),loadBookings(),loadSettings(),loadSocial()]);
+//  updateDashboard();
+//}
+
 async function initApp(){
-  await Promise.all([loadCats(),loadSessions(),loadPhotos(),loadSvcs(),loadSvcPhotos(),loadTestis(),loadMsgs(),loadBookings(),loadSettings(),loadSocial()]);
-  updateDashboard();
+  try{
+    await Promise.all([
+      loadCats(),
+      loadSessions(),
+      loadPhotos(),
+      loadSvcs(),
+      loadSvcPhotos(),
+      loadTestis(),
+      loadMsgs(),
+      loadBookings(),
+      loadSettings(),
+      loadSocial()
+    ]);
+
+    updateDashboard();
+
+  }catch(e){
+    console.error('[Admin] Erro ao inicializar:', e);
+    toast('Erro ao carregar dados do Admin: ' + (e.message || e), 'error');
+  }
 }
 
 /* ════════════════════════════════════════════
@@ -925,6 +1079,8 @@ function goPage(p){
   document.getElementById('page-'+p).classList.add('active');
   document.querySelector(`.side-link[data-page="${p}"]`)?.classList.add('active');
   document.getElementById('sidebar').classList.remove('open');
+  if(p==='calendar')     renderCalendar();
+  if(p==='clients')      renderClients();
   if(p==='sessions')     renderSessionsList();
   if(p==='categories')   renderCats();
   if(p==='services'){    currentServiceId=null; renderSvcs(); }
@@ -947,7 +1103,52 @@ async function loadSvcs(){services=await db.select('sl_services','order=sort_ord
 async function loadSvcPhotos(){servicePhotos=await db.select('sl_service_photos','order=sort_order.asc,uploaded_at.asc')||[]}
 async function loadTestis(){testimonials=await db.select('sl_testimonials','order=created_at.desc')||[]}
 async function loadMsgs(){messages=await db.select('sl_messages','order=created_at.desc')||[];const u=messages.filter(m=>!m.is_read).length;const b=document.getElementById('msgBadge');if(u>0){b.textContent=u;b.style.display='inline-block'}else b.style.display='none'}
-async function loadBookings(){bookings=await db.select('sl_bookings','order=created_at.desc')||[];const p=bookings.filter(b=>b.status==='pendente').length;const badge=document.getElementById('bookingBadge');if(p>0){badge.textContent=p;badge.style.display='inline-block'}else badge.style.display='none'}
+async function loadBookings(){
+  try{
+    console.log('[Bookings] A carregar pedidos...');
+
+    const rows = await bookingDb.select(
+      'sl_bookings',
+      'select=*&order=created_at.desc'
+    );
+
+    bookings = Array.isArray(rows) ? rows : [];
+
+    console.log('[Bookings] Pedidos carregados:', bookings);
+
+    const p = bookings.filter(
+      b => String(b.status || '').toLowerCase() === 'pendente'
+    ).length;
+
+    const badge = document.getElementById('bookingBadge');
+
+    if(badge){
+      if(p > 0){
+        badge.textContent = p;
+        badge.style.display = 'inline-block';
+      }else{
+        badge.textContent = '0';
+        badge.style.display = 'none';
+      }
+    }
+
+  }catch(e){
+    console.error('[Bookings] ERRO AO CARREGAR:', e);
+
+    bookings = [];
+
+    const badge = document.getElementById('bookingBadge');
+
+    if(badge){
+      badge.style.display = 'none';
+    }
+
+    toast(
+      'Não foi possível carregar as marcações: ' + (e.message || e),
+      'error'
+    );
+  }
+}
 async function loadSettings(){const rows=await db.select('sl_settings')||[];settings={};rows.forEach(r=>settings[r.key]=r.value)}
 async function loadSocial(){social=await db.select('sl_social','order=sort_order.asc')||[]}
 
@@ -960,6 +1161,8 @@ function updateDashboard(){
   document.getElementById('kSvcs').textContent=services.filter(s=>s.is_active).length;
   document.getElementById('kMsgs').textContent=messages.filter(m=>!m.is_read).length;
   document.getElementById('kBookings').textContent=bookings.filter(b=>b.status==='pendente').length;
+  document.getElementById('kConfirmed').textContent=bookings.filter(b=>b.status==='confirmado').length;
+  document.getElementById('kClients').textContent=getClients().length;
 
   const recentB=bookings.slice(0,5);
   const tbodyB=document.getElementById('recentBookings');
@@ -978,6 +1181,31 @@ function updateDashboard(){
     <td>${new Date(m.created_at).toLocaleDateString()}</td>
     <td><span class="badge ${m.is_read?'':'unread'}">${m.is_read?'Read':'Unread'}</span></td>
   </tr>`).join('');
+}
+
+/* ════════════════════════════════════════════
+   CALENDAR / CLIENTS
+════════════════════════════════════════════ */
+let calendarCursor=new Date();
+function getClients(){
+  const map=new Map();
+  bookings.forEach(b=>{const key=(b.email||b.phone||b.name||'').toLowerCase();if(!key)return;let c=map.get(key);if(!c)c={name:b.name,email:b.email,phone:b.phone,bookings:[]};c.bookings.push(b);if(new Date(b.session_date)>new Date(c.lastDate||'1900-01-01'))c.lastDate=b.session_date;map.set(key,c)});
+  return [...map.values()].sort((a,b)=>new Date(b.lastDate||0)-new Date(a.lastDate||0));
+}
+function renderClients(){
+  const tb=document.getElementById('clientsTable'); if(!tb)return; const cs=getClients();
+  if(!cs.length){tb.innerHTML='<tr><td colspan="5" class="tbl-empty">Ainda não existem clientes nas marcações.</td></tr>';return}
+  tb.innerHTML=cs.map(c=>{const latest=c.bookings.reduce((a,b)=>new Date(b.session_date)>new Date(a.session_date)?b:a,c.bookings[0]);return `<tr><td><strong>${esc(c.name)}</strong></td><td>${esc(c.phone||'—')}<br><span class="muted-small">${esc(c.email||'')}</span></td><td>${c.bookings.length}</td><td>${new Date(c.lastDate).toLocaleDateString()}</td><td><span class="badge status-${latest.status}">${bookingStatusLabel(latest.status)}</span></td></tr>`}).join('');
+}
+function calendarToday(){calendarCursor=new Date();renderCalendar()}
+function changeCalendarMonth(delta){calendarCursor=new Date(calendarCursor.getFullYear(),calendarCursor.getMonth()+delta,1);renderCalendar()}
+function renderCalendar(){
+  const title=document.getElementById('calendarTitle'),grid=document.getElementById('calendarGrid'); if(!grid)return; const y=calendarCursor.getFullYear(),m=calendarCursor.getMonth();
+  title.textContent=new Intl.DateTimeFormat('pt-PT',{month:'long',year:'numeric'}).format(new Date(y,m,1)).replace(/^./,x=>x.toUpperCase());
+  const first=new Date(y,m,1),days=new Date(y,m+1,0).getDate(),offset=(first.getDay()+6)%7; const names=['Seg','Ter','Qua','Qui','Sex','Sáb','Dom']; let h=names.map(n=>`<div class="cal-weekday">${n}</div>`).join('');
+  for(let i=0;i<offset;i++)h+='<div class="cal-day empty"></div>';
+  for(let d=1;d<=days;d++){const iso=`${y}-${String(m+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;const bs=bookings.filter(b=>b.session_date===iso).sort((a,b)=>(a.session_time||'').localeCompare(b.session_time||''));h+=`<div class="cal-day"><div class="cal-num">${d}</div>${bs.map(b=>`<button class="cal-event ${b.status}" onclick="viewBooking(${b.id})"><span>${(b.session_time||'').slice(0,5)}</span> ${esc(b.name)}</button>`).join('')}</div>`}
+  grid.innerHTML=h;
 }
 
 /* ════════════════════════════════════════════
@@ -1839,7 +2067,7 @@ async function saveBookingStatus(){
   const status=document.getElementById('bkModalStatus').value;
   const admin_notes=document.getElementById('bkModalAdminNotes').value.trim()||null;
   try{
-    await db.update('sl_bookings',`id=eq.${id}`,{status,admin_notes});
+    await bookingDb.update('sl_bookings',`id=eq.${id}`,{status,admin_notes});
     toast('Marcação atualizada','success');
     closeModal('modalBooking');
     await loadBookings();renderBookings();updateDashboard();
@@ -1847,13 +2075,13 @@ async function saveBookingStatus(){
 }
 async function delBooking(id){
   if(!confirm('Eliminar este pedido de marcação?'))return;
-  try{await db.delete('sl_bookings',`id=eq.${id}`);toast('Deleted','success');await loadBookings();renderBookings();updateDashboard()}
+  try{await bookingDb.delete('sl_bookings',`id=eq.${id}`);toast('Deleted','success');await loadBookings();renderBookings();updateDashboard()}
   catch(e){toast('Error: '+e.message,'error')}
 }
 async function deleteBooking(){
   const id=document.getElementById('bkModalId').value;
   if(!confirm('Eliminar este pedido de marcação?'))return;
-  try{await db.delete('sl_bookings',`id=eq.${id}`);toast('Deleted','success');closeModal('modalBooking');await loadBookings();renderBookings();updateDashboard()}
+  try{await bookingDb.delete('sl_bookings',`id=eq.${id}`);toast('Deleted','success');closeModal('modalBooking');await loadBookings();renderBookings();updateDashboard()}
   catch(e){toast('Error: '+e.message,'error')}
 }
 
@@ -2008,6 +2236,7 @@ function toast(msg,type=''){
   wrap.appendChild(el);
   setTimeout(()=>{el.style.opacity='0';setTimeout(()=>el.remove(),300)},3500);
 }
+
 </script>
 </body>
 </html>

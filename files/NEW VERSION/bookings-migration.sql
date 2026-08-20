@@ -77,3 +77,70 @@ NOTIFY pgrst, 'reload schema';
 --  DONE. A tabela sl_bookings está pronta a receber pedidos
 --  vindos do formulário público e a ser gerida em admin.html.
 -- ══════════════════════════════════════════════════════════════
+
+
+-- ══════════════════════════════════════════════════════════════
+--  SHUTTERLITE 2026 — Gestão de Clientes / Auditoria
+--  Incremental: não apaga dados existentes.
+-- ══════════════════════════════════════════════════════════════
+
+ALTER TABLE sl_bookings ADD COLUMN IF NOT EXISTS client_key TEXT;
+CREATE INDEX IF NOT EXISTS idx_bookings_client_key ON sl_bookings(client_key);
+
+UPDATE sl_bookings
+SET client_key = lower(trim(coalesce(email, phone, name)))
+WHERE client_key IS NULL;
+
+-- Mantém um histórico mínimo das alterações de estado/notas do pedido.
+CREATE TABLE IF NOT EXISTS sl_booking_events (
+  id BIGSERIAL PRIMARY KEY,
+  booking_id BIGINT NOT NULL REFERENCES sl_bookings(id) ON DELETE CASCADE,
+  old_status TEXT,
+  new_status TEXT,
+  old_admin_notes TEXT,
+  new_admin_notes TEXT,
+  created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+CREATE INDEX IF NOT EXISTS idx_booking_events_booking ON sl_booking_events(booking_id, created_at DESC);
+
+CREATE OR REPLACE FUNCTION sl_bookings_sync_client_key()
+RETURNS TRIGGER AS $$
+BEGIN
+  NEW.client_key = lower(trim(coalesce(NEW.email, NEW.phone, NEW.name)));
+  RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+DROP TRIGGER IF EXISTS trg_sl_bookings_client_key ON sl_bookings;
+CREATE TRIGGER trg_sl_bookings_client_key
+BEFORE INSERT OR UPDATE ON sl_bookings
+FOR EACH ROW EXECUTE FUNCTION sl_bookings_sync_client_key();
+
+CREATE OR REPLACE FUNCTION sl_bookings_audit()
+RETURNS TRIGGER AS $$
+BEGIN
+  IF OLD.status IS DISTINCT FROM NEW.status
+     OR OLD.admin_notes IS DISTINCT FROM NEW.admin_notes THEN
+    INSERT INTO sl_booking_events
+      (booking_id, old_status, new_status, old_admin_notes, new_admin_notes)
+    VALUES
+      (NEW.id, OLD.status, NEW.status, OLD.admin_notes, NEW.admin_notes);
+  END IF;
+  RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+DROP TRIGGER IF EXISTS trg_sl_bookings_audit ON sl_bookings;
+CREATE TRIGGER trg_sl_bookings_audit
+AFTER UPDATE ON sl_bookings
+FOR EACH ROW EXECUTE FUNCTION sl_bookings_audit();
+
+-- IMPORTANTE — compatibilidade com a versão atual do Admin:
+-- O Admin atual ainda utiliza a anon key para ler/alterar bookings.
+-- Por isso, a policy abaixo mantém compatibilidade e NÃO deve ser
+-- considerada a configuração final de produção.
+-- Antes de colocar o sistema em produção com dados reais, migre o
+-- Admin para Supabase Auth + RLS por utilizador/role e remova a policy
+-- anon_all_bookings.
+
+NOTIFY pgrst, 'reload schema';

@@ -1865,3 +1865,23 @@ body.light-theme .lb-nav {
   color:rgba(255,255,255,.75);
   border-color:rgba(255,255,255,.2);
 }
+
+
+/* SHUTTERLITE 2026 UX UPDATE */
+.nav-booking-link{border:1px solid var(--w30);padding:9px 16px;border-radius:999px;color:#fff!important}
+.nav-booking-link:hover{background:#fff;color:#000!important}
+.why-section{padding-top:120px}
+.why-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:14px}
+.why-card{padding:30px;border:1px solid var(--w10);background:linear-gradient(180deg,var(--w05),transparent);min-height:230px;transition:transform .35s var(--ease),border-color .35s}
+.why-card:hover{transform:translateY(-5px);border-color:var(--w30)}
+.why-card span{font-size:11px;letter-spacing:.25em;color:var(--w40)}
+.why-card h4{font-size:19px;font-weight:300;margin:38px 0 12px}
+.why-card p{font-size:13px;color:var(--w50);line-height:1.8}
+.contact-fast-actions{margin:28px 0 36px;display:flex;align-items:center;gap:18px;flex-wrap:wrap}
+.contact-whatsapp{display:inline-flex;gap:28px;align-items:center;border:1px solid var(--w30);padding:14px 20px;border-radius:999px;text-transform:uppercase;letter-spacing:.18em;font-size:10px;transition:.3s}
+.contact-whatsapp:hover{background:#fff;color:#000}
+.contact-fast-note{font-size:12px;color:var(--w40)}
+@media(max-width:900px){.why-grid{grid-template-columns:repeat(2,1fr)}}
+@media(max-width:560px){.why-grid{grid-template-columns:1fr}.nav-booking-link{padding:7px 11px}}
+body.light-theme .nav-booking-link{border-color:rgba(0,0,0,.2);color:#111!important}
+body.light-theme .nav-booking-link:hover{background:#111;color:#fff!important}
