@@ -868,7 +868,6 @@ const SESSION_DAYS = 7;
 async function bookingApi(url, opts = {}) {
   const r = await fetch(url, {
     ...opts,
-    body: opts.body && typeof opts.body !== 'string' ? JSON.stringify(opts.body) : opts.body,
     headers: {
       apikey: BOOKING_SUPABASE_ANON,
       Authorization: `Bearer ${BOOKING_SUPABASE_ANON}`,
@@ -1969,7 +1968,7 @@ async function saveBookingStatus(){
   const status=document.getElementById('bkModalStatus').value;
   const admin_notes=document.getElementById('bkModalAdminNotes').value.trim()||null;
   try{
-    await bookingDb.update('sl_bookings',`id=eq.${id}`,{status,admin_notes});
+    await db.update('sl_bookings',`id=eq.${id}`,{status,admin_notes});
     toast('Marcação atualizada','success');
     closeModal('modalBooking');
     await loadBookings();renderBookings();updateDashboard();
@@ -1977,13 +1976,13 @@ async function saveBookingStatus(){
 }
 async function delBooking(id){
   if(!confirm('Eliminar este pedido de marcação?'))return;
-  try{await bookingDb.delete('sl_bookings',`id=eq.${id}`);toast('Deleted','success');await loadBookings();renderBookings();updateDashboard()}
+  try{await db.delete('sl_bookings',`id=eq.${id}`);toast('Deleted','success');await loadBookings();renderBookings();updateDashboard()}
   catch(e){toast('Error: '+e.message,'error')}
 }
 async function deleteBooking(){
   const id=document.getElementById('bkModalId').value;
   if(!confirm('Eliminar este pedido de marcação?'))return;
-  try{await bookingDb.delete('sl_bookings',`id=eq.${id}`);toast('Deleted','success');closeModal('modalBooking');await loadBookings();renderBookings();updateDashboard()}
+  try{await db.delete('sl_bookings',`id=eq.${id}`);toast('Deleted','success');closeModal('modalBooking');await loadBookings();renderBookings();updateDashboard()}
   catch(e){toast('Error: '+e.message,'error')}
 }
 
