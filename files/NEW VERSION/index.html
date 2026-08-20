@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="pt">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -31,8 +31,9 @@
       <a href="#portfolio">Portfólio</a>
       <a href="#about">Acerca</a>
       <a href="#services">Serviços</a>
+      <a href="#why-us">Porquê nós</a>
       <a href="#contact">Contactos</a>
-      <a href="/assets/booking/booking.html">Marcações</a>
+      <a class="nav-booking-link" href="booking.html">Marcações</a>
     </nav>
     <div class="nav-btn">
       <label class="switch">
@@ -61,8 +62,9 @@
   <a href="#portfolio" onclick="toggleMobileMenu()">Portfólio</a>
   <a href="#about" onclick="toggleMobileMenu()">Acerca</a>
   <a href="#services" onclick="toggleMobileMenu()">Serviços</a>
+  <a href="#why-us" onclick="toggleMobileMenu()">Porquê nós</a>
   <a href="#contact" onclick="toggleMobileMenu()">Contactos</a>
-  <a href="/assets/booking/booking.html" onclick="toggleMobileMenu()">Marcações</a>
+  <a href="booking.html" onclick="toggleMobileMenu()">Marcações</a>
 </div>
 
 <!-- HERO -->
@@ -79,9 +81,7 @@
     <p class="hero-desc" id="heroDesc">Narrativas cinematográficas através de fotografias elegantes. Casamentos, retratos, editoriais e experiências visuais inesquecíveis.</p>
     <div class="hero-actions">
       <a href="#portfolio" class="btn-pill primary">Ver Portfólio</a>
-      <button class="button type1">
-        <a href="/assets/booking/booking.html" class="btn-pill outline">Agendar Sessão</a>
-      </button>
+      <a href="booking.html" class="btn-pill outline">Agendar Sessão</a>
     </div>
   </div>
   <div class="hero-dots" id="heroDots"></div>
@@ -144,6 +144,22 @@
   </div>
 </section>
 
+<!-- WHY US -->
+<section id="why-us" class="section why-section">
+  <div class="section-narrow">
+    <div class="section-head">
+      <p class="section-eyebrow reveal">A nossa diferença</p>
+      <h3 class="section-title reveal delay-1">Mais do que fotografias.<br>Uma experiência pensada para si.</h3>
+    </div>
+    <div class="why-grid reveal delay-2">
+      <article class="why-card"><span>01</span><h4>Direção fotográfica</h4><p>Orientação durante a sessão para criar imagens naturais, elegantes e intencionais.</p></article>
+      <article class="why-card"><span>02</span><h4>Assinatura cinematográfica</h4><p>Cor, luz e composição trabalhadas para manter uma identidade visual consistente.</p></article>
+      <article class="why-card"><span>03</span><h4>Experiência personalizada</h4><p>Cada sessão começa com planeamento, briefing e atenção aos detalhes que importam.</p></article>
+      <article class="why-card"><span>04</span><h4>Entrega profissional</h4><p>As suas fotografias são tratadas com cuidado e entregues de forma organizada e segura.</p></article>
+    </div>
+  </div>
+</section>
+
 <!-- TESTIMONIALS -->
 <section id="testimonials" class="section">
   <div class="section-narrowest">
@@ -182,6 +198,7 @@
       <div class="form-msg" id="formMsg"></div>
       <button type="submit" class="contact-submit" id="submitBtn">Enviar Mensagem</button>
     </form>
+    <div class="contact-fast-actions"><a class="contact-whatsapp" href="https://wa.me/258000000000" target="_blank" rel="noopener">Falar pelo WhatsApp <span>→</span></a><span class="contact-fast-note">Resposta rápida para disponibilidade e dúvidas.</span></div>
     <div class="contact-info">
       <div class="contact-info-item">
         <div class="contact-info-label">Email</div>
