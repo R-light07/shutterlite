@@ -208,20 +208,23 @@ select {
   justify-content:space-between
 }
 .nav-logo {
-  font-size:clamp(18px,2.2vw,28px);
+  font-size:clamp(12px,2.2vw,18px);
   letter-spacing:.4em;
   font-weight:300;
   cursor:pointer
+}
+.logo .logo-img {
+  display: none;
 }
 .nav-links {
   display:flex;
   align-items:center;
   justify-content:center;
-  gap:40px;
+  gap: 20px;
   list-style:none
 }
 .nav-links a {
-  font-size:13px;
+  font-size:12px;
   text-transform:uppercase;
   letter-spacing:.25em;
   color:var(--w70);
@@ -1054,6 +1057,16 @@ input:checked + .slider:before {
   opacity:.7
 }
 
+/* ════ WHY-US ════ */
+
+.why-section{padding-top:120px}
+.why-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:14px}
+.why-card{padding:30px;border:1px solid var(--w10);background:linear-gradient(180deg,var(--w05),transparent);min-height:230px;transition:transform .35s var(--ease),border-color .35s}
+.why-card:hover{transform:translateY(-5px);border-color:var(--w30)}
+.why-card span{font-size:11px;letter-spacing:.25em;color:var(--w40)}
+.why-card h4{font-size:19px;font-weight:300;margin:38px 0 12px}
+.why-card p{font-size:13px;color:var(--w50);line-height:1.8}
+
 /* ════ TESTIMONIALS ════ */
 #testimonials {
   border-top:1px solid var(--w10);
@@ -1472,30 +1485,42 @@ to {
 
 /* ════ RESPONSIVE ════ */
 @media(max-width:1024px) {
-.about-grid {
-  grid-template-columns:1fr;
-  gap:48px
-}
-#servicesGrid {
-  grid-template-columns:repeat(1fr)
-}
-.sm-grid {
-  grid-template-columns:repeat(2,1fr)
-}
 
-.nav-btn {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-}
+  .nav-logo {
+    display: none;
+  }
 
-#about-sec {
+  .logo .logo-img {
+    display: block;
+  }
+
+  .about-grid {
+    grid-template-columns:1fr;
+    gap:48px
+  }
+  #servicesGrid {
+    grid-template-columns:repeat(1fr)
+  }
+  .sm-grid {
+    grid-template-columns:repeat(2,1fr)
+  }
+
+  .nav-btn {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+  }
+
+  #about-sec {
     display: flex;
     flex-direction: column;
     align-items: center;
     justify-content: center;
   }
 
+  .why-grid {
+    grid-template-columns:repeat(2,1fr)
+  }
 }
 
 @media(max-width:768px) {
@@ -1615,6 +1640,14 @@ to {
     flex-direction: column;
     align-items: center;
     justify-content: center;
+  }
+
+  .why-grid {
+    grid-template-columns:1fr
+  }
+  
+  .nav-booking-link {
+    padding:7px 11px
   }
 
 }
