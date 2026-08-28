@@ -1,0 +1,37 @@
+INTEGRAÇÃO NO SHUTTERLITE
+==========================
+
+1. FOOTER
+No index.html e service.html, dentro de .footer-social ou .footer-bottom, adicionar:
+<a href="mentorias.html">Mentorias Online</a>
+
+2. MENU MOBILE
+Adicionar:
+<a href="mentorias.html">Mentorias Online</a>
+
+3. ADMIN
+O admin.html atual autentica através de sl_admins + localStorage. Isso não é uma sessão Supabase Auth.
+Para que a gestão de mentorias seja protegida por RLS, a gestão deve ser executada por uma sessão Supabase Auth de um utilizador cujo mentoria_profiles.role seja admin.
+A integração segura recomendada é:
+- adicionar um botão “Mentorias” ao admin.html;
+- abrir uma área/página de administração que use Supabase Auth;
+- não tentar reutilizar o localStorage sl_admin_session como prova de autorização no Supabase.
+
+4. CRIAÇÃO DE CONTA DO ALUNO
+A aprovação da candidatura NÃO cria automaticamente uma conta Auth.
+Para criar uma conta, o administrador deve criar/invitar o utilizador através do Supabase Auth.
+Depois, usando uma sessão administrativa válida, chamar:
+mentoria_activate_student(application_id, user_id)
+
+Nunca exponha a Service Role Key no browser.
+
+5. ÁREA PRIVADA
+mentorias-area.html deve:
+- obter a sessão com supabase.auth.getSession()
+- consultar mentoria_profiles para auth.uid()
+- exigir role=student e status=active
+- redirecionar utilizadores não autorizados para mentorias-login.html
+
+6. ADMIN EXISTENTE
+O código atual do admin.html usa sl_admins/password_hash/localStorage para login. Isso está documentado nos ficheiros existentes.
+A migração do login administrativo para Supabase Auth deve ser tratada como uma alteração separada, porque pode afetar todas as funções atuais do painel.

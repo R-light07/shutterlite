@@ -1,0 +1,40 @@
+INTEGRAÇÃO V3
+=============
+
+1) Copie os quatro HTML para a mesma pasta do site:
+   mentorias.html
+   mentorias-login.html
+   mentorias-area.html
+   mentorias-admin.html
+
+2) No index.html, acrescente no menu mobile:
+   <a href="mentorias.html">Mentorias Online</a>
+   e no footer (.footer-social):
+   <a href="mentorias.html">Mentorias Online</a>
+
+3) No service.html, acrescente no menu mobile e no footer:
+   <a href="mentorias.html">Mentorias Online</a>
+
+4) No admin.html, acrescente na sidebar existente:
+   <a class="side-link" href="mentorias-admin.html">Mentorias Online</a>
+
+5) Execute mentorias.sql no Supabase.
+
+6) Crie o primeiro administrador em Authentication > Users.
+   Depois:
+   insert into public.mentoria_profiles(id,full_name,role,status)
+   values('UUID_DO_ADMIN','Administrador','admin','active');
+
+7) Fluxo:
+   candidatura -> pending -> aprovação manual -> candidato cria conta Auth ->
+   trigger cria mentoria_profiles(student, active) -> área privada.
+
+8) Pendentes/rejeitados não entram na área privada.
+   role/status são protegidos por RLS/RPC.
+
+9) Para apagar também o utilizador do Auth use a Edge Function
+   mentoria-remove-user.ts. A SERVICE_ROLE_KEY fica APENAS nas secrets
+   da Edge Function, nunca no frontend.
+
+10) O admin.html atual continua com o seu login antigo nesta etapa,
+    evitando quebrar o painel existente. O módulo de mentorias usa Supabase Auth.
