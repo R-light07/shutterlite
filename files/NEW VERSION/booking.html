@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>SHUTTERLITE — Marcação</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@200;300;400;500&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#000;--panel:#0a0a0a;--w10:rgba(255,255,255,.1);--w20:rgba(255,255,255,.2);--w40:rgba(255,255,255,.4);--w60:rgba(255,255,255,.6);--ease:cubic-bezier(.16,1,.3,1)}*{box-sizing:border-box}body{margin:0;background:var(--bg);color:#fff;font-family:Outfit,sans-serif;font-weight:300;line-height:1.6}a{color:inherit;text-decoration:none}.wrap{width:min(920px,calc(100% - 32px));margin:auto;padding:48px 0 90px}.top{display:flex;justify-content:space-between;align-items:center;margin-bottom:65px}.logo{letter-spacing:.4em;font-size:20px}.back{text-transform:uppercase;letter-spacing:.18em;font-size:10px;color:var(--w40)}.head{text-align:center;margin-bottom:42px}.eyebrow{text-transform:uppercase;letter-spacing:.3em;color:var(--w40);font-size:10px}.head h1{font-size:clamp(38px,7vw,68px);font-weight:200;line-height:1.05;margin:15px 0}.head p{max-width:600px;margin:auto;color:var(--w40);font-size:14px}.panel{background:var(--panel);border:1px solid var(--w10);border-radius:26px;padding:34px}.section-title{text-transform:uppercase;letter-spacing:.2em;color:var(--w40);font-size:10px;margin:4px 0 20px}.grid{display:grid;grid-template-columns:repeat(2,1fr);gap:18px}.field{margin-bottom:18px}.field.full{grid-column:1/-1}label{display:block;text-transform:uppercase;letter-spacing:.18em;color:var(--w40);font-size:9px;margin-bottom:8px}input,select,textarea{width:100%;background:#111;color:#fff;border:1px solid var(--w10);border-radius:13px;padding:14px 15px;font:300 14px Outfit,sans-serif;outline:none}input:focus,select:focus,textarea:focus{border-color:var(--w60)}textarea{min-height:120px;resize:vertical}.actions{display:flex;align-items:center;justify-content:space-between;gap:15px;margin-top:15px}.submit{border:0;background:#fff;color:#000;border-radius:999px;padding:15px 25px;text-transform:uppercase;letter-spacing:.18em;font:400 10px Outfit;cursor:pointer}.submit:disabled{opacity:.45}.msg{font-size:12px;color:var(--w40)}.success{display:none;text-align:center;padding:55px 20px}.success.show{display:block}.success h2{font-size:34px;font-weight:200}.code{display:inline-block;margin:20px 0;padding:12px 20px;border:1px solid var(--w20);border-radius:999px;letter-spacing:.2em}.error{color:#ff8080}.hidden{display:none}@media(max-width:650px){.grid{grid-template-columns:1fr}.field.full{grid-column:auto}.panel{padding:22px}.top{margin-bottom:40px}.actions{align-items:flex-start;flex-direction:column}}
+</style>
+</head>
+<body><div class="wrap">
+<header class="top"><a class="logo" href="index.html">SHUTTERLITE</a><a class="back" href="index.html">← Voltar ao site</a></header>
+<div class="head"><div class="eyebrow">Marcação de sessão</div><h1>Vamos criar algo<br>brilhante.</h1><p>Envie o seu pedido. A disponibilidade será analisada e receberá uma confirmação antes da sessão.</p></div>
+<div class="panel" id="formPanel"><form id="bookingForm">
+<div class="section-title">Contacto</div><div class="grid">
+<div class="field"><label>Nome completo</label><input id="name" required></div><div class="field"><label>WhatsApp / Telefone</label><input id="phone" required></div>
+<div class="field"><label>E-mail</label><input id="email" type="email" required></div><div class="field"><label>Número de pessoas</label><input id="people" type="number" min="1" value="1" required></div>
+</div>
+<div class="section-title">Sessão</div><div class="grid">
+<div class="field"><label>Tipo de sessão</label><select id="session_type" required><option value="">Selecione</option><option>Casamento</option><option>Retrato</option><option>Evento</option><option>Comercial</option><option>Editorial</option><option>Outro</option></select></div>
+<div class="field"><label>Pacote pretendido</label><input id="package" placeholder="Ex.: Signature" required></div>
+<div class="field"><label>Data pretendida</label><input id="session_date" type="date" required></div><div class="field"><label>Hora pretendida</label><input id="session_time" type="time" required></div>
+<div class="field"><label>Duração</label><select id="duration" required><option value="">Selecione</option><option>1 hora</option><option>2 horas</option><option>4 horas</option><option>8 horas</option><option>A combinar</option></select></div>
+<div class="field"><label>Estilo / objetivo</label><input id="style" placeholder="Ex.: elegante, editorial, natural" required></div>
+</div>
+<div class="section-title">Local e pagamento</div><div class="grid">
+<div class="field"><label>Local</label><select id="location" required><option value="">Selecione</option><option>Estúdio</option><option>Exterior</option><option>Domicílio</option><option>Outro</option></select></div>
+<div class="field"><label>Método de pagamento</label><select id="payment_method" required><option value="">Selecione</option><option>Numerário</option><option>Transferência</option><option>Pagamento móvel</option><option>A combinar</option></select></div>
+<div class="field full"><label>Morada / local específico</label><input id="address" placeholder="Preencha se necessário"></div>
+<div class="field full"><label>Observações</label><textarea id="notes" placeholder="Conte-nos mais sobre a sessão, evento ou necessidades especiais."></textarea></div>
+</div>
+<div class="actions"><div class="msg" id="msg">Os dados serão usados apenas para processar o seu pedido.</div><button class="submit" id="submit" type="submit">Enviar pedido →</button></div>
+</form><div class="success" id="success"><div class="eyebrow">Pedido recebido</div><h2>Obrigado.</h2><p class="msg">O seu pedido foi registado. Guarde o código abaixo para referência.</p><div class="code" id="successCode">—</div><br><a class="back" href="index.html">Voltar ao site</a></div></div>
+</div>
+<script>
+const SUPABASE_URL='https://ckighonenakuruscgvps.supabase.co';const SUPABASE_ANON='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImNraWdob25lbmFrdXJ1c2NndnBzIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzYyOTE5ODIsImV4cCI6MjA5MTg2Nzk4Mn0.y3O-xbECIrMTj8Qg_9EI7a5BuepzzuhAVZLyKjGw3ow';
+const REST=SUPABASE_URL+'/rest/v1';
+function headers(extra={}){return {'apikey':SUPABASE_ANON,'Authorization':'Bearer '+SUPABASE_ANON,'Content-Type':'application/json',...extra}}
+function esc(s){return String(s).replace(/[^A-Z0-9]/gi,'').slice(-4).toUpperCase()}
+function makeCode(){const d=new Date(),date=d.getFullYear()+String(d.getMonth()+1).padStart(2,'0')+String(d.getDate()).padStart(2,'0');return 'SL-'+date+'-'+Math.random().toString(36).slice(2,6).toUpperCase()}
+function val(id){return document.getElementById(id).value.trim()}
+const minDate=new Date();minDate.setDate(minDate.getDate()+1);document.getElementById('session_date').min=minDate.toISOString().slice(0,10);
+document.getElementById('bookingForm').addEventListener('submit',async e=>{e.preventDefault();const btn=document.getElementById('submit'),msg=document.getElementById('msg');btn.disabled=true;btn.textContent='A enviar…';msg.textContent='A processar o pedido…';msg.classList.remove('error');const body={code:makeCode(),name:val('name'),phone:val('phone'),email:val('email'),session_type:val('session_type'),package:val('package'),session_date:val('session_date'),session_time:val('session_time'),duration:val('duration'),people:Number(document.getElementById('people').value||1),style:val('style'),location:val('location'),address:val('address')||null,notes:val('notes')||null,payment_method:val('payment_method'),status:'pendente'};try{const r=await fetch(REST+'/sl_bookings',{method:'POST',headers:headers({'Prefer':'return=representation'}),body:JSON.stringify(body)});const t=await r.text();if(!r.ok)throw new Error(t||('HTTP '+r.status));document.getElementById('formPanel').querySelector('form').classList.add('hidden');document.getElementById('success').classList.add('show');document.getElementById('successCode').textContent=body.code}catch(err){console.error(err);msg.textContent='Não foi possível enviar o pedido. Verifique os dados e tente novamente.';msg.classList.add('error');btn.disabled=false;btn.textContent='Enviar pedido →'}})
+</script></body></html>

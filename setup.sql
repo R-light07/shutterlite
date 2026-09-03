@@ -18,6 +18,7 @@ DROP TABLE IF EXISTS sl_messages     CASCADE;
 DROP TABLE IF EXISTS sl_settings     CASCADE;
 DROP TABLE IF EXISTS sl_social       CASCADE;
 DROP TABLE IF EXISTS sl_admins       CASCADE;
+DROP TABLE IF EXISTS sl_bookings     CASCADE;
 
 -- ── 1. ADMIN USERS ────────────────────────────────────────────
 CREATE TABLE sl_admins (
@@ -143,6 +144,49 @@ CREATE TABLE sl_social (
   is_active  BOOLEAN DEFAULT TRUE
 );
 
+-- ── 10. BOOKINGS (pedidos de marcação de sessões) ─────────────
+CREATE TABLE sl_bookings (
+  id             BIGSERIAL PRIMARY KEY,
+  code           TEXT UNIQUE NOT NULL,
+
+  name           TEXT NOT NULL,
+  phone          TEXT NOT NULL,
+  email          TEXT NOT NULL,
+
+  session_type   TEXT NOT NULL,
+  package        TEXT NOT NULL,
+  session_date   DATE NOT NULL,
+  session_time   TIME NOT NULL,
+  duration       TEXT NOT NULL,
+  people         INT NOT NULL DEFAULT 1,
+  style          TEXT NOT NULL,
+
+  location       TEXT NOT NULL,
+  address        TEXT,
+
+  notes          TEXT,
+  payment_method TEXT NOT NULL,
+
+  status         TEXT NOT NULL DEFAULT 'pendente'
+                 CHECK (status IN ('pendente','confirmado','recusado','concluido','cancelado')),
+  admin_notes    TEXT,
+
+  created_at     TIMESTAMPTZ DEFAULT NOW(),
+  updated_at     TIMESTAMPTZ DEFAULT NOW()
+);
+
+CREATE OR REPLACE FUNCTION sl_bookings_set_updated_at()
+RETURNS TRIGGER AS $$
+BEGIN
+  NEW.updated_at = NOW();
+  RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE TRIGGER trg_sl_bookings_updated_at
+  BEFORE UPDATE ON sl_bookings
+  FOR EACH ROW EXECUTE FUNCTION sl_bookings_set_updated_at();
+
 -- ── INDEXES ───────────────────────────────────────────────────
 CREATE INDEX idx_photos_session   ON sl_photos(session_id);
 CREATE INDEX idx_photos_cover     ON sl_photos(is_cover);
@@ -151,6 +195,9 @@ CREATE INDEX idx_sessions_hero    ON sl_sessions(cover_in_hero);
 CREATE INDEX idx_messages_read    ON sl_messages(is_read);
 CREATE INDEX idx_service_photos_service ON sl_service_photos(service_id);
 CREATE INDEX idx_services_slug    ON sl_services(slug);
+CREATE INDEX idx_bookings_status  ON sl_bookings(status);
+CREATE INDEX idx_bookings_date    ON sl_bookings(session_date);
+CREATE INDEX idx_bookings_created ON sl_bookings(created_at);
 
 -- ══════════════════════════════════════════════════════════════
 --  RLS — public read / anon full access
@@ -165,6 +212,7 @@ ALTER TABLE sl_testimonials ENABLE ROW LEVEL SECURITY;
 ALTER TABLE sl_messages     ENABLE ROW LEVEL SECURITY;
 ALTER TABLE sl_settings     ENABLE ROW LEVEL SECURITY;
 ALTER TABLE sl_social       ENABLE ROW LEVEL SECURITY;
+ALTER TABLE sl_bookings     ENABLE ROW LEVEL SECURITY;
 
 CREATE POLICY "anon_all_admins"       ON sl_admins       FOR ALL TO anon USING (true) WITH CHECK (true);
 CREATE POLICY "anon_all_categories"   ON sl_categories   FOR ALL TO anon USING (true) WITH CHECK (true);
@@ -176,6 +224,7 @@ CREATE POLICY "anon_all_testimonials" ON sl_testimonials FOR ALL TO anon USING (
 CREATE POLICY "anon_all_messages"     ON sl_messages     FOR ALL TO anon USING (true) WITH CHECK (true);
 CREATE POLICY "anon_all_settings"     ON sl_settings     FOR ALL TO anon USING (true) WITH CHECK (true);
 CREATE POLICY "anon_all_social"       ON sl_social       FOR ALL TO anon USING (true) WITH CHECK (true);
+CREATE POLICY "anon_all_bookings"     ON sl_bookings     FOR ALL TO anon USING (true) WITH CHECK (true);
 
 -- ══════════════════════════════════════════════════════════════
 --  STORAGE POLICIES — bucket portfolio-media (criar manualmente)
@@ -198,60 +247,5 @@ CREATE POLICY "sl_storage_insert" ON storage.objects FOR INSERT TO anon, authent
 CREATE POLICY "sl_storage_update" ON storage.objects FOR UPDATE TO anon, authenticated USING (bucket_id = 'portfolio-media') WITH CHECK (bucket_id = 'portfolio-media');
 CREATE POLICY "sl_storage_delete" ON storage.objects FOR DELETE TO anon, authenticated USING (bucket_id = 'portfolio-media');
 
--- buckets: anon precisa ver o bucket
-DROP POLICY IF EXISTS "sl_buckets_view" ON storage.buckets;
-CREATE POLICY "sl_buckets_view" ON storage.buckets FOR SELECT TO anon, authenticated USING (true);
 
--- ══════════════════════════════════════════════════════════════
---  SEED DATA
--- ══════════════════════════════════════════════════════════════
 
--- Categorias (tags opcionais)
-INSERT INTO sl_categories (name, slug, sort_order) VALUES
-  ('Wedding',    'wedding',    1),
-  ('Portrait',   'portrait',   2),
-  ('Editorial',  'editorial',  3),
-  ('Corporate',  'corporate',  4),
-  ('Event',      'event',      5);
-
--- Settings padrão
-INSERT INTO sl_settings (key, value) VALUES
-  ('photographer',     'Shutterlite'),
-  ('tagline',          'Cinematic storytelling through elegant photography'),
-  ('about_text',       'SHUTTERLITE is a premium photography brand focused on capturing authentic moments with cinematic elegance. Every image is crafted to preserve emotion, atmosphere and timeless beauty.'),
-  ('about_since',      '2018'),
-  ('hero_title',       'Capturing\nTimeless\nMoments'),
-  ('hero_sub',         'Premium Photography Experience'),
-  ('contact_email',    'contact@shutterlite.com'),
-  ('contact_phone',    '+351 900 000 000'),
-  ('contact_location', 'Lisbon, Portugal');
-
--- Serviços
-INSERT INTO sl_services (title, slug, description, price_from, sort_order) VALUES
-  ('Wedding Photography',    'wedding-photography',    'Cinematic coverage of your most important day, from preparations to the final dance.', 'From €1.200', 1),
-  ('Event Coverage',         'event-coverage',         'Authentic documentation of corporate events, launches and private celebrations.',     'From €450',   2),
-  ('Portrait Sessions',      'portrait-sessions',      'Editorial portraits crafted in studio or on location with a refined aesthetic.',      'From €250',   3),
-  ('Commercial Photography', 'commercial-photography', 'Brand-focused imagery for products, campaigns and visual identity.',                  'From €600',   4);
-
--- Testemunhos
-INSERT INTO sl_testimonials (client_name, client_role, content, rating, is_featured) VALUES
-  ('Ana & Miguel',  'Wedding, June 2025',   'An unforgettable experience. The photographs exceeded every expectation and captured every emotion beautifully.', 5, TRUE),
-  ('Sofia Martins', 'Marketing Director',   'Working with SHUTTERLITE on our campaign was extraordinary. Professional, creative, and always on time.',       5, TRUE),
-  ('Carlos Ferreira','Family Session',      'The family session was incredible. The kids loved it and the photos are simply perfect.',                          5, TRUE);
-
--- Redes sociais
-INSERT INTO sl_social (platform, url, sort_order) VALUES
-  ('Instagram', 'https://instagram.com/',  1),
-  ('Facebook',  'https://facebook.com/',   2),
-  ('Pinterest', 'https://pinterest.com/',  3),
-  ('LinkedIn',  'https://linkedin.com/',   4);
-
--- ── PostgREST cache reload ────────────────────────────────────
-NOTIFY pgrst, 'reload schema';
-
--- ══════════════════════════════════════════════════════════════
---  DONE. Próximos passos:
---    1. Confirme bucket "portfolio-media" criado e PUBLIC
---    2. Login no admin com admin / admin123
---    3. Mude a password depois (em produção)
--- ══════════════════════════════════════════════════════════════

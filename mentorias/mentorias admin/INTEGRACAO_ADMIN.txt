@@ -1,0 +1,37 @@
+INTEGRAÇÃO FINAL
+=================
+
+1. Copie mentorias-admin.html para a mesma pasta de admin.html.
+
+2. No index.html e service.html adicione no footer:
+<a href="mentorias.html">Mentorias Online</a>
+e no menu mobile:
+<a href="mentorias.html">Mentorias Online</a>
+
+3. No admin.html atual, adicione um link no sidebar:
+<a class="side-link" href="mentorias-admin.html">
+  Mentorias Online
+</a>
+
+4. O mentorias-admin.html usa Supabase Auth e valida:
+   mentoria_profiles.role = admin
+   mentoria_profiles.status = active
+
+5. Execute mentorias.sql ANTES de utilizar o painel.
+
+6. Crie um administrador no Supabase Auth:
+   Authentication > Users > Add user
+   Depois copie o UUID e execute:
+   insert into public.mentoria_profiles(id,full_name,role,status)
+   values('UUID_DO_AUTH_USER','Administrador','admin','active');
+
+7. A aprovação usa exclusivamente:
+   mentoria_review_application(...)
+   Portanto o frontend não altera diretamente o status.
+
+8. O admin.html existente continua a funcionar com a autenticação antiga.
+   O módulo de mentorias fica separado para não quebrar o painel existente.
+   A migração completa do login antigo para Supabase Auth deve ser feita numa etapa própria.
+
+9. IMPORTANTE:
+   Não coloque Service Role Key em qualquer HTML/JS.

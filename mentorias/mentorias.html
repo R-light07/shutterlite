@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<meta name="description" content="SHUTTERLITE — Mentorias Online.">
+<title>SHUTTERLITE — Mentorias Online</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@200;300;400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+<link rel="icon" type="image/png" href="assets/favicon.png">
+<style>
+.ment-hero{padding:170px 24px 100px;text-align:center;border-bottom:1px solid var(--w10)}
+.ment-kicker{text-transform:uppercase;letter-spacing:.45em;color:var(--w40);font-size:12px;margin-bottom:20px}
+.ment-title{font-size:clamp(48px,8vw,96px);font-weight:300;line-height:.95;letter-spacing:-.025em}
+.ment-lead{max-width:46rem;margin:30px auto 0;color:var(--w60);font-size:17px;line-height:1.8}
+.ment-actions{display:flex;justify-content:center;gap:14px;flex-wrap:wrap;margin-top:40px}
+.ment-section{padding:110px 24px}
+.ment-head{text-align:center;margin-bottom:60px}
+.ment-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:20px}
+.ment-card{border:1px solid var(--w10);border-radius:24px;background:var(--neutral-950);padding:34px;min-height:250px;transition:all .45s var(--ease)}
+.ment-card:hover{transform:translateY(-4px);border-color:var(--w30)}
+.ment-num{font-size:40px;font-weight:200;line-height:1;margin-bottom:38px}
+.ment-card h3{font-size:22px;font-weight:300;margin-bottom:12px}
+.ment-card p{font-size:14px;line-height:1.7;color:var(--w50)}
+.ment-process{display:grid;grid-template-columns:repeat(4,1fr);gap:16px}
+.ment-step{padding:28px;border-top:1px solid var(--w20)}
+.ment-step span{font-size:11px;letter-spacing:.3em;color:var(--w40);text-transform:uppercase}
+.ment-step h3{font-size:20px;font-weight:300;margin:18px 0 10px}
+.ment-step p{font-size:14px;color:var(--w50);line-height:1.7}
+.ment-form-wrap{max-width:900px;margin:0 auto;border:1px solid var(--w10);border-radius:24px;padding:48px;background:var(--neutral-950)}
+.ment-form{display:grid;gap:18px}
+.ment-row{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+.ment-label{display:block;text-transform:uppercase;letter-spacing:.22em;color:var(--w50);font-size:10px;margin:0 0 8px 4px}
+.ment-field{background:var(--neutral-900);border:1px solid var(--w10);border-radius:16px;padding:18px 20px;font-size:15px;width:100%;font-weight:300;transition:border-color .3s}
+.ment-field:focus{border-color:#fff}
+textarea.ment-field{resize:vertical;min-height:140px}
+.ment-note{font-size:12px;color:var(--w40);line-height:1.7}
+.ment-msg{display:none;padding:18px 20px;border-radius:16px;border:1px solid var(--w20);font-size:14px;text-align:center}
+.ment-msg.show{display:block}
+.ment-msg.error{border-color:rgba(255,80,80,.35);color:#ff8888}
+.ment-submit{width:100%;border:0}
+body.light-theme .ment-card:hover{background:#fff;border-color:#111}
+@media(max-width:900px){.ment-grid,.ment-process{grid-template-columns:1fr 1fr}}
+@media(max-width:600px){.ment-hero{padding:140px 20px 80px}.ment-section{padding:80px 20px}.ment-grid,.ment-process,.ment-row{grid-template-columns:1fr}.ment-form-wrap{padding:28px 20px}.ment-title{font-size:clamp(48px,16vw,72px)}}
+</style>
+</head>
+<body>
+<div id="loader"><div style="text-align:center"><div class="loader-text">SHUTTERLITE</div><div class="loader-bar"></div></div></div>
+
+<header id="nav" class="scrolled">
+<div class="nav-inner">
+<a href="index.html#hero" class="nav-logo">SHUTTERLITE</a>
+<nav class="nav-links">
+<a href="index.html#hero">Início</a><a href="index.html#portfolio">Portfólio</a><a href="index.html#about">Acerca</a><a href="index.html#services">Serviços</a><a href="index.html#contact">Contactos</a>
+</nav>
+<div class="nav-btn">
+<label class="switch"><input type="checkbox" id="themeToggle"><span class="slider"></span></label>
+<button class="nav-mobile" onclick="toggleMobileMenu()" aria-label="Menu"><label class="hamburger"><input type="checkbox" id="menuToggle"><svg viewBox="0 0 32 32"><path class="line line-top-bottom" d="M27 10 13 10C10.8 10 9 8.2 9 6 9 3.5 10.8 2 13 2 15.2 2 17 3.8 17 6L17 26C17 28.2 18.8 30 21 30 23.2 30 25 28.2 25 26 25 23.8 23.2 22 21 22L7 22"></path><path class="line" d="M7 16 27 16"></path></svg></label></button>
+</div></div></header>
+<div id="mobileMenu">
+<a href="index.html#hero">Início</a><a href="index.html#portfolio">Portfólio</a><a href="index.html#about">Acerca</a><a href="index.html#services">Serviços</a><a href="index.html#contact">Contactos</a>
+</div>
+
+<section class="ment-hero">
+<div class="ment-kicker">SHUTTERLITE / FORMAÇÃO</div>
+<h1 class="ment-title">Mentorias<br>Online</h1>
+<p class="ment-lead">Aprenda com orientação prática, experiência real e acompanhamento focado no resultado. Escolha a área que quer desenvolver e candidate-se à próxima turma.</p>
+<div class="ment-actions"><a class="btn-pill primary" href="#candidatura">Candidatar-me</a><a class="btn-pill" style="border:1px solid var(--w20)" href="mentorias-login.html">Área do aluno</a></div>
+</section>
+
+<section class="ment-section">
+<div class="section-narrow">
+<div class="ment-head"><p class="section-eyebrow">Áreas</p><h2 class="section-title">Escolha o seu caminho.</h2></div>
+<div class="ment-grid">
+<div class="ment-card"><div class="ment-num">01</div><h3>Fotografia</h3><p>Domine técnica, composição, iluminação, direção e construção de um trabalho profissional.</p></div>
+<div class="ment-card"><div class="ment-num">02</div><h3>Vídeo</h3><p>Desenvolva captação, narrativa visual, iluminação, edição e produção de vídeo.</p></div>
+<div class="ment-card"><div class="ment-num">03</div><h3>Importações e comércio</h3><p>Aprenda a estruturar compras, fornecedores, custos, logística e comercialização.</p></div>
+<div class="ment-card"><div class="ment-num">04</div><h3>Tráfego pago / Marketing Digital</h3><p>Construa campanhas, ofertas e processos de aquisição orientados para resultados.</p></div>
+</div>
+</div>
+</section>
+
+<section class="ment-section" style="border-top:1px solid var(--w10);background:var(--neutral-950)">
+<div class="section-narrow">
+<div class="ment-head"><p class="section-eyebrow">Como funciona</p><h2 class="section-title">Do interesse à evolução.</h2></div>
+<div class="ment-process">
+<div class="ment-step"><span>01 / Candidatura</span><h3>Conte-nos sobre si.</h3><p>Preencha o formulário e explique o que pretende alcançar.</p></div>
+<div class="ment-step"><span>02 / Análise</span><h3>Avaliamos o perfil.</h3><p>Cada candidatura é analisada manualmente pela equipa Shutterlite.</p></div>
+<div class="ment-step"><span>03 / Aprovação</span><h3>Receba a decisão.</h3><p>Se for aprovado, poderá avançar para a criação da sua conta.</p></div>
+<div class="ment-step"><span>04 / Mentoria</span><h3>Entre na área privada.</h3><p>Aceda aos conteúdos e recursos disponibilizados para a sua formação.</p></div>
+</div>
+</div>
+</section>
+
+<section id="candidatura" class="ment-section">
+<div class="section-narrow">
+<div class="ment-head"><p class="section-eyebrow">Candidatura</p><h2 class="section-title">Dê o primeiro passo.</h2><p class="ment-lead">A candidatura não cria automaticamente uma conta. Primeiro analisamos o seu perfil.</p></div>
+<div class="ment-form-wrap">
+<form id="applicationForm" class="ment-form" novalidate>
+<div class="ment-row">
+<div><label class="ment-label">Nome completo *</label><input class="ment-field" id="full_name" required minlength="3" autocomplete="name"></div>
+<div><label class="ment-label">Email *</label><input class="ment-field" id="email" type="email" required autocomplete="email"></div>
+</div>
+<div class="ment-row">
+<div><label class="ment-label">Número de telefone *</label><input class="ment-field" id="phone" required autocomplete="tel"></div>
+<div><label class="ment-label">País *</label><input class="ment-field" id="country" required autocomplete="country-name"></div>
+</div>
+<div class="ment-row">
+<div><label class="ment-label">Cidade *</label><input class="ment-field" id="city" required autocomplete="address-level2"></div>
+<div><label class="ment-label">Área de interesse *</label><select class="ment-field" id="interest_area" required><option value="">Selecione</option><option>Fotografia</option><option>Vídeo</option><option>Importações e comércio</option><option>Tráfego pago / Marketing Digital</option></select></div>
+</div>
+<div><label class="ment-label">Nível de experiência *</label><select class="ment-field" id="experience_level" required><option value="">Selecione</option><option>Iniciante</option><option>Intermédio</option><option>Avançado</option><option>Profissional</option></select></div>
+<div><label class="ment-label">Objetivo com a mentoria *</label><textarea class="ment-field" id="goals" required minlength="10" placeholder="O que pretende conseguir com esta mentoria?"></textarea></div>
+<div><label class="ment-label">Experiência profissional ou académica *</label><textarea class="ment-field" id="experience" required minlength="10" placeholder="Fale brevemente da sua experiência."></textarea></div>
+<div><label class="ment-label">Como conheceu a Shutterlite?</label><input class="ment-field" id="how_found_us"></div>
+<div><label class="ment-label">Informações adicionais</label><textarea class="ment-field" id="additional_information" placeholder="Algo mais que devemos saber?"></textarea></div>
+<p class="ment-note">* Campos obrigatórios. Os dados serão utilizados para avaliar a candidatura e gerir o processo de mentoria.</p>
+<div id="formMsg" class="ment-msg"></div>
+<button class="contact-submit ment-submit" id="submitBtn" type="submit">Enviar candidatura</button>
+</form>
+</div>
+</div>
+</section>
+
+<footer>
+<div class="footer-inner"><h2 class="footer-logo">SHUTTERLITE</h2><div class="footer-social"><a href="index.html#">Instagram</a><a href="index.html#">Facebook</a></div></div>
+<div class="footer-bottom"><span>© 2026 SHUTTERLITE. Todos os direitos reservados.</span><a href="admin.html">Admin →</a></div>
+</footer>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
+const SUPABASE_URL='https://utcfzksfipgsktupwusg.supabase.co';
+const SUPABASE_ANON='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InV0Y2Z6a3NmaXBnc2t0dXB3dXMiLCJpYXQiOjE3ODYwMTUwNjgsImV4cCI6MjEwMTU5MTA2OH0.Hp4nBYqZwRtmi50teeH5T-N-APT2y5HWrmylvGV-7n0';
+const {createClient}=supabase;
+const sb=createClient(SUPABASE_URL,SUPABASE_ANON);
+const $=id=>document.getElementById(id);
+function showMsg(text,error=false){$('formMsg').textContent=text;$('formMsg').className='ment-msg show'+(error?' error':'')}
+$('applicationForm').addEventListener('submit',async e=>{
+ e.preventDefault();
+ const form=e.currentTarget;
+ if(!form.checkValidity()){form.reportValidity();return}
+ const btn=$('submitBtn');btn.disabled=true;btn.textContent='A enviar...';showMsg('');
+ try{
+  const {data,error}=await sb.rpc('mentoria_submit_application',{
+   p_full_name:$('full_name').value.trim(),p_email:$('email').value.trim(),p_phone:$('phone').value.trim(),
+   p_country:$('country').value.trim(),p_city:$('city').value.trim(),p_interest_area:$('interest_area').value,
+   p_experience_level:$('experience_level').value,p_goals:$('goals').value.trim(),p_experience:$('experience').value.trim(),
+   p_how_found_us:$('how_found_us').value.trim()||null,p_additional_information:$('additional_information').value.trim()||null
+  });
+  if(error)throw error;
+  showMsg('Candidatura recebida. O estado inicial é Pendente. A nossa equipa irá analisar o seu perfil.');
+  form.reset();
+ }catch(err){console.error(err);showMsg(err.message||'Não foi possível enviar a candidatura.',true)}
+ finally{btn.disabled=false;btn.textContent='Enviar candidatura'}
+});
+function toggleMobileMenu(){document.getElementById('menuToggle').checked=!document.getElementById('menuToggle').checked;document.getElementById('mobileMenu').classList.toggle('open')}
+document.getElementById('themeToggle').addEventListener('change',()=>{document.body.classList.toggle('light-theme');localStorage.setItem('theme',document.body.classList.contains('light-theme')?'light':'dark')});
+if(localStorage.getItem('theme')==='light')document.body.classList.add('light-theme');
+setTimeout(()=>document.getElementById('loader').classList.add('out'),600);
+</script>
+</body>
+</html>
