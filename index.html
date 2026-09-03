@@ -783,6 +783,29 @@ function escapeHtml(s) {
       });
   })();
 
+  
+  document.querySelectorAll('a[href^="#"]').forEach(link => {
+      link.addEventListener('click', function (e) {
+          const targetId = this.getAttribute('href');
+
+          if (targetId === '#') return;
+
+          const target = document.querySelector(targetId);
+
+          if (target) {
+              e.preventDefault();
+
+              target.scrollIntoView({
+                  behavior: 'smooth',
+                  block: 'start'
+              });
+
+              // Remove o #contact da URL
+              history.replaceState(null, '', window.location.pathname);
+          }
+      });
+  });
+
 </script>
 </body>
 </html>
