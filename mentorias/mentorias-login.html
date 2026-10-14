@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>SHUTTERLITE — Área do aluno</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@200;300;400;500&display=swap" rel="stylesheet"><link rel="stylesheet" href="style.css">
+<style>
+.auth-wrap{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:120px 24px 80px}.auth-card{width:100%;max-width:480px;border:1px solid var(--w10);background:var(--neutral-950);border-radius:24px;padding:44px}.auth-card h1{font-size:42px;font-weight:300;line-height:1.05;margin-bottom:12px}.auth-sub{color:var(--w50);line-height:1.7;margin-bottom:32px}.auth-form{display:grid;gap:16px}.auth-input{background:var(--neutral-900);border:1px solid var(--w10);border-radius:16px;padding:18px;width:100%;font-size:15px}.auth-input:focus{border-color:#fff}.auth-msg{display:none;padding:16px;border:1px solid var(--w20);border-radius:16px;font-size:13px}.auth-msg.show{display:block}.auth-msg.error{border-color:rgba(255,80,80,.35);color:#ff8888}.auth-links{text-align:center;margin-top:22px;font-size:12px;color:var(--w50)}.auth-links a{text-decoration:underline}
+</style></head><body>
+<header id="nav" class="scrolled"><div class="nav-inner"><a href="index.html#hero" class="nav-logo">SHUTTERLITE</a><div class="nav-btn"><label class="switch"><input type="checkbox" id="themeToggle"><span class="slider"></span></label></div></div></header>
+<main class="auth-wrap"><div class="auth-card"><p class="section-eyebrow">Mentorias / Área privada</p><h1>Área do aluno</h1><p class="auth-sub">Entre com a conta associada à sua candidatura aprovada.</p>
+<form id="loginForm" class="auth-form"><input class="auth-input" id="email" type="email" required placeholder="Email"><input class="auth-input" id="password" type="password" required minlength="6" placeholder="Palavra-passe"><div id="msg" class="auth-msg"></div><button class="contact-submit" id="btn">Entrar</button></form>
+<div class="auth-links"><a href="mentorias.html#candidatura">Ainda não se candidatou?</a></div></div></main>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
+const {createClient}=supabase;const sb=createClient('https://utcfzksfipgsktupwusg.supabase.co','eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InV0Y2Z6a3NmaXBnc2t0dXB3dXNnIiLCJpYXQiOjE3ODYwMTUwNjgsImV4cCI6MjEwMTU5MTA2OH0.Hp4nBYqZwRtmi50teeH5T-N-APT2y5HWrmylvGV-7n0');
+const $=id=>document.getElementById(id);function msg(t,e=false){$('msg').textContent=t;$('msg').className='auth-msg show'+(e?' error':'')}
+$('loginForm').addEventListener('submit',async e=>{e.preventDefault();$('btn').disabled=true;$('btn').textContent='A entrar...';try{
+ const {data,error}=await sb.auth.signInWithPassword({email:$('email').value.trim(),password:$('password').value});if(error)throw error;
+ const {data:p,error:pe}=await sb.from('mentoria_profiles').select('role,status').eq('id',data.user.id).maybeSingle();if(pe)throw pe;
+ if(!p||p.role!=='student'||p.status!=='active'){await sb.auth.signOut();throw new Error('A sua conta ainda não está autorizada para a área de mentorias.')}
+ location.href='mentorias-area.html';
+}catch(x){msg(x.message||'Não foi possível iniciar sessão.',true)}finally{$('btn').disabled=false;$('btn').textContent='Entrar'}});
+$('themeToggle').addEventListener('change',()=>{document.body.classList.toggle('light-theme');localStorage.setItem('theme',document.body.classList.contains('light-theme')?'light':'dark')});if(localStorage.getItem('theme')==='light')document.body.classList.add('light-theme');
+</script></body></html>

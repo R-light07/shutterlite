@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>SHUTTERLITE — Mentorias</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@200;300;400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+<style>
+.private{padding:160px 24px 100px}.private-head{display:flex;align-items:flex-end;justify-content:space-between;gap:30px;margin-bottom:70px}
+.private-title{font-size:clamp(44px,7vw,82px);font-weight:300;line-height:1}.private-sub{color:var(--w50);margin-top:14px}
+.private-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:20px}.private-card{border:1px solid var(--w10);border-radius:24px;background:var(--neutral-950);padding:34px;min-height:230px}
+.private-card span{text-transform:uppercase;letter-spacing:.3em;color:var(--w40);font-size:10px}.private-card h2{font-size:25px;font-weight:300;margin:22px 0 10px}
+.private-card p{color:var(--w50);line-height:1.7;font-size:14px}.logout{padding:12px 20px;border:1px solid var(--w20);border-radius:9999px;text-transform:uppercase;letter-spacing:.2em;font-size:11px}
+@media(max-width:700px){.private-head{display:block}.logout{display:inline-flex;margin-top:24px}.private-grid{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<header id="nav" class="scrolled"><div class="nav-inner">
+<a href="index.html#hero" class="nav-logo">SHUTTERLITE</a>
+<div class="nav-btn"><label class="switch"><input type="checkbox" id="themeToggle"><span class="slider"></span></label></div>
+</div></header>
+
+<main class="private"><div class="section-narrow">
+<div class="private-head"><div><p class="section-eyebrow">Mentorias / Área privada</p>
+<h1 class="private-title">Bem-vindo.</h1><p class="private-sub" id="welcome">A validar acesso...</p></div>
+<button class="logout" id="logout">Terminar sessão</button></div>
+<div class="private-grid">
+<article class="private-card"><span>01 / Conteúdos</span><h2>Materiais</h2><p>Área preparada para receber aulas, documentos, vídeos e recursos da sua mentoria.</p></article>
+<article class="private-card"><span>02 / Progresso</span><h2>Acompanhamento</h2><p>Estrutura preparada para acompanhar módulos e evolução do aluno.</p></article>
+<article class="private-card"><span>03 / Próximo passo</span><h2>Em breve</h2><p>Os conteúdos da sua turma serão disponibilizados aqui pela equipa Shutterlite.</p></article>
+</div></div></main>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
+const SUPABASE_URL='https://utcfzksfipgsktupwusg.supabase.co';
+const SUPABASE_ANON='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJ1dGNmemtzZmlwZ3NrdHVwd3VzZyIsInJvbGUiOiJhbm9uIiwiaWF0IjoxNzg2MDE1MDY4LCJleHAiOjIxMDE1OTEwNjB9.Hp4nBYqZwRtmi50teeH5T-N-APT2y5HWrmylvGV-7n0';
+</script>
+</body></html>

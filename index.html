@@ -246,7 +246,7 @@
   </div>
   <div class="footer-bottom">
     <span id="footerCopy">© 2026 SHUTTERLITE. Todos os direitos reservados.</span>
-    <a href="admin.html">Admin →</a>
+    <a href="/admin/admin.html">Admin →</a>
   </div>
 </footer>
 
@@ -806,6 +806,29 @@ function escapeHtml(s) {
               document.body.classList.contains("light-theme");
       });
   })();
+
+  
+  document.querySelectorAll('a[href^="#"]').forEach(link => {
+      link.addEventListener('click', function (e) {
+          const targetId = this.getAttribute('href');
+
+          if (targetId === '#') return;
+
+          const target = document.querySelector(targetId);
+
+          if (target) {
+              e.preventDefault();
+
+              target.scrollIntoView({
+                  behavior: 'smooth',
+                  block: 'start'
+              });
+
+              // Remove o #contact da URL
+              history.replaceState(null, '', window.location.pathname);
+          }
+      });
+  });
 
 </script>
 </body>
