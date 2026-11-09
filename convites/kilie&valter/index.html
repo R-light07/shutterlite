@@ -1,161 +1,207 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="pt">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<meta name="theme-color" content="#090a0c">
-<meta name="description" content="Convite de casamento de Kylie & Valter — 5 de Dezembro de 2026.">
-<title>Kylie & Valter — O início de sempre</title>
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Ana & Daniel — Convite de Casamento</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@200;300;400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=Outfit:wght@300;400;500&family=Cormorant+Garamond:ital,wght@0,300;0,400;1,300;1,400&display=swap">
 <style>
-:root{--bg:#fff;--surface:#f7f3eb;--text:#24211c;--muted:#777064;--line:#ffffff;--gold:#b69a5a;--max:1120px}
-*{box-sizing:border-box}html{scroll-behavior:smooth;scroll-padding-top:80px}
-
-body {
-    margin:0;
-    background:var(--bg);
-    color:var(--text);
-    font-family:'Outfit',sans-serif;
-    font-weight:300;overflow-x:hidden;-webkit-font-smoothing:antialiased;line-height:1.6
-}
-a{color:inherit;text-decoration:none}button,input,select,textarea{font:inherit}
-.nav{height:76px;position:fixed;z-index:10;inset:0 0 auto;background:#fffffff0;backdrop-filter:blur(16px);border-bottom:1px solid #e7dfd0}.nav-inner{max-width:var(--max);height:100%;margin:auto;padding:0 26px;display:flex;align-items:center;justify-content:space-between}.brand{font-size:15px;font-weight:600;letter-spacing:.22em}.brand span{color:var(--gold)}.links{display:flex;gap:26px;font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:#625b50}.links a:hover{color:var(--gold)}.menu{display:none;background:none;border:0;color:#24211c;font-size:24px}
-.hero{min-height:100svh;display:grid;grid-template-columns:1fr 1fr;align-items:center;gap:48px;max-width:var(--max);margin:auto;padding:125px 26px 70px}.eyebrow{color:var(--gold);font-size:10px;letter-spacing:.28em;text-transform:uppercase}.hero h1{font:clamp(64px,9vw,118px)/.88 "DM Serif Display",serif;letter-spacing:-.045em;margin:24px 0}.hero h1 em{font-weight:400;color:var(--gold)}.hero p{color:var(--muted);font-size:15px;line-height:1.8;max-width:410px}.date{margin-top:34px;padding-top:22px;border-top:1px solid var(--line);display:flex;gap:24px;align-items:center}.date strong{font-size:13px;font-weight:500;letter-spacing:.12em}.date small{color:var(--muted);font-size:10px;letter-spacing:.16em;text-transform:uppercase}.hero-photo{height:min(690px,75vh);min-height:430px;position:relative;overflow:hidden;background:#e9e1d3}.hero-photo img{width:100%;height:100%;object-fit:cover;object-position:center 30%;filter:saturate(.78)}.photo-caption{position:absolute;bottom:22px;left:22px;font-size:10px;letter-spacing:.2em;text-transform:uppercase;text-shadow:0 2px 8px #000}
-section{padding:110px 26px}.wrap{max-width:var(--max);margin:auto}.section-head{text-align:center;margin-bottom:54px}.section-head h2{font:clamp(40px,6vw,66px)/1 "DM Serif Display",serif;font-weight:400;margin:15px 0}.section-head p{color:var(--muted);font-size:14px;line-height:1.8}.intro{background:var(--surface);text-align:center}.quote{font:clamp(24px,3.5vw,38px)/1.35 "DM Serif Display",serif;max-width:760px;margin:0 auto 24px}.verse{color:var(--gold);font-size:10px;letter-spacing:.2em;text-transform:uppercase}
-.couple-grid{display:grid;grid-template-columns:1fr 1fr;gap:24px}.person{border-top:1px solid var(--line);padding:25px 0}.person h3{font:42px "DM Serif Display",serif;margin:0 0 12px}.person p{color:var(--muted);line-height:1.8;font-size:13px}.person b{color:var(--text);font-weight:400}
-.event-grid{display:grid;grid-template-columns:repeat(3,1fr);border-top:1px solid var(--line);border-bottom:1px solid var(--line)}.event{padding:30px 24px;border-right:1px solid var(--line)}.event:last-child{border:0}.event time{color:var(--gold);font-size:12px;letter-spacing:.18em}.event h3{font:27px "DM Serif Display",serif;font-weight:400;margin:16px 0 8px}.event p{color:var(--muted);font-size:13px}
-.dress{background:var(--surface);text-align:center}.dress strong{display:block;font:36px "DM Serif Display",serif;font-weight:400;margin:15px}.dress p{color:var(--muted);font-size:13px}.gallery{display:grid;grid-template-columns:1.1fr .9fr 1fr;gap:12px}.gallery img{width:100%;height:440px;object-fit:cover;filter:saturate(.75);transition:filter .4s,transform .6s}.gallery img:hover{filter:saturate(1);transform:scale(.99)}
-.rsvp{background:var(--surface)}.form{max-width:560px;margin:auto;display:grid;gap:14px}.field{width:100%;padding:16px 15px;background:#fff;border:1px solid var(--line);color:var(--text);outline:none}.field:focus{border-color:var(--gold)}.choice{display:flex;gap:24px;color:var(--muted);font-size:13px}.btn{display:inline-flex;justify-content:center;align-items:center;padding:15px 24px;background:var(--gold);color:#fff;border:1px solid var(--gold);font-size:11px;font-weight:600;letter-spacing:.16em;text-transform:uppercase;cursor:pointer;transition:.25s}.btn:hover{background:#9e8248;border-color:#9e8248}.note{text-align:center;color:var(--muted);font-size:11px;line-height:1.7}
-.gifts{display:grid;grid-template-columns:1fr 1fr;gap:30px;align-items:center}.gift-card{padding:30px;border:1px solid var(--line)}.gift-card h3{font:30px "DM Serif Display",serif;font-weight:400}.gift-card p{color:var(--muted);font-size:13px;line-height:1.8}
-footer{border-top:1px solid var(--line);padding:42px 26px;text-align:center;color:var(--muted);font-size:11px;letter-spacing:.12em}footer strong{display:block;color:var(--text);font-size:14px;letter-spacing:.22em;margin-bottom:10px}
-.reveal{opacity:0;transform:translateY(22px);transition:opacity .8s,transform .8s}.reveal.visible{opacity:1;transform:none}
-
-.calendar-wrap{display:grid;grid-template-columns:.85fr 1.15fr;gap:42px;align-items:center;max-width:850px;margin:auto}
-.calendar-card,.location-card,.contact-card{background:#fff;border:1px solid #e7dfd0;padding:28px;box-shadow:0 14px 38px rgba(60,45,20,.05)}
-.cal-top{text-align:center;color:var(--muted);font-size:10px;letter-spacing:.2em;text-transform:uppercase}
-.cal-month{text-align:center;font:32px "DM Serif Display",serif;margin:8px 0 20px}
-.cal-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:5px;text-align:center}
-.cal-grid span{height:38px;display:grid;place-items:center;font-size:12px;color:#6f695e;position:relative}
-.cal-grid .weekday{font-size:9px;color:#a69b87}
-.cal-grid .event-day{color:#8b6b2d;font-weight:700;z-index:0;height:40px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:0}
-.cal-grid .event-day svg{position:absolute;width:46px;height:46px;left:50%;top:50%;transform:translate(-50%,-50%);display:block;filter:drop-shadow(0 1px 1px rgba(75,55,18,.16));overflow:visible;z-index:0;pointer-events:none}
-.cal-grid .event-day .day-number{position:relative;z-index:1;font-size:12px;line-height:1;color:#76551d;font-weight:700}
-.calendar-note h3,.location-card h3,.contact-card h3{font:32px "DM Serif Display",serif;font-weight:400;margin:8px 0 12px}
-.calendar-note p,.location-card p,.contact-card p{font-size:13px;color:var(--muted);line-height:1.8}
-.calendar-actions{display:flex;flex-wrap:wrap;gap:10px;margin-top:20px}
-.calendar-actions .btn{font-size:10px;padding:13px 15px}
-.location-section{background:var(--surface)}
-.location-grid{display:grid;grid-template-columns:1fr 1fr;gap:24px}
-.location-meta{display:flex;gap:12px;margin:18px 0}
-.location-meta .ico{color:var(--gold);font-size:20px}
-.location-meta strong{display:block;font-size:12px;font-weight:500}
-.location-meta span{font-size:12px;color:var(--muted)}
-.contact-list{display:grid;gap:12px;margin:20px 0}
-.contact-link{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:13px 0;border-bottom:1px solid #eee8dc;font-size:13px}
-.contact-link small{display:block;color:var(--muted);font-size:10px;letter-spacing:.1em;text-transform:uppercase}
-.contact-link b{font-weight:500}
-.map-frame{width:100%;height:240px;border:0;margin-top:16px;filter:grayscale(.2)}
-.location-hint{font-size:11px!important;color:#98896e!important}
-@media(max-width:760px){.calendar-wrap,.location-grid{grid-template-columns:1fr;gap:20px}.calendar-note{text-align:center}.calendar-actions{justify-content:center}}
-
-@media(max-width:760px){.nav-inner{padding:0 20px}.menu{display:block}.links{display:none;position:absolute;top:76px;left:0;right:0;background:#fff;padding:22px;flex-direction:column;gap:18px;border-bottom:1px solid var(--line)}.links.open{display:flex}.hero{grid-template-columns:1fr;gap:30px;padding:120px 20px 55px}.hero h1{font-size:76px}.hero-photo{height:520px;min-height:0;order:-1}.hero-photo img{object-position:center 25%}section{padding:78px 20px}.couple-grid,.gifts{grid-template-columns:1fr}.event-grid{grid-template-columns:1fr}.event{border-right:0;border-bottom:1px solid var(--line);padding:24px 4px}.event:last-child{border-bottom:0}.gallery{grid-template-columns:1fr 1fr}.gallery img{height:260px}.gallery img:last-child{display:none}.section-head{margin-bottom:38px}}
-@media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}.reveal{opacity:1;transform:none;transition:none}}
+:root{--white:#FFFFFF;--ivory:#F7F3EB;--beige:#E9E0D3;--gold:#B69A5A;--brown:#8C7060;--ink:#24211C;--page:#E9E0D3;--paper:#F7F3EB;--card:#FFFFFF;
+--serif:"DM Serif Display",Georgia,serif;--sans:"Outfit",system-ui,sans-serif;
+box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--page:#1b1814;--paper:#26221c;--card:#2d2822;--ink:#F7F3EB;--brown:#c9ad9c;--beige:#3a332a}}
+:root[data-theme="dark"]{--page:#1b1814;--paper:#26221c;--card:#2d2822;--ink:#F7F3EB;--brown:#c9ad9c;--beige:#3a332a}
+html{scroll-padding-top:env(safe-area-inset-top,0px);scroll-behavior:smooth}
+*{box-sizing:border-box}
+body{margin:0;background:var(--page);color:var(--ink);font:300 17px/1.7 var(--sans)}
+.sheet{max-width:560px;margin:0 auto;background:var(--paper);position:relative}
+h1,h2,h3{font-family:var(--serif);font-weight:400;margin:0;line-height:1.05}
+h2{font-size:clamp(34px,9vw,46px);text-align:center;margin-bottom:28px}
+p{margin:0 0 1em}
+section{padding:72px 32px;text-align:center}
+.torn{position:relative}
+.hero{position:relative;display:flex;align-items:center;justify-content:center;text-align:center;padding:0;color:#fff;overflow:hidden;font-family:"Cormorant Garamond",Georgia,serif;background:#3a2c24}
+.hero-bg{position:absolute;}
+.hero-bg svg{width:100%;height:100%;display:block}
+.hero-bg::after{content:"";position:absolute;inset:0;background:radial-gradient(120% 90% at 50% 45%,rgba(20,14,10,.18) 0%,rgba(20,14,10,.55) 100%),linear-gradient(180deg,rgba(20,14,10,.35) 0%,rgba(20,14,10,.25) 50%,rgba(20,14,10,.5) 100%)}
+.hero .in{position:relative;z-index:2;width:100%;padding:90px 24px 130px;display:flex;flex-direction:column;align-items:center}
+.hero small{display:block;font:italic 400 clamp(19px,5vw,24px)/1.4 "Cormorant Garamond",Georgia,serif;letter-spacing:.04em;margin-bottom:22px;color:#f3e9d2;max-width:24ch}
+.hero h1{font:300 clamp(66px,20vw,118px)/.9 "Cormorant Garamond",Georgia,serif;letter-spacing:.01em;text-shadow:0 2px 30px rgba(0,0,0,.35)}
+.hero h1 i{font:italic 300 .5em/1 "Cormorant Garamond",Georgia,serif;color:#e3cf94;display:block;margin:.18em 0}
+.hero .date{margin-top:26px;font:400 clamp(19px,5vw,23px)/1.5 "Cormorant Garamond",Georgia,serif;letter-spacing:.08em}
+.hero .date::before{content:"";display:block;width:56px;height:1px;background:#e3cf94;margin:0 auto 18px}
+.hc{display:flex;justify-content:center;align-items:flex-start;gap:clamp(14px,5vw,26px);margin-top:34px}
+.hc div{min-width:58px;position:relative}
+.hc div+div::before{content:"";position:absolute;left:calc(clamp(14px,5vw,26px)/-2);top:8px;height:34px;width:1px;background:rgba(227,207,148,.55)}
+.hc b{display:block;font:300 clamp(34px,10vw,46px)/1 "Cormorant Garamond",Georgia,serif;font-variant-numeric:tabular-nums;color:#fff}
+.hc span{display:block;margin-top:6px;font:italic 400 15px "Cormorant Garamond",Georgia,serif;letter-spacing:.06em;color:#e3cf94}
+.tear{position:absolute;left:0;right:0;bottom:-1px;height:clamp(54px,12vw,84px);z-index:3;pointer-events:none}
+.tear svg{width:100%;height:100%;display:block}
+.scroll{position:absolute;z-index:2;bottom:calc(clamp(54px,12vw,84px) + 8px);left:50%;width:1px;height:38px;background:#fff;opacity:.7;transform-origin:top;animation:l 2.2s ease-in-out infinite}
+@keyframes l{0%{transform:scaleY(0)}60%{transform:scaleY(1)}100%{transform:scaleY(1);opacity:0}}
+.ivory{background:var(--paper)}
+.white{background:var(--card)}
+.beige{background:var(--beige)}
+.lead{font-family:var(--serif);font-size:clamp(22px,6vw,28px);line-height:1.35;color:var(--brown);max-width:30ch;margin:0 auto 1em}
+.count{display:flex;justify-content:center;gap:22px;margin-top:32px}
+.count div{min-width:58px}.count b{display:block;font:400 40px var(--serif);color:var(--gold)}.count span{font-size:14px;color:var(--brown)}
+.photo{aspect-ratio:3/4;margin:0 0 -40px;background:linear-gradient(160deg,#cdb99a,#8C7060)}
+.photo.b{background:linear-gradient(200deg,#e3d5bb,#B69A5A);aspect-ratio:4/3}
+.story{text-align:left;max-width:44ch;margin:0 auto}
+.story h3{font-size:26px;color:var(--brown);margin:1.6em 0 .3em}
+.tl{list-style:none;margin:0 auto;padding:0 0 0 28px;max-width:380px;text-align:left;border-left:1px solid var(--gold)}
+.tl li{position:relative;padding:0 0 30px 20px}
+.tl li::before{content:"";position:absolute;left:-34px;top:9px;width:11px;height:11px;border-radius:50%;background:var(--gold)}
+.tl b{font:400 24px var(--serif);display:block}.tl em{font-style:normal;color:var(--brown)}
+.gallery{display:grid;grid-template-columns:1fr 1fr;gap:10px;padding:0 10px 72px}
+.gallery div{aspect-ratio:3/4;background:linear-gradient(160deg,#d8c7a8,#a38a72)}
+.gallery div:nth-child(2){margin-top:36px;background:linear-gradient(160deg,#efe4cc,#B69A5A)}
+.gallery div:nth-child(3){background:linear-gradient(160deg,#c9b8a3,#8C7060)}
+.gallery div:nth-child(4){margin-top:36px;background:linear-gradient(160deg,#e9e0d3,#b9a58a)}
+.btn{display:inline-block;font:400 16px var(--sans);letter-spacing:.04em;padding:15px 32px;border:1px solid var(--gold);background:var(--gold);color:#fff;text-decoration:none;cursor:pointer;margin:6px}
+.btn.o{background:transparent;color:var(--ink)}
+.btn:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-visible{outline:2px solid var(--brown);outline-offset:3px}
+form{max-width:380px;margin:0 auto;text-align:left;display:grid;gap:16px}
+label{font-size:15px;color:var(--brown)}
+input,select,textarea{width:100%;font:300 17px var(--sans);padding:12px 0;border:0;border-bottom:1px solid var(--gold);background:transparent;color:var(--ink);border-radius:0}
+.gifts{display:grid;gap:14px;max-width:400px;margin:0 auto;text-align:left}
+.gift{background:var(--card);padding:22px 24px;border-left:3px solid var(--gold)}
+.gift b{font:400 22px var(--serif);display:block}
+footer{padding:64px 32px 90px;text-align:center;background:var(--ink);color:#F7F3EB}
+footer h2{margin-bottom:8px;color:#F7F3EB}
+#ok{display:none;color:var(--brown);font-family:var(--serif);font-size:24px;text-align:center}
+@media (prefers-reduced-motion:reduce){.scroll{animation:none}html{scroll-behavior:auto}}
 </style>
 </head>
 <body>
-<header class="nav"><div class="nav-inner"><a class="brand" href="#top">SHUTTERLITE<span>.</span></a><button class="menu" aria-label="Abrir menu" onclick="document.querySelector('.links').classList.toggle('open')">☰</button><nav class="links"><a href="#historia">História</a><a href="#agenda">Agenda</a><a href="#local">Localização</a><a href="#galeria">Galeria</a><a href="#presenca">Presença</a><a href="#presentes">Presentes</a></nav></div></header>
-<main id="top">
-<section class="hero">
- <div class="hero-copy reveal"><div class="eyebrow">Um convite · Uma história · Um para sempre</div><h1>Kylie <em>&</em><br>Valter</h1><p>Com a bênção de Deus e dos nossos pais, convidamos-te para celebrar o início de um novo capítulo das nossas vidas.</p><div class="date"><div><small>Data</small><br><strong>05 DEZEMBRO 2026</strong></div><div><small>Dia</small><br><strong>SÁBADO</strong></div></div></div>
- <div class="hero-photo reveal"><img src="/convites/kilie&valter/assets/fotos/img05.jpeg" alt="Retrato de Kylie e Valter"><div class="photo-caption">Kylie & Valter · 2026</div></div>
+<main class="sheet">
+
+<header class="hero">
+  <div class="hero-bg" role="img" aria-label="Casal ao pôr do sol (fotografia a substituir)">
+    <img src="/convites/kilie&valter/assets/fotos/bk.jpg" alt="" >
+  </div>
+  <div class="in">
+    <small>Convidam-no para celebrar o seu casamento</small>
+    <h1>Ana<i>&</i>Daniel</h1>
+    <div class="date">Sábado, 27 de Março de 2027<br>Maputo, Moçambique</div>
+    <div class="hc" id="hc" role="timer" aria-label="Tempo até ao casamento"></div>
+  </div>
+  <div class="scroll" aria-hidden="true"></div>
+  <div class="tear" aria-hidden="true"><svg id="tearsvg" viewBox="0 0 1000 80" preserveAspectRatio="none"></svg></div>
+</header>
+
+<section class="ivory torn" id="historia">
+  <p class="lead">Dois caminhos, uma só casa.</p>
+  <p style="max-width:34ch;margin:0 auto">Queremos partilhar consigo o dia em que dizemos «sim» para sempre. A sua presença é o maior presente.</p>
+  <div class="count" id="count" aria-live="off"></div>
 </section>
-<section class="intro" id="historia"><div class="wrap reveal"><div class="quote">“Por essa razão, o homem deixará pai e mãe e se unirá à sua mulher, e eles se tornarão uma só carne.”</div><div class="verse">Génesis 2:24</div><div style="height:48px"></div><div class="section-head"><div class="eyebrow">As nossas famílias</div><h2>Com a bênção de</h2></div><div class="couple-grid"><div class="person"><h3>Kylie</h3><p>Filha de<br><b>-</b><br>e<br><b>-</b></p></div><div class="person"><h3>Valter</h3><p>Filho de<br><b>-</b><br>e<br><b>-</b></p></div></div></div></section>
 
-<section id="calendario"><div class="wrap">
-<div class="section-head reveal"><div class="eyebrow">Reserva a data</div><h2>Guarda este dia</h2><p>Será um prazer celebrar contigo.</p></div>
-<div class="calendar-wrap reveal">
-<div class="calendar-card"><div class="cal-top">O nosso dia especial</div><div class="cal-month">Dezembro 2026</div>
-<div class="cal-grid">
-<span class="weekday">DOM</span><span class="weekday">SEG</span><span class="weekday">TER</span><span class="weekday">QUA</span><span class="weekday">QUI</span><span class="weekday">SEX</span><span class="weekday">SÁB</span>
-<span></span><span></span><span>1</span><span>2</span><span>3</span><span>4</span><span class="event-day" aria-label="5 de Dezembro, dia do casamento">
-<svg viewBox="0 0 64 48" role="img" aria-label="Anel dourado com diamante à volta do dia 5">
- <defs>
-  <linearGradient id="goldRing" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#fff4c9"/><stop offset=".22" stop-color="#c49b45"/><stop offset=".48" stop-color="#fff0b0"/><stop offset=".72" stop-color="#9d7429"/><stop offset="1" stop-color="#f7d77d"/></linearGradient>
-  <linearGradient id="diamondFill" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#ffffff"/><stop offset=".35" stop-color="#e7f8ff"/><stop offset=".68" stop-color="#9ec9dc"/><stop offset="1" stop-color="#ffffff"/></linearGradient>
- </defs>
- <ellipse cx="32" cy="27" rx="18.5" ry="17" fill="none" stroke="url(#goldRing)" stroke-width="3.8"/>
- <path d="M24 10 L28 3.5 L36 3.5 L40 10 L32 20 Z" fill="url(#diamondFill)" stroke="#b7d0d8" stroke-width="1"/>
- <path d="M24 10 L32 20 L28 3.5 Z" fill="#fff" opacity=".92"/><path d="M40 10 L32 20 L36 3.5 Z" fill="#a8d4e5" opacity=".78"/>
- <path d="M28 3.5 L36 3.5 M24 10 L40 10" stroke="#fff" stroke-width="1.1" opacity=".95"/>
- <path d="M20 27 Q32 15 44 27" fill="none" stroke="#fff4ce" stroke-width="1" opacity=".65"/>
-</svg><span class="day-number">5</span></span>
-<span>6</span><span>7</span><span>8</span><span>9</span><span>10</span><span>11</span><span>12</span>
-<span>13</span><span>14</span><span>15</span><span>16</span><span>17</span><span>18</span><span>19</span>
-<span>20</span><span>21</span><span>22</span><span>23</span><span>24</span><span>25</span><span>26</span>
-<span>27</span><span>28</span><span>29</span><span>30</span><span>31</span><span></span><span></span>
-</div></div>
-<div class="calendar-note"><div class="eyebrow">Sábado · 05.12.2026</div><h3>Kylie &amp; Valter</h3><p>Marca no teu calendário: um dia de amor, família e celebração. Esperamos por ti!</p>
-<div class="calendar-actions">
-<a class="btn" href="https://calendar.google.com/calendar/render?action=TEMPLATE&amp;text=Casamento+Kylie+%26+Valter&amp;dates=20261205T100000Z/20261205T160000Z&amp;details=Casamento+de+Kylie+e+Valter&amp;location=Complexo+Lotus" target="_blank" rel="noopener">Adicionar ao Google Calendar</a>
-<a class="btn" href="data:text/calendar;charset=utf-8,BEGIN:VCALENDAR%0AVERSION:2.0%0ABEGIN:VEVENT%0ADTSTART:20261205T100000Z%0ADTEND:20261205T160000Z%0ASUMMARY:Casamento%20Kylie%20%26%20Valter%0ALOCATION:Complexo%20Lotus%0AEND:VEVENT%0AEND:VCALENDAR" download="casamento-kylie-valter.ics">Guardar data (.ics)</a>
-</div></div></div></div></section>
+<div class="photo torn" role="img" aria-label="Fotografia dos noivos (a substituir)"></div>
 
-<section id="agenda"><div class="wrap"><div class="section-head reveal"><div class="eyebrow">05 · 12 · 2026</div><h2>O dia que vamos recordar</h2><p>Será uma alegria ter-te connosco em cada momento.</p></div><div class="event-grid reveal"><article class="event"><time>12:00</time><h3>Cerimónia religiosa</h3><p>Complexo Lotus</p></article><article class="event"><time>14:00</time><h3>Sessão fotográfica</h3><p>Complexo Lotus</p></article><article class="event"><time>16:00</time><h3>Copo d’água</h3><p>Complexo Lotus</p></article></div></div></section>
+<section class="white torn" style="padding-top:96px">
+  <h2>A nossa história</h2>
+  <div class="story">
+    <h3>Onde nos conhecemos</h3>
+    <p>Um encontro ao acaso, uma conversa que não quis acabar. Escreva aqui como tudo começou.</p>
+    <h3>O pedido</h3>
+    <p>Numa tarde simples, a pergunta que mudou tudo. Conte o momento com as vossas palavras.</p>
+    <h3>E agora</h3>
+    <p>Começa o capítulo mais bonito, e queremos escrevê-lo ao lado de quem mais amamos.</p>
+  </div>
+</section>
 
-<section class="location-section" id="local"><div class="wrap">
-<div class="section-head reveal"><div class="eyebrow">Como chegar</div><h2>Vamos encontrar-nos aqui</h2><p>Consulta os detalhes do local antes de iniciares a viagem.</p></div>
-<div class="location-grid reveal">
-<article class="location-card"><div class="eyebrow">Local do evento</div><h3>Complexo Lotus</h3>
-<div class="location-meta"><span class="ico">⌖</span><div><strong>Morada / referência</strong><span>Av. Julius Nyerere, Maputo, Moçambique <em style="color:#a58b53;font-style:normal">(localização provisória)</em></span></div></div>
-<div class="location-meta"><span class="ico">◷</span><div><strong>Programa</strong><span>12h00 cerimónia · 14h00 sessão fotográfica · 16h00 copo d’água</span></div></div>
-<p class="location-hint">ATENÇÃO: localização de demonstração. Substitui este endereço pelo local correcto antes de partilhares o convite.</p>
-   <iframe class="map-frame" title="Mapa — localização provisória do evento" loading="lazy" referrerpolicy="no-referrer-when-downgrade" src="https://maps.google.com/maps?q=Av.%20Julius%20Nyerere%2C%20Maputo%2C%20Mozambique&t=&z=14&ie=UTF8&iwloc=&output=embed"></iframe>
-   <a class="btn" style="margin-top:14px" href="https://www.google.com/maps/dir/?api=1&destination=Av.%20Julius%20Nyerere%2C%20Maputo%2C%20Mozambique" target="_blank" rel="noopener">Como chegar (local provisório)</a>
-</article>
-<article class="contact-card"><div class="eyebrow">Estamos disponíveis</div><h3>Contactos</h3><p>Para dúvidas sobre o convite, confirmação de presença ou orientação, entra em contacto.</p>
-<div class="contact-list"><div class="contact-link"><div><small>WhatsApp · RSVP</small><b>+258 84 252 5842</b></div><a class="btn" href="https://wa.me/258842525842?text=Ol%C3%A1%2C%20preciso%20de%20informa%C3%A7%C3%B5es%20sobre%20o%20casamento%20de%20Kylie%20%26%20Valter." target="_blank" rel="noopener">Contactar</a></div>
-<div class="contact-link"><div><small>Organização</small><b>Kylie &amp; Valter</b></div><span>✦</span></div></div>
-<p class="location-hint">O número acima é o WhatsApp configurado para receber as confirmações.</p>
-</article></div></div></section>
+<section class="beige torn" id="programa">
+  <h2>Programação</h2>
+  <ul class="tl">
+    <li><b>15:00</b><em>Cerimónia</em><br>Os noivos dizem «sim».</li>
+    <li><b>16:30</b><em>Cocktail e fotografias</em><br>Brinde e momentos em família.</li>
+    <li><b>18:30</b><em>Jantar</em><br>Discursos e primeira dança.</li>
+    <li><b>21:00</b><em>Festa</em><br>Música até de madrugada.</li>
+  </ul>
+</section>
 
-<section class="dress"><div class="wrap reveal"><div class="eyebrow">Dress code</div><strong>Black Tie</strong><p>Traje elegante. Agradecemos que evites jeans e sapatilhas.</p></div></section>
-<section id="galeria"><div class="wrap"><div class="section-head reveal"><div class="eyebrow">Memórias</div><h2>Em boa companhia</h2><p>Alguns instantes da nossa história.</p></div><div class="gallery reveal"><img src="/convites/kilie&valter/assets/fotos/img01.jpeg" alt="Kylie e Valter juntos"><img src="/convites/kilie&valter/assets/fotos/img02.jpeg" alt="Retrato de Kylie e Valter"><img src="/convites/kilie&valter/assets/fotos/img03.jpeg" alt="Kylie e Valter sorrindo"></div></div></section>
-<section class="rsvp" id="presenca"><div class="wrap reveal"><div class="section-head"><div class="eyebrow"></div><h2>Contamos contigo</h2><p>Por favor, confirma a tua presença.</p></div><form class="form" id="rsvpForm">
-<input class="field" name="nome" placeholder="Nome completo" autocomplete="name" required>
-<div class="choice"><label><input type="radio" name="presenca" value="Confirmada — estarei presente" required> Estarei presente</label><label><input type="radio" name="presenca" value="Não poderei estar"> Não poderei estar</label></div>
-<input class="field" name="acompanhantes" type="number" min="0" max="10" value="0" placeholder="Número de acompanhantes (0–10)" aria-label="Número de acompanhantes">
-<textarea class="field" name="mensagem" rows="3" placeholder="Mensagem opcional aos noivos"></textarea>
-<button class="btn" type="submit">Confirmar pelo WhatsApp</button>
-<p class="note" id="rsvpMsg">Ao clicar, o WhatsApp abrirá com a confirmação preenchida. Basta rever e tocar em Enviar.</p>
-</form></div></section>
-<section id="presentes"><div class="wrap"><div class="section-head reveal"><div class="eyebrow">Com carinho</div><h2>Presentes</h2><p>A tua presença é o nosso maior presente. Se desejares oferecer algo, preparámos estas opções.</p></div><div class="gifts reveal"><article class="gift-card"><div class="eyebrow">01 · Presente material</div><h3>Uma lembrança especial</h3><p>A nossa lista de presentes encontra-se disponível na loja A Casa das Loiças.</p><a class="btn" href="#top">Informações no convite</a></article><article class="gift-card"><div class="eyebrow">02 · Presente monetário</div><h3>Um gesto de carinho</h3><p>Para receber os dados de transferência, consulta os noivos ou a família. Os dados bancários não foram incluídos nesta versão de demonstração.</p></article></div></div></section>
+<div class="gallery" aria-label="Galeria (fotografias a substituir)"><div></div><div></div><div></div><div></div></div>
+
+<section class="white torn" id="local">
+  <h2>Local</h2>
+  <p class="lead">Nome do Local</p>
+  <p>Endereço completo, Maputo<br>Estacionamento disponível</p>
+  <a class="btn" href="https://www.google.com/maps/search/?api=1&query=Maputo" target="_blank" rel="noopener">Ver no mapa</a>
+  <a class="btn o" id="cal" target="_blank" rel="noopener" href="#">Guardar no calendário</a>
+</section>
+
+<section class="ivory torn" id="rsvp">
+  <h2>Confirme a sua presença</h2>
+  <p style="margin-bottom:28px">Agradecemos a resposta até 27 de Fevereiro.</p>
+  <form id="f">
+    <div><label for="n">Nome completo</label><input id="n" required></div>
+    <div><label for="a">Vai estar presente?</label>
+      <select id="a"><option>Sim, com todo o gosto</option><option>Infelizmente não poderei</option></select></div>
+    <div><label for="g">Número de pessoas</label><input id="g" type="number" min="1" max="6" value="1"></div>
+    <div><label for="m">Mensagem para os noivos</label><textarea id="m" rows="2"></textarea></div>
+    <button class="btn" type="submit">Enviar confirmação</button>
+  </form>
+  <p id="ok">Obrigado! A mensagem está pronta para enviar.</p>
+</section>
+
+<section class="beige torn" id="presentes">
+  <h2>Lista de presentes</h2>
+  <p class="lead">O vosso carinho é o que mais importa.</p>
+  <div class="gifts">
+    <div class="gift"><b>Lua de mel</b>Contribuição para a nossa viagem.</div>
+    <div class="gift"><b>Casa nova</b>Peças para o nosso primeiro lar.</div>
+    <div class="gift"><b>Experiências</b>Um jantar, um passeio, uma memória.</div>
+  </div>
+</section>
+
+<footer>
+  <h2>Ana & Daniel</h2>
+  <p style="opacity:.75">27.03.2027 — Esperamos por si.</p>
+</footer>
 </main>
-<footer><strong>SHUTTERLITE.</strong>Kylie & Valter · 05 Dezembro 2026<br><br>Um convite criado para celebrar o amor.</footer>
+
 <script>
-const io=new IntersectionObserver(entries=>entries.forEach(e=>{if(e.isIntersecting){e.target.classList.add('visible');io.unobserve(e.target)}}),{threshold:.12});
-document.querySelectorAll('.reveal').forEach(el=>io.observe(el));
-document.getElementById('rsvpForm').addEventListener('submit',e=>{
- e.preventDefault();
- const form=e.currentTarget;
- const nome=form.elements.nome.value.trim();
- const presenca=form.elements.presenca.value;
- const acompanhantes=form.elements.acompanhantes.value || "0";
- const mensagemExtra=form.elements.mensagem.value.trim();
- const texto=[
-  "Olá! Estou a responder ao convite de casamento de Kylie & Valter.",
-  "",
-  "Nome: "+nome,
-  "Presença: "+presenca,
-  "Acompanhantes: "+acompanhantes,
-  mensagemExtra ? "Mensagem: "+mensagemExtra : "",
-  "",
-  "Obrigado(a)!"
- ].filter(Boolean).join("\\n");
- const url="https://wa.me/258842525842?text="+encodeURIComponent(texto);
- window.open(url,"_blank","noopener,noreferrer");
- document.getElementById('rsvpMsg').textContent="O WhatsApp foi aberto com a mensagem preenchida. Confirma os dados e toca em Enviar.";
+// Bordas rasgadas
+document.querySelectorAll('.torn').forEach(function(el){
+  var p=['0% 0%','100% 0%'],n=26;
+  for(var i=n;i>=0;i--){p.push((i/n*100).toFixed(1)+'% '+(100-(i%2?0:0)-Math.random()*1.6).toFixed(2)+'%')}
+  el.style.clipPath='polygon('+p.join(',')+')';
+  el.style.paddingBottom=el.classList.contains('hero')?'':'88px';
+  el.style.marginBottom='-14px';
+});
+// Contagem decrescente
+var target=new Date('2027-03-27T15:00:00+02:00');
+function tick(){var d=Math.max(0,target-new Date()),s=Math.floor(d/1000);
+  var v=[[Math.floor(s/86400),'dias'],[Math.floor(s%86400/3600),'horas'],[Math.floor(s%3600/60),'min']];
+  document.getElementById('count').innerHTML=v.map(function(x){return '<div><b>'+x[0]+'</b><span>'+x[1]+'</span></div>'}).join('')}
+tick();setInterval(tick,30000);
+// Hero: contador a cada segundo
+function htick(){var s=Math.max(0,Math.floor((target-new Date())/1000)),p=function(x){return x<10?'0'+x:x};
+  var v=[[Math.floor(s/86400),'dias'],[p(Math.floor(s%86400/3600)),'horas'],[p(Math.floor(s%3600/60)),'minutos'],[p(s%60),'segundos']];
+  document.getElementById('hc').innerHTML=v.map(function(x){return '<div><b>'+x[0]+'</b><span>'+x[1]+'</span></div>'}).join('')}
+htick();setInterval(htick,1000);
+// Hero: borda de papel rasgado orgânica
+(function(){var W=1000,top=[],w=0,x=0,ph=[Math.random()*6,Math.random()*6,Math.random()*6];
+  while(x<=W){w+=(Math.random()-.5)*5;w*=.94;
+    var y=34+9*Math.sin(x*.006+ph[0])+5*Math.sin(x*.021+ph[1])+2.5*Math.sin(x*.07+ph[2])+w+(Math.random()-.5)*3.5;
+    if(Math.random()<.035)y+=Math.random()*9;
+    top.push([x,Math.max(8,Math.min(60,y))]);x+=2+Math.random()*7}
+  function path(off,dep){var d='M0 80 L0 '+(top[0][1]+off).toFixed(1);
+    top.forEach(function(p,i){d+=' L'+p[0].toFixed(1)+' '+(p[1]+off+(dep?dep[i]:0)).toFixed(1)});
+    return d+' L'+W+' 80Z'}
+  var dep=top.map(function(){return 3+Math.random()*6});
+  document.getElementById('tearsvg').innerHTML='<path d="'+path(0)+'" fill="var(--card)" opacity=".96"/><path d="'+path(0,dep)+'" fill="var(--paper)"/>'})();
+// Calendário
+document.getElementById('cal').href='https://calendar.google.com/calendar/render?action=TEMPLATE&text='+encodeURIComponent('Casamento Ana & Daniel')+'&dates=20270327T130000Z/20270327T220000Z&location='+encodeURIComponent('Maputo, Moçambique');
+// RSVP via WhatsApp (substituir o número)
+var WHATSAPP='258000000000';
+document.getElementById('f').addEventListener('submit',function(e){
+  e.preventDefault();
+  var t='Olá! Sou '+n.value+'. '+a.value+'. Pessoas: '+g.value+'. '+m.value;
+  document.getElementById('ok').style.display='block';
+  window.open('https://wa.me/'+WHATSAPP+'?text='+encodeURIComponent(t),'_blank');
 });
 </script>
-</body></html>
+</body>
+</html>
