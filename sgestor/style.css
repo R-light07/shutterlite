@@ -1,0 +1,829 @@
+/* ==========================================================================
+   ÍNDICE
+   --------------------------------------------------------------------------
+   01. Variáveis e temas (:root)
+   02. Reset e base (html, body)
+   03. Layout principal (.app, nav, main)
+   04. Tipografia (h2, h3, a)
+   05. Botões (.b, .p, .d, .s)
+   06. Formulários (input, select, textarea, .f)
+   07. Controle segmentado (.seg)
+   08. Cards e boxes (.cards, .card, .box)
+   09. Grid e gráficos (.grid, .cv)
+   10. Tabelas (.wrap, table, th, td)
+   11. Tags e utilitários de cor (.tag, .ok, .wn, .er, .mu, .r)
+   12. Calendário (.cal)
+   13. Lista (.li)
+   14. Modal (.md)
+   15. Chave-valor (.kv)
+   16. Botão de tema (#theme-toggle)
+   17. Responsivo (max-width: 720px)
+   ========================================================================== */
+
+
+/* ==========================================================================
+   01. VARIÁVEIS E TEMAS
+   ========================================================================== */
+
+/* Tema escuro (padrão) */
+:root {
+  /* Cores: fundo e superfícies */
+  --bg:  #04080f;   /* fundo da página */
+  --sf:  #0d1018;   /* superfície principal (cards, botões) */
+  --sf2: #111318;   /* superfície secundária (nav, inputs) */
+
+  /* Cores: texto e bordas */
+  --tx: #f4f5f7;    /* texto */
+  --mu: #9299a6;    /* texto suave (muted) */
+  --bd: #2b2f37;    /* bordas */
+
+  /* Cores: destaque e status */
+  --ac:  #2563eb;   /* accent */
+  --ac2: #f11b1b;   /* accent claro */
+  --ok:  #55b985;   /* sucesso */
+  --wn:  #dd4415;   /* aviso */
+  --er:  #ff626b;   /* erro */
+
+  /* Configurações do elemento raiz */
+  box-sizing: border-box;
+  padding-top: env(safe-area-inset-top, 0px);
+  padding-bottom: env(safe-area-inset-bottom, 0px);
+  color-scheme: dark;
+}
+
+/* Tema claro */
+:root[data-theme="light"] {
+  --bg:  #f3f4f6;
+  --sf:  #fff;
+  --sf2: #f8f9fb;
+
+  --tx: #171a20;
+  --mu: #687181;
+  --bd: #e0e4ea;
+
+  --ac:  #2563eb;
+  --ac2: #527bc5;
+  --ok:  #258454;
+  --wn:  #a66b16;
+  --er:  #d83e4a;
+
+  color-scheme: light;
+}
+
+
+/* ==========================================================================
+   02. RESET E BASE
+   ========================================================================== */
+
+* {
+  box-sizing: border-box;
+}
+
+html {
+  scroll-padding-top: env(safe-area-inset-top, 0px);
+}
+
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--tx);
+  font: 14px/1.5 'Outfit',sans-serif;
+  letter-spacing: -.01em;
+  transition: background .2s, color .2s;
+  overflow-y: hidden;
+}
+
+
+/* ==========================================================================
+   03. LAYOUT PRINCIPAL
+   ========================================================================== */
+
+/* ---- Container geral (sidebar + conteúdo) ---- */
+.app {
+  display: grid;
+  grid-template-columns: 235px minmax(0, 1fr);
+  min-height: 100vh;
+}
+
+/* ---- Navegação lateral ---- */
+nav {
+  position: sticky;
+  top: 0;
+  z-index: 5;
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  height: 100vh;
+  padding: 22px 14px;
+  background: var(--sf2);
+  border-right: 1px solid var(--bd);
+}
+
+/* Logo / título da navegação */
+nav h1 {
+  margin: center;
+  font: 400 21px/1.2 'Inter', sans-serif;
+  letter-spacing: .12em;
+  text-transform: uppercase;
+  color: var(--tx);
+}
+
+nav h1 span {
+  color: var(--ac2);
+}
+
+/* Itens da navegação */
+nav button {
+  all: unset;
+  cursor: pointer;
+  padding: 11px 12px;
+  border-radius: 7px;
+  color: var(--mu);
+  font-size: 13px;
+  font-weight: 500;
+  transition: .18s;
+}
+
+nav button:hover {
+  background: var(--bg);
+  color: var(--tx);
+}
+
+/* Item ativo */
+nav button.on {
+  background: #f4f5f7;
+  color: #15171b;
+  font-weight: 400;
+}
+
+:root[data-theme="light"] nav button.on {
+  background: #20242c;
+  color: #fff;
+}
+
+/* Espaçador (empurra itens para o fim) */
+nav .sp {
+  flex: 1;
+}
+
+/* ---- Conteúdo principal ---- */
+main {
+  width: 100%;
+  min-width: 0;
+  max-width: 1800px;
+  margin: 0 auto;
+  padding: 34px clamp(18px, 2.3vw, 38px) 28px;
+}
+
+/* ---- Barra de ações (topo das páginas) ---- */
+.bar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 9px;
+  margin-bottom: 20px;
+}
+
+.bar .sp {
+  flex: 1;
+}
+
+
+/* ==========================================================================
+   04. TIPOGRAFIA
+   ========================================================================== */
+
+h2 {
+  margin: 0 0 14px;
+  font-size: 27px;
+  line-height: 1.25;
+  font-weight: 700;
+  letter-spacing: -.045em;
+}
+
+h3 {
+  margin: 0 0 10px;
+  font-size: 15px;
+  font-weight: 400;
+  letter-spacing: .015em;
+}
+
+a {
+  color: var(--ac2);
+}
+
+
+/* ==========================================================================
+   05. BOTÕES
+   ========================================================================== */
+
+/* ---- Base (.b) ---- */
+button.b,
+.b {
+  cursor: pointer;
+  padding: 8px 14px;
+  border: 1px solid var(--bd);
+  border-radius: 7px;
+  background: var(--sf);
+  color: var(--tx);
+  font: 400 12px 'Inter', sans-serif;
+  transition: .18s;
+}
+
+button.b:hover,
+.b:hover {
+  border-color: var(--ac);
+  filter: brightness(1.08);
+}
+
+/* ---- Variações (a ordem importa: vêm depois da base) ---- */
+
+/* Primário (.p) */
+button.p {
+  background: #f5f6f8;
+  color: #17191e;
+  border-color: #f5f6f8;
+}
+
+:root[data-theme="light"] button.p {
+  background: #20242c;
+  color: #fff;
+  border-color: #20242c;
+}
+
+/* Perigo (.d) */
+button.d {
+  color: var(--er);
+}
+
+/* Pequeno (.s) */
+button.s {
+  padding: 4px 9px;
+  font-size: 11px;
+}
+
+/* ---- Estados ---- */
+button:disabled {
+  opacity: .45;
+  cursor: not-allowed;
+}
+
+button:focus-visible,
+input:focus-visible,
+select:focus-visible,
+textarea:focus-visible {
+  outline: 2px solid var(--ac);
+  outline-offset: 2px;
+}
+
+
+/* ==========================================================================
+   06. FORMULÁRIOS
+   ========================================================================== */
+
+input,
+select,
+textarea {
+  width: 100%;
+  padding: 9px 11px;
+  border: 1px solid var(--bd);
+  border-radius: 7px;
+  background: var(--sf2);
+  color: var(--tx);
+  font: 13px 'Inter', sans-serif;
+}
+
+/* ---- Grade de campos (.f) ---- */
+.f {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+}
+
+.f label {
+  display: block;
+  font-size: 12px;
+  color: var(--mu);
+}
+
+/* Campo que ocupa a linha inteira */
+.f .w {
+  grid-column: 1 / -1;
+}
+
+
+/* ==========================================================================
+   07. CONTROLE SEGMENTADO (.seg)
+   ========================================================================== */
+
+.seg {
+  display: flex;
+  overflow: hidden;
+  border: 1px solid var(--bd);
+  border-radius: 7px;
+}
+
+.seg button {
+  all: unset;
+  cursor: pointer;
+  padding: 7px 11px;
+  background: var(--sf);
+  color: var(--mu);
+  font-size: 12px;
+}
+
+.seg button.on {
+  background: var(--tx);
+  color: var(--bg);
+}
+
+
+/* ==========================================================================
+   08. CARDS E BOXES
+   ========================================================================== */
+
+/* ---- Container dos cards de métricas ---- */
+.cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(155px, 1fr));
+  gap: 15px;
+  margin-bottom: 18px;
+}
+
+/* ---- Base compartilhada ---- */
+.card,
+.box {
+  padding: 17px;
+  background: var(--sf);
+  border: 1px solid var(--bd);
+  border-radius: 10px;
+}
+
+/* ---- Card de métrica ---- */
+.card {
+  min-height: 105px;
+}
+
+.card small {
+  display: block;
+  color: var(--mu);
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: .11em;
+  text-transform: uppercase;
+}
+
+.card b {
+  font-size: 27px;
+  font-weight: 400;
+  letter-spacing: -.045em;
+}
+
+/* Card em destaque (.hero) */
+.card.hero {
+  background: var(--sf);
+  color: var(--tx);
+  border-color: var(--bd);
+}
+
+.card.hero small {
+  color: var(--mu);
+}
+
+.card.hero b {
+  color: var(--tx);
+}
+
+
+/* ==========================================================================
+   09. GRID E GRÁFICOS
+   ========================================================================== */
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 15px;
+  margin-bottom: 15px;
+}
+
+/* Container de canvas/gráfico */
+.cv {
+  position: relative;
+  height: 230px;
+}
+
+
+/* ==========================================================================
+   10. TABELAS
+   ========================================================================== */
+
+/* Wrapper com scroll horizontal */
+.wrap {
+  overflow-x: auto;
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+th,
+td {
+  padding: 10px 11px;
+  border-bottom: 1px solid var(--bd);
+  text-align: left;
+  font-size: 12px;
+  white-space: nowrap;
+}
+
+th {
+  color: var(--mu);
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: .09em;
+  text-transform: uppercase;
+}
+
+/* Linha clicável */
+tr.k {
+  cursor: pointer;
+}
+
+tr.k:hover td {
+  background: var(--bg);
+}
+
+
+/* ==========================================================================
+   11. TAGS E UTILITÁRIOS DE COR
+   ========================================================================== */
+
+/* Tag / badge (a cor da borda segue a cor do texto) */
+.tag {
+  display: inline-block;
+  padding: 2px 9px;
+  border: 1px solid currentColor;
+  border-radius: 99px;
+  font-size: 11px;
+}
+
+/* Cores de status */
+.ok { color: var(--ok); }
+.wn { color: var(--wn); }
+.er { color: var(--er); }
+.mu { color: var(--mu); }
+
+/* Alinhamento */
+.r { text-align: right; }
+
+
+/* ==========================================================================
+   12. CALENDÁRIO (.cal)
+   ========================================================================== */
+
+.cal {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 4px;
+  text-align: center;
+}
+
+/* Cabeçalho (dias da semana) */
+.cal .h {
+  color: var(--mu);
+  font-size: 11px;
+}
+
+/* Dia */
+.cal .dy {
+  min-height: 44px;
+  padding: 4px;
+  border: 1px solid transparent;
+  border-radius: 6px;
+  background: var(--sf2);
+  font-size: 12px;
+  cursor: pointer;
+}
+
+.cal .dy.t {          /* hoje */
+  border-color: var(--ac);
+}
+
+.cal .dy.sel {        /* selecionado */
+  background: var(--ac);
+  color: #fff;
+}
+
+/* Indicador dentro do dia */
+.cal .dy i {
+  display: block;
+  font-style: normal;
+  font-size: 10px;
+  color: var(--ac2);
+}
+
+.cal .dy.sel i {
+  color: #fff;
+}
+
+
+/* ==========================================================================
+   13. LISTA (.li)
+   ========================================================================== */
+
+.li {
+  display: flex;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 11px 0;
+  border-bottom: 1px solid var(--bd);
+  /* font-size: 12px; */
+  cursor: pointer;
+}
+
+
+/* ==========================================================================
+   14. MODAL (.md)
+   ========================================================================== */
+
+.md {
+  position: fixed;
+  inset: 0;
+  z-index: 20;
+  display: none;
+  align-items: flex-start;
+  justify-content: center;
+  overflow: auto;
+  padding: 20px;
+  background: #0009;
+}
+
+.md.on {
+  display: flex;
+}
+
+.md .box {
+  width: min(680px, 100%);
+  margin: auto;
+}
+
+
+/* ==========================================================================
+   15. CHAVE-VALOR (.kv)
+   ========================================================================== */
+
+.kv {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+  gap: 8px;
+  margin: 10px 0;
+}
+
+
+/* ==========================================================================
+   16. BOTÃO DE TEMA
+   Controle fixo no canto superior direito (alternar claro/escuro)
+   ========================================================================== */
+
+#theme-toggle {
+  position: fixed;
+  /* top: 34.5px; */
+  /* right: 480px; */
+  z-index: 15;
+  padding: 5px 10px;
+  border: 1px solid var(--bd);
+  /* border-radius: 9px; */
+  background: var(--sf);
+  color: var(--tx);
+  font: 600 11px 'Inter', sans-serif;
+  box-shadow: 0 2px 8px #0002;
+  cursor: pointer;
+}
+
+
+/* ==========================================================================
+   17. RESPONSIVO (até 720px)
+   ========================================================================== */
+
+@media (max-width: 720px) {
+
+  /* Layout: sidebar vira barra horizontal no topo */
+  .app {
+    grid-template-columns: 1fr;
+  }
+
+  body {
+    overflow-y: scroll;
+  }
+
+  nav {
+    position: sticky;
+    top: 0;
+    z-index: 5;
+    flex-direction: row;
+    height: auto;
+    padding: 8px;
+    overflow-x: auto;
+  }
+
+  nav h1,
+  nav .sp {
+    display: none;
+  }
+
+  nav button {
+    padding: 9px 11px;
+    white-space: nowrap;
+  }
+
+  main {
+    padding: 62px 14px 20px;
+  }
+
+  /* Formulários */
+  .f {
+    grid-template-columns: 1fr;
+  }
+
+  /* Cards e grids */
+  .cards {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 9px;
+  }
+
+  .card,
+  .box {
+    padding: 13px;
+  }
+
+  .card b {
+    font-size: 21px;
+  }
+
+  .grid {
+    grid-template-columns: 1fr;
+  }
+
+  /* Botão de tema */
+  #theme-toggle {
+    top: 9px;
+    right: 12px;
+    padding: 7px 10px;
+  }
+}
+
+/* Portáteis e tablets em landscape */
+@media (max-width:1100px) and (min-width:721px) {
+  .app { grid-template-columns:205px minmax(0,1fr); }
+  nav { padding:18px 10px; }
+  main { padding:26px 20px; }
+  .cards { grid-template-columns:repeat(2,minmax(0,1fr)); }
+  .grid { grid-template-columns:repeat(2,minmax(0,1fr)); }
+  #theme-toggle { right:16px; top:12px; }
+   body {
+    overflow-y: scroll;
+  }
+}
+
+/* Tablets e telemóveis */
+@media (max-width:720px) {
+  .app { display:flex; flex-direction:column; min-height:100dvh; }
+
+   body {
+    overflow-y: scroll;
+  }
+  /* Navegação horizontal, com espaço para o botão de tema */
+  nav {
+    position:sticky;
+    top:0;
+    width:100%;
+    height:auto;
+    min-height:0;
+    flex:0 0 auto;
+    flex-direction:row;
+    align-items:center;
+    gap:5px;
+    padding:48px 9px 9px;
+    overflow-x:auto;
+    overflow-y:hidden;
+    white-space:nowrap;
+    scrollbar-width:thin;
+    -webkit-overflow-scrolling:touch;
+    border-right:0;
+    border-bottom:1px solid var(--bd);
+  }
+  nav h1, nav .sp { display:none !important; }
+  nav button {
+    flex:0 0 auto;
+    white-space:nowrap;
+    padding:9px 12px;
+    font-size:12px;
+  }
+
+  #theme-toggle {
+    position:fixed;
+    top:8px;
+    right:10px;
+    z-index:30;
+    padding:7px 11px;
+    min-height:32px;
+  }
+
+  main {
+    width:100%;
+    max-width:none;
+    padding:20px 13px 28px;
+    margin:0;
+  }
+
+  h2 { font-size:24px; }
+  h3 { font-size:14px; }
+
+  .bar {
+    align-items:stretch;
+    gap:8px;
+    margin-bottom:15px;
+  }
+  .bar h2 { flex:1 1 100%; }
+  .bar .sp { display:none; }
+  .bar > input,
+  .bar > select { flex:1 1 140px; width:auto !important; min-width:0; }
+  .bar > button { flex:0 0 auto; }
+  .seg {
+    max-width:100%;
+    overflow-x:auto;
+    -webkit-overflow-scrolling:touch;
+  }
+  .seg button { flex:0 0 auto; white-space:nowrap; }
+
+  .cards {
+    grid-template-columns:repeat(2,minmax(0,1fr));
+    gap:9px;
+    margin-bottom:13px;
+  }
+  .card {
+    min-width:0;
+    min-height:88px;
+    padding:12px;
+    overflow-wrap:anywhere;
+  }
+  .card small { font-size:9px; letter-spacing:.07em; }
+  .card b { font-size:clamp(17px,4.7vw,22px); overflow-wrap:anywhere; }
+
+  .grid { grid-template-columns:minmax(0,1fr); gap:11px; }
+  .box { padding:13px; }
+  .cv { height:220px; min-width:0; }
+
+  /* Formulários e janelas */
+  .f { grid-template-columns:minmax(0,1fr); gap:10px; }
+  .f .w { grid-column:1; }
+  .md {
+    align-items:flex-start;
+    padding:10px;
+    padding-top:max(10px, env(safe-area-inset-top));
+    padding-bottom:max(10px, env(safe-area-inset-bottom));
+  }
+  .md .box {
+    width:100%;
+    max-width:680px;
+    margin:0 auto;
+    padding:16px;
+    border-radius:10px;
+  }
+  .kv { grid-template-columns:repeat(2,minmax(0,1fr)); }
+
+  /* Calendário */
+  .cal { gap:3px; }
+  .cal .dy { min-height:39px; padding:3px 1px; font-size:11px; }
+  .cal .dy i { font-size:9px; }
+
+  /* Listas e textos longos */
+  .li { gap:8px; min-width:0; overflow-wrap:anywhere; }
+  .li > span { min-width:0; }
+  p { overflow-wrap:anywhere; }
+}
+
+/* Telemóveis estreitos */
+@media (max-width:390px) {
+  main { padding-left:10px; padding-right:10px; }
+  nav { padding-left:7px; padding-right:7px; }
+  nav button { padding:8px 10px; font-size:11px; }
+  .cards { grid-template-columns:minmax(0,1fr); }
+  .card { min-height:75px; }
+  .card b { font-size:21px; }
+  .kv { grid-template-columns:minmax(0,1fr); }
+  .bar > button { padding:8px 10px; font-size:11px; }
+  .md .box { padding:13px; }
+   body {
+    overflow-y: scroll;
+  }
+}
+
+/* Ecrãs muito baixos: permite navegar sem cortar os modais */
+@media (max-height:560px) and (max-width:720px) {
+  .md { align-items:flex-start; }
+  .md .box { margin:0 auto; }
+   body {
+    overflow-y: scroll;
+  }
+}

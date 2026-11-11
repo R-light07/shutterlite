@@ -1,0 +1,1334 @@
+<!DOCTYPE html>
+<html lang="pt">
+
+<!-- ============================================================
+     HEAD · metadados, fontes, CSS e bibliotecas externas
+     ============================================================ -->
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>Shutterlite · Gestão de Trabalhos Fotográficos</title>
+
+  <!-- Fonte -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@200;300;400;500&display=swap" rel="stylesheet">
+
+  <!-- Estilos da aplicação -->
+  <link rel="stylesheet" href="style.css">
+
+  <!-- Bibliotecas externas (cada <script src> fica sozinho, sem código dentro) -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+
+  <!-- Tema claro/escuro (só preferência visual; dados e sincronização não são afetados) -->
+  <script>
+    function applyTheme(mode) {
+      document.documentElement.setAttribute('data-theme', mode);
+      const button = document.getElementById('theme-toggle');
+      if (button) button.textContent = (mode === 'dark') ? '☀ Light mode' : '☾ Dark mode';
+    }
+
+    function toggleTheme() {
+      const current = document.documentElement.getAttribute('data-theme') || 'dark';
+      const next = (current === 'dark') ? 'light' : 'dark';
+      try { localStorage.setItem('Shutterlite-theme', next); } catch (e) {}
+      applyTheme(next);
+    }
+
+    // Aplica o tema guardado antes de desenhar a página (evita "piscar")
+    try { applyTheme(localStorage.getItem('Shutterlite-theme') || 'dark'); }
+    catch (e) { applyTheme('dark'); }
+  </script>
+</head>
+
+
+<!-- ============================================================
+     BODY · estrutura da página
+     ============================================================ -->
+<body>
+
+  <!-- Botão de tema -->
+  <button id="theme-toggle" type="button" onclick="toggleTheme()">☀ Light mode</button>
+
+  <!-- Estrutura principal: menu lateral + conteúdo -->
+  <div class="app">
+    <nav id="nav"></nav>     <!-- preenchido por render() -->
+    <main id="main"></main>  <!-- preenchido pela vista activa -->
+  </div>
+
+  <!-- Janela modal (formulários e detalhes) -->
+  <div class="md" id="md">
+    <div class="box" id="mb"></div>
+  </div>
+
+
+  <!-- ============================================================
+       SCRIPT PRINCIPAL
+       Índice:
+         1. Constantes e listas
+         2. Estado e armazenamento local
+         3. Utilitários
+         4. Cálculos
+         5. Navegação e modal
+         6. Filtro por período
+         7. Painel (dashboard, calendário, gráficos)
+         8. Trabalhos (lista, formulário, detalhe)
+         9. Pagamentos e despesas (formulários)
+        10. Clientes
+        11. Páginas Pagamentos e Despesas
+        12. Supabase (login e sincronização)
+        13. Arranque
+       ============================================================ -->
+  <script>
+
+    /* =====================================================
+       1. CONSTANTES E LISTAS
+       ===================================================== */
+    const KEY = 'Shutterlite-v1';   // chave do localStorage
+
+    const TYPES = ['Casamento', 'Aniversário', 'Batizado', 'Sessão individual', 'Sessão de casal',
+                   'Sessão familiar', 'Fotografia corporativa', 'Evento', 'Outro'];
+
+    const ST    = ['Pendente', 'Confirmado', 'Em execução', 'Concluído', 'Cancelado'];
+
+    const CATS  = ['Transporte e combustível', 'Alimentação', 'Alojamento', 'Aluguer de equipamentos',
+                   'Assistentes e colaboradores', 'Edição e tratamento', 'Impressões e álbuns',
+                   'Decoração e cenografia', 'Marketing e publicidade', 'Outras'];
+
+    const METH  = ['Dinheiro', 'Transferência bancária', 'M-Pesa', 'e-Mola', 'Outro'];
+    const PT    = ['Sinal', 'Parcial', 'Final'];
+    const MN    = ['Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Jun', 'Jul', 'Ago', 'Set', 'Out', 'Nov', 'Dez'];
+
+    const VIEWS = [
+      ['dash',    'Painel'],
+      ['jobs',    'Trabalhos'],
+      ['clients', 'Clientes'],
+      ['pays',    'Pagamentos'],
+      ['fin',     'Despesas']
+    ];
+
+
+    /* =====================================================
+       2. ESTADO E ARMAZENAMENTO LOCAL
+       ===================================================== */
+    let db = { clients: [], jobs: [], expenses: [], payments: [] };
+
+    try {
+      const saved = localStorage.getItem(KEY);
+      if (saved) db = JSON.parse(saved);
+    } catch (e) {}
+
+    // Guarda no navegador e agenda sincronização com a nuvem
+    const save = () => {
+      try {
+        localStorage.setItem(KEY, JSON.stringify(db));
+      } catch (e) {
+        alert('Não foi possível guardar localmente (ficheiros muito grandes?).');
+      }
+      queueSync();
+    };
+
+    // Estado da interface
+    let view   = 'dash';        // vista activa
+    let period = 'month';       // período do painel
+    let cur    = null;          // id do trabalho aberto
+    let calM   = new Date();    // mês mostrado no calendário
+    let calSel = null;          // dia seleccionado no calendário
+    let charts = [];            // gráficos Chart.js activos
+    let jq = '', jf = '';       // pesquisa e filtro de estado em "Trabalhos"
+
+
+    /* =====================================================
+       3. UTILITÁRIOS
+       ===================================================== */
+    const $   = id => document.getElementById(id);
+    const uid = () => crypto.randomUUID();
+    const today = () => new Date().toISOString().slice(0, 10);
+
+    // Formata dinheiro: 1 234,50 MT
+    const fm = n => (+n || 0).toLocaleString('pt-PT', {
+      minimumFractionDigits: 2,
+      maximumFractionDigits: 2
+    }) + ' MT';
+
+    // Formata data: 2026-11-11 → 11/11/2026
+    const fd = d => d ? d.split('-').reverse().join('/') : '—';
+
+    // Escapa texto para HTML (segurança)
+    const esc = s => String(s ?? '').replace(/[&<>"]/g, c => ({
+      '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;'
+    }[c]));
+
+    // Procura cliente / trabalho por id
+    const cl = id => db.clients.find(c => c.id === id) || { name: '(sem cliente)' };
+    const jb = id => db.jobs.find(j => j.id === id);
+
+    // Etiquetas coloridas
+    const payTag = p =>
+      `<span class="tag ${p === 'Totalmente pago' ? 'ok' : p === 'Não pago' ? 'er' : 'wn'}">${p}</span>`;
+
+    const stTag = s =>
+      `<span class="tag ${s === 'Concluído' ? 'ok' : s === 'Cancelado' ? 'er' : s === 'Pendente' ? 'wn' : ''}">${s}</span>`;
+
+    // Gera <option> a partir de uma lista
+    const opts = (list, selected) =>
+      list.map(x => `<option ${x === selected ? 'selected' : ''}>${x}</option>`).join('');
+
+    // Lê um ficheiro; só guarda o conteúdo se tiver menos de 600 KB
+    const readF = f => new Promise(resolve => {
+      if (!f) return resolve(null);
+      const reader = new FileReader();
+      reader.onload = () => resolve({
+        name: f.name,
+        data: f.size < 600000 ? reader.result : null
+      });
+      reader.readAsDataURL(f);
+    });
+
+
+    /* =====================================================
+       4. CÁLCULOS
+       ===================================================== */
+    function calc(j) {
+      const rev = (j.status === 'Cancelado') ? 0 : (+j.value || 0);
+
+      const exp = db.expenses
+        .filter(e => e.jobId === j.id)
+        .reduce((a, e) => a + +e.amount, 0);
+
+      const rec = db.payments
+        .filter(p => p.jobId === j.id)
+        .reduce((a, p) => a + +p.amount, 0);
+
+      const profit = rev - exp;
+
+      return {
+        rev,
+        exp,
+        rec,
+        profit,
+        margin:   rev ? profit / rev * 100 : 0,
+        due:      Math.max(0, (+j.value || 0) - rec),
+        realized: rec - exp,
+        pay:      rec <= 0 ? 'Não pago'
+                : rec >= (+j.value || 0) ? 'Totalmente pago'
+                : 'Parcialmente pago'
+      };
+    }
+
+
+    /* =====================================================
+       5. NAVEGAÇÃO E MODAL
+       ===================================================== */
+    function go(v, id) {
+      view = v;
+      cur = id || null;
+      render();
+    }
+
+    function render() {
+      // Menu lateral
+      $('nav').innerHTML =
+        '<h1>Shutter<span>lite</span></h1>' +
+
+        VIEWS.map(([key, label]) => `
+          <button class="${view === key || (view === 'job' && key === 'jobs') ? 'on' : ''}"
+                  onclick="go('${key}')">${label}</button>
+        `).join('') +
+
+        '<div class="sp"></div>' +
+
+        (sb
+          ? `<small class="mu" id="sy" style="padding:0 12px">${syncMsg}</small>
+             <button onclick="logout()">Terminar sessão</button>`
+          : '') +
+
+        `<button onclick="backup()">Exportar cópia</button>
+         <button onclick="$('imp').click()">Importar cópia</button>
+         <input id="imp" type="file" accept=".json" hidden onchange="restore(this.files[0])">`;
+
+      // Destrói gráficos antigos antes de desenhar a nova vista
+      charts.forEach(c => c.destroy());
+      charts = [];
+
+      // Chama a função da vista activa
+      ({ dash, jobs, clients, pays, fin, job })[view]();
+      window.scrollTo(0, 0);
+    }
+
+    // Exportar / importar cópia de segurança (.json)
+    function backup() {
+      const a = document.createElement('a');
+      a.href = URL.createObjectURL(new Blob([JSON.stringify(db)], { type: 'application/json' }));
+      a.download = 'Shutterlite-copia.json';
+      a.click();
+    }
+
+    async function restore(f) {
+      if (!f) return;
+      try {
+        db = JSON.parse(await f.text());
+        save();
+        render();
+      } catch (e) {
+        alert('Ficheiro inválido.');
+      }
+    }
+
+    // Modal
+    function modal(html) {
+      $('mb').innerHTML = html;
+      $('md').classList.add('on');
+    }
+
+    function close_() {
+      $('md').classList.remove('on');
+    }
+
+    $('md').addEventListener('mousedown', e => {
+      if (e.target.id === 'md') close_();   // clicar fora fecha
+    });
+
+
+    /* =====================================================
+       6. FILTRO POR PERÍODO
+       ===================================================== */
+    function inPeriod(d) {
+      if (period === 'all') return true;
+
+      const t = new Date();
+      const x = new Date(d + 'T00:00');
+
+      if (period === 'day') return d === today();
+
+      if (period === 'week') {
+        const start = new Date(t);
+        start.setHours(0, 0, 0, 0);
+        start.setDate(t.getDate() - ((t.getDay() + 6) % 7));   // segunda-feira
+        const end = new Date(start);
+        end.setDate(start.getDate() + 7);
+        return x >= start && x < end;
+      }
+
+      if (period === 'month') {
+        return x.getMonth() === t.getMonth() && x.getFullYear() === t.getFullYear();
+      }
+
+      if (period === 'quarter') {
+        return Math.floor(x.getMonth() / 3) === Math.floor(t.getMonth() / 3)
+            && x.getFullYear() === t.getFullYear();
+      }
+
+      return x.getFullYear() === t.getFullYear();   // 'year'
+    }
+
+
+    /* =====================================================
+       7. PAINEL (DASHBOARD)
+       ===================================================== */
+    function dash() {
+      const js  = db.jobs.filter(j => inPeriod(j.date));
+      const act = js.filter(j => j.status !== 'Cancelado');
+
+      // Totais do período
+      const T = act.reduce((acc, j) => {
+        const c = calc(j);
+        acc.rev += c.rev;
+        acc.exp += c.exp;
+        acc.rec += c.rec;
+        acc.due += c.due;
+        return acc;
+      }, { rev: 0, exp: 0, rec: 0, due: 0 });
+
+      // Próximos eventos
+      const up = db.jobs
+        .filter(j => j.date >= today() && !['Cancelado', 'Concluído'].includes(j.status))
+        .sort((a, b) => (a.date + a.time).localeCompare(b.date + b.time));
+
+      // Trabalhos com valor por receber
+      const pend = db.jobs.filter(j => j.status !== 'Cancelado' && calc(j).due > 0);
+
+      const P = [
+        ['day', 'Dia'], ['week', 'Semana'], ['month', 'Mês'],
+        ['quarter', 'Trimestre'], ['year', 'Ano'], ['all', 'Tudo']
+      ];
+
+      $('main').innerHTML = `
+
+        <!-- Cabeçalho: título, filtro de período, botão novo -->
+        <div class="bar">
+          <h2 style="margin:0">Painel</h2>
+          <div class="sp"></div>
+          <div class="seg">
+            ${P.map(([k, l]) => `
+              <button class="${period === k ? 'on' : ''}"
+                      onclick="period='${k}';render()">${l}</button>
+            `).join('')}
+          </div>
+          <button class="b p" onclick="jobForm()">+ Novo trabalho</button>
+        </div>
+
+        <!-- Cartões de resumo -->
+        <div class="cards">
+          <div class="card hero"><small>Lucro líquido (previsto)</small><b>${fm(T.rev - T.exp)}</b></div>
+          <div class="card"><small>Receita acordada</small><b>${fm(T.rev)}</b></div>
+          <div class="card"><small>Despesas</small><b>${fm(T.exp)}</b></div>
+          <div class="card"><small>Já recebido</small><b>${fm(T.rec)}</b></div>
+          <div class="card"><small>Por receber</small><b class="wn">${fm(T.due)}</b></div>
+          <div class="card">
+            <small>Dinheiro disponível (recebido − despesas)</small>
+            <b class="${T.rec - T.exp < 0 ? 'er' : ''}">${fm(T.rec - T.exp)}</b>
+          </div>
+          <div class="card">
+            <small>Trabalhos</small><b>${js.length}</b>
+            <span class="mu">${js.filter(j => j.status === 'Concluído').length} concluídos</span>
+          </div>
+        </div>
+
+        <!-- Calendário, próximas sessões, pagamentos pendentes -->
+        <div class="grid">
+
+          <div class="box">
+            <div class="bar" style="margin:0 0 8px">
+              <h3 style="margin:0">Calendário</h3>
+              <div class="sp"></div>
+              <button class="b s" onclick="calM.setMonth(calM.getMonth()-1);dash()">‹</button>
+              <button class="b s" onclick="calM.setMonth(calM.getMonth()+1);dash()">›</button>
+            </div>
+            <div id="cal"></div>
+            <div id="calsel"></div>
+          </div>
+
+          <div class="box">
+            <h3>Próximas sessões e eventos</h3>
+            ${up.slice(0, 6).map(j => `
+              <div class="li" onclick="go('job','${j.id}')">
+                <span>
+                  <b>${esc(j.title)}</b><br>
+                  <span class="mu">${esc(cl(j.clientId).name)} · ${esc(j.loc)}</span>
+                </span>
+                <span class="r">${fd(j.date)}<br><span class="mu">${j.time || ''}</span></span>
+              </div>
+            `).join('') || '<p class="mu">Sem eventos futuros. Crie um novo trabalho.</p>'}
+          </div>
+
+          <div class="box">
+            <h3>Pagamentos pendentes</h3>
+            ${pend.slice(0, 6).map(j => `
+              <div class="li" onclick="go('job','${j.id}')">
+                <span>
+                  <b>${esc(j.title)}</b><br>
+                  <span class="mu">${esc(cl(j.clientId).name)}</span>
+                </span>
+                <b class="wn">${fm(calc(j).due)}</b>
+              </div>
+            `).join('') || '<p class="mu">Tudo pago.</p>'}
+          </div>
+        </div>
+
+        <!-- Gráficos -->
+        <div class="grid">
+          <div class="box"><h3>Receitas, despesas e lucro por mês</h3><div class="cv"><canvas id="c1"></canvas></div></div>
+          <div class="box"><h3>Evolução do lucro</h3><div class="cv"><canvas id="c2"></canvas></div></div>
+          <div class="box"><h3>Despesas por categoria</h3><div class="cv"><canvas id="c3"></canvas></div></div>
+          <div class="box"><h3>Rentabilidade por tipo (lucro)</h3><div class="cv"><canvas id="c4"></canvas></div></div>
+        </div>
+      `;
+
+      drawCal();
+      drawCharts(act);
+    }
+
+    // --- Calendário mensal ---
+    function drawCal() {
+      const y = calM.getFullYear();
+      const m = calM.getMonth();
+      const first = (new Date(y, m, 1).getDay() + 6) % 7;   // dias vazios antes do dia 1
+      const n = new Date(y, m + 1, 0).getDate();            // nº de dias do mês
+
+      let h = `<div class="cal">
+        <div style="grid-column:1/-1;font-weight:500">${MN[m]} ${y}</div>`
+        + ['S', 'T', 'Q', 'Q', 'S', 'S', 'D'].map(x => `<div class="h">${x}</div>`).join('')
+        + '<div></div>'.repeat(first);
+
+      for (let d = 1; d <= n; d++) {
+        const ds = `${y}-${String(m + 1).padStart(2, '0')}-${String(d).padStart(2, '0')}`;
+        const c = db.jobs.filter(j => j.date === ds && j.status !== 'Cancelado').length;
+
+        h += `<div class="dy ${ds === today() ? 't' : ''} ${ds === calSel ? 'sel' : ''}"
+                   onclick="calSel='${ds}';dash()">${d}${c ? `<i>● ${c}</i>` : ''}</div>`;
+      }
+
+      $('cal').innerHTML = h + '</div>';
+
+      // Lista do dia seleccionado
+      if (calSel) {
+        $('calsel').innerHTML =
+          db.jobs.filter(j => j.date === calSel).map(j => `
+            <div class="li" onclick="go('job','${j.id}')">
+              <span>${j.time || ''} <b>${esc(j.title)}</b></span>
+              ${stTag(j.status)}
+            </div>
+          `).join('')
+          || `<p class="mu">Nada agendado a ${fd(calSel)}.</p>`;
+      }
+    }
+
+    // --- Gráficos (Chart.js) ---
+    function drawCharts(act) {
+      // Últimos 12 meses (formato AAAA-MM)
+      const t = new Date();
+      const ms = [];
+      for (let i = 11; i >= 0; i--) {
+        const d = new Date(t.getFullYear(), t.getMonth() - i, 1);
+        ms.push(d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0'));
+      }
+
+      const all = db.jobs.filter(j => j.status !== 'Cancelado');
+
+      const R = ms.map(k => all.filter(j => j.date.startsWith(k)).reduce((a, j) => a + calc(j).rev, 0));
+      const E = ms.map(k => all.filter(j => j.date.startsWith(k)).reduce((a, j) => a + calc(j).exp, 0));
+      const L = R.map((r, i) => r - E[i]);
+      const lab = ms.map(k => MN[+k.slice(5) - 1] + ' ' + k.slice(2, 4));
+
+      // Cores vindas do CSS (variáveis --ac, --ac2, --er, --mu)
+      const cs = getComputedStyle(document.documentElement);
+      const ac = cs.getPropertyValue('--ac').trim();
+      const a2 = cs.getPropertyValue('--ac2').trim();
+      const er = cs.getPropertyValue('--er').trim();
+      const tx = cs.getPropertyValue('--mu').trim();
+
+      Chart.defaults.color = tx;
+      Chart.defaults.font.family = "'Bricolage Grotesque',system-ui";
+
+      const mk = (id, cfg) => charts.push(new Chart($(id), {
+        ...cfg,
+        options: { responsive: true, maintainAspectRatio: false, ...(cfg.options || {}) }
+      }));
+
+      // c1 · Receitas x Despesas por mês
+      mk('c1', {
+        type: 'bar',
+        data: {
+          labels: lab,
+          datasets: [
+            { label: 'Receitas', data: R, backgroundColor: ac },
+            { label: 'Despesas', data: E, backgroundColor: er }
+          ]
+        }
+      });
+
+      // c2 · Evolução do lucro
+      mk('c2', {
+        type: 'line',
+        data: {
+          labels: lab,
+          datasets: [{
+            label: 'Lucro', data: L,
+            borderColor: a2, backgroundColor: a2 + '33',
+            fill: true, tension: .3
+          }]
+        }
+      });
+
+      // c3 · Despesas por categoria
+      const ct = CATS.map(c =>
+        db.expenses
+          .filter(e => e.cat === c && act.some(j => j.id === e.jobId))
+          .reduce((a, e) => a + +e.amount, 0)
+      );
+      const pal = [ac, a2, er, '#6b7fd7', '#8a5fb0', '#4d9f6b', '#c76d9a', '#8c8c8c', '#d98c4a', '#3b8fc4'];
+
+      mk('c3', {
+        type: 'doughnut',
+        data: { labels: CATS, datasets: [{ data: ct, backgroundColor: pal, borderWidth: 0 }] },
+        options: { plugins: { legend: { position: 'right', labels: { boxWidth: 10, font: { size: 11 } } } } }
+      });
+
+      // c4 · Lucro por tipo de trabalho
+      mk('c4', {
+        type: 'bar',
+        data: {
+          labels: TYPES,
+          datasets: [{
+            label: 'Lucro',
+            data: TYPES.map(tp => act.filter(j => j.type === tp).reduce((a, j) => a + calc(j).profit, 0)),
+            backgroundColor: ac
+          }]
+        },
+        options: { indexAxis: 'y', plugins: { legend: { display: false } } }
+      });
+    }
+
+
+    /* =====================================================
+       8. TRABALHOS
+       ===================================================== */
+
+    // --- Lista de trabalhos ---
+    function jobs() {
+      const rows = () => db.jobs
+        .filter(j => (!jf || j.status === jf)
+                  && (j.title + cl(j.clientId).name + j.type).toLowerCase().includes(jq.toLowerCase()))
+        .sort((a, b) => b.date.localeCompare(a.date));
+
+      $('main').innerHTML = `
+        <div class="bar">
+          <h2 style="margin:0">Trabalhos</h2>
+          <div class="sp"></div>
+          <input style="width:200px" placeholder="Pesquisar…" value="${esc(jq)}" oninput="jq=this.value;jt()">
+          <select style="width:150px" onchange="jf=this.value;jt()">
+            <option value="">Todos os estados</option>
+            ${opts(ST, jf)}
+          </select>
+          <button class="b p" onclick="jobForm()">+ Novo trabalho</button>
+        </div>
+        <div class="box wrap" id="jt"></div>
+      `;
+
+      // Redesenha só a tabela (mantém o foco na pesquisa)
+      window.jt = () => {
+        $('jt').innerHTML = `
+          <table>
+            <tr>
+              <th>Data</th><th>Trabalho</th><th>Cliente</th><th>Tipo</th>
+              <th>Estado</th><th>Pagamento</th><th class="r">Valor</th><th class="r">Lucro</th>
+            </tr>`
+          + rows().map(j => {
+              const c = calc(j);
+              return `
+                <tr class="k" onclick="go('job','${j.id}')">
+                  <td>${fd(j.date)}</td>
+                  <td><b>${esc(j.title)}</b></td>
+                  <td>${esc(cl(j.clientId).name)}</td>
+                  <td>${esc(j.type)}</td>
+                  <td>${stTag(j.status)}</td>
+                  <td>${payTag(c.pay)}</td>
+                  <td class="r">${fm(j.value)}</td>
+                  <td class="r ${c.profit < 0 ? 'er' : ''}">${fm(c.profit)}</td>
+                </tr>`;
+            }).join('')
+          + '</table>'
+          + (rows().length ? '' : '<p class="mu">Nenhum trabalho encontrado.</p>');
+      };
+      jt();
+    }
+
+    // --- Formulário (novo / editar) ---
+    function jobForm(id) {
+      const j = id ? jb(id) : {
+        title: '', clientId: '', type: TYPES[0], date: today(), time: '10:00',
+        loc: '', desc: '', value: '', status: 'Pendente', delivery: '', docs: []
+      };
+
+      modal(`
+        <h3>${id ? 'Editar' : 'Novo'} trabalho</h3>
+
+        <div class="f">
+          <div class="w">
+            <label>Título</label>
+            <input id="f_title" value="${esc(j.title)}">
+          </div>
+
+          <div>
+            <label>Cliente</label>
+            <select id="f_cl" onchange="$('nc').style.display=this.value==='new'?'grid':'none'">
+              <option value="">—</option>
+              ${db.clients.map(c => `<option value="${c.id}" ${c.id === j.clientId ? 'selected' : ''}>${esc(c.name)}</option>`).join('')}
+              <option value="new">+ Novo cliente…</option>
+            </select>
+          </div>
+
+          <div>
+            <label>Tipo de trabalho</label>
+            <select id="f_type">${opts(TYPES, j.type)}</select>
+          </div>
+
+          <!-- Campos extra: aparecem ao escolher "+ Novo cliente…" -->
+          <div id="nc" class="f w" style="display:none;grid-column:1/-1">
+            <div><label>Nome do cliente</label><input id="n_name"></div>
+            <div><label>Telefone</label><input id="n_tel"></div>
+            <div class="w"><label>E-mail</label><input id="n_mail" type="email"></div>
+          </div>
+
+          <div><label>Data</label><input id="f_date" type="date" value="${j.date}"></div>
+          <div><label>Hora</label><input id="f_time" type="time" value="${j.time}"></div>
+
+          <div class="w"><label>Localização</label><input id="f_loc" value="${esc(j.loc)}"></div>
+
+          <div><label>Valor total acordado (MT)</label><input id="f_val" type="number" min="0" step="any" value="${j.value}"></div>
+          <div><label>Entrega prevista das fotos</label><input id="f_del" type="date" value="${j.delivery}"></div>
+
+          <div><label>Estado</label><select id="f_st">${opts(ST, j.status)}</select></div>
+
+          ${id ? '' : `<div><label>Sinal recebido (MT)</label><input id="f_dep" type="number" min="0" step="any"></div>`}
+
+          <div class="w"><label>Descrição e observações</label><textarea id="f_desc" rows="3">${esc(j.desc)}</textarea></div>
+          <div class="w"><label>Anexar contratos / referências</label><input id="f_files" type="file" multiple></div>
+        </div>
+
+        <div class="bar" style="margin:14px 0 0">
+          <div class="sp"></div>
+          <button class="b" onclick="close_()">Cancelar</button>
+          <button class="b p" onclick="saveJob('${id || ''}')">Guardar</button>
+        </div>
+      `);
+    }
+
+    // --- Guardar trabalho ---
+    async function saveJob(id) {
+      const title = $('f_title').value.trim();
+      if (!title) return alert('Indique o título.');
+
+      // Cliente existente ou novo
+      let cid = $('f_cl').value;
+      if (cid === 'new') {
+        const name = $('n_name').value.trim();
+        if (!name) return alert('Indique o nome do cliente.');
+        cid = uid();
+        db.clients.push({
+          id: cid, name,
+          tel: $('n_tel').value, mail: $('n_mail').value,
+          addr: '', obs: ''
+        });
+      }
+
+      // Anexos
+      const docs = [];
+      for (const f of $('f_files').files) docs.push(await readF(f));
+
+      const o = {
+        title,
+        clientId: cid,
+        type:     $('f_type').value,
+        date:     $('f_date').value,
+        time:     $('f_time').value,
+        loc:      $('f_loc').value,
+        desc:     $('f_desc').value,
+        value:    +$('f_val').value || 0,
+        status:   $('f_st').value,
+        delivery: $('f_del').value
+      };
+
+      if (id) {
+        // Editar
+        const j = jb(id);
+        Object.assign(j, o);
+        j.docs = (j.docs || []).concat(docs);
+      } else {
+        // Criar (+ sinal opcional)
+        o.id = uid();
+        o.docs = docs;
+        db.jobs.push(o);
+
+        const deposit = +$('f_dep').value;
+        if (deposit > 0) {
+          db.payments.push({
+            id: uid(), jobId: o.id, type: 'Sinal',
+            amount: deposit, date: today(), method: 'Dinheiro'
+          });
+        }
+      }
+
+      save();
+      close_();
+      render();
+    }
+
+    // --- Detalhe de um trabalho ---
+    function job() {
+      const j = jb(cur);
+      if (!j) return go('jobs');
+
+      const c  = calc(j);
+      const ex = db.expenses.filter(e => e.jobId === j.id);
+      const pa = db.payments.filter(p => p.jobId === j.id);
+
+      $('main').innerHTML = `
+
+        <!-- Barra superior -->
+        <div class="bar">
+          <button class="b" onclick="go('jobs')">‹ Trabalhos</button>
+          <div class="sp"></div>
+          <button class="b" onclick="jobForm('${j.id}')">Editar</button>
+          <button class="b d" onclick="delJob('${j.id}')">Eliminar</button>
+        </div>
+
+        <!-- Título e informações -->
+        <h2>${esc(j.title)} ${stTag(j.status)} ${payTag(c.pay)}</h2>
+        <p class="mu">
+          ${esc(cl(j.clientId).name)} · ${esc(j.type)} · ${fd(j.date)} ${j.time || ''} · ${esc(j.loc) || 'sem local'}<br>
+          Entrega prevista: ${fd(j.delivery)}${cl(j.clientId).tel ? ' · ' + esc(cl(j.clientId).tel) : ''}${cl(j.clientId).mail ? ' · ' + esc(cl(j.clientId).mail) : ''}
+        </p>
+        ${j.desc ? `<p>${esc(j.desc)}</p>` : ''}
+
+        <!-- Cartões financeiros -->
+        <div class="cards">
+          <div class="card"><small>Valor cobrado</small><b>${fm(c.rev)}</b></div>
+          <div class="card"><small>Total de despesas</small><b>${fm(c.exp)}</b></div>
+          <div class="card hero"><small>Lucro líquido · margem</small><b>${fm(c.profit)}</b> · ${c.margin.toFixed(1)}%</div>
+          <div class="card"><small>Recebido</small><b>${fm(c.rec)}</b></div>
+          <div class="card"><small>Por receber</small><b class="wn">${fm(c.due)}</b></div>
+          <div class="card"><small>Disponível (recebido − despesas)</small><b>${fm(c.realized)}</b></div>
+        </div>
+
+        <!-- Pagamentos e despesas do trabalho -->
+        <div class="grid">
+
+          <div class="box wrap">
+            <div class="bar" style="margin:0 0 8px">
+              <h3 style="margin:0">Pagamentos</h3>
+              <div class="sp"></div>
+              <button class="b s p" onclick="payForm('${j.id}')">+ Pagamento</button>
+            </div>
+            <table>
+              ${pa.map(p => `
+                <tr>
+                  <td>${fd(p.date)}</td>
+                  <td>${p.type}</td>
+                  <td>${p.method}</td>
+                  <td class="r">${fm(p.amount)}</td>
+                  <td><button class="b s d" onclick="del('payments','${p.id}')">×</button></td>
+                </tr>
+              `).join('') || '<tr><td class="mu">Sem pagamentos.</td></tr>'}
+            </table>
+          </div>
+
+          <div class="box wrap">
+            <div class="bar" style="margin:0 0 8px">
+              <h3 style="margin:0">Despesas</h3>
+              <div class="sp"></div>
+              <button class="b s p" onclick="expForm('${j.id}')">+ Despesa</button>
+            </div>
+            <table>
+              ${ex.map(e => `
+                <tr>
+                  <td>${fd(e.date)}</td>
+                  <td>${esc(e.desc)}<br><span class="mu">${e.cat} · ${e.method}</span></td>
+                  <td>${e.receipt
+                        ? (e.receipt.data
+                            ? `<a href="${e.receipt.data}" download="${esc(e.receipt.name)}">recibo</a>`
+                            : esc(e.receipt.name))
+                        : ''}</td>
+                  <td class="r">${fm(e.amount)}</td>
+                  <td><button class="b s d" onclick="del('expenses','${e.id}')">×</button></td>
+                </tr>
+              `).join('') || '<tr><td class="mu">Sem despesas.</td></tr>'}
+            </table>
+          </div>
+        </div>
+
+        <!-- Documentos anexados -->
+        <div class="box">
+          <h3>Documentos</h3>
+          ${(j.docs || []).map(d => d.data
+              ? `<a href="${d.data}" download="${esc(d.name)}">${esc(d.name)}</a>`
+              : esc(d.name) + ' <span class="mu">(ficheiro grande, só o nome foi guardado)</span>'
+            ).join('<br>')
+            || '<span class="mu">Nenhum anexo. Use Editar para anexar.</span>'}
+        </div>
+      `;
+    }
+
+    // --- Eliminar ---
+    function delJob(id) {
+      if (!confirm('Eliminar este trabalho e as suas despesas e pagamentos?')) return;
+      db.jobs     = db.jobs.filter(j => j.id !== id);
+      db.expenses = db.expenses.filter(e => e.jobId !== id);
+      db.payments = db.payments.filter(p => p.jobId !== id);
+      save();
+      go('jobs');
+    }
+
+    // Eliminar registo genérico (pagamento ou despesa)
+    function del(key, id) {
+      if (!confirm('Eliminar este registo?')) return;
+      db[key] = db[key].filter(x => x.id !== id);
+      save();
+      render();
+    }
+
+
+    /* =====================================================
+       9. FORMULÁRIOS DE PAGAMENTO E DESPESA
+       ===================================================== */
+    function payForm(jid) {
+      modal(`
+        <h3>Novo pagamento</h3>
+        <div class="f">
+          <div class="w">
+            <label>Trabalho</label>
+            <select id="p_j">
+              ${db.jobs.map(j => `<option value="${j.id}" ${j.id === jid ? 'selected' : ''}>${esc(j.title)}</option>`).join('')}
+            </select>
+          </div>
+          <div><label>Tipo</label><select id="p_t">${opts(PT)}</select></div>
+          <div><label>Valor (MT)</label><input id="p_a" type="number" min="0" step="any"></div>
+          <div><label>Data</label><input id="p_d" type="date" value="${today()}"></div>
+          <div><label>Método</label><select id="p_m">${opts(METH)}</select></div>
+        </div>
+        <div class="bar" style="margin:14px 0 0">
+          <div class="sp"></div>
+          <button class="b" onclick="close_()">Cancelar</button>
+          <button class="b p" onclick="savePay()">Guardar</button>
+        </div>
+      `);
+    }
+
+    function savePay() {
+      const a = +$('p_a').value;
+      if (!a || !$('p_j').value) return alert('Indique trabalho e valor.');
+
+      db.payments.push({
+        id: uid(),
+        jobId:  $('p_j').value,
+        type:   $('p_t').value,
+        amount: a,
+        date:   $('p_d').value,
+        method: $('p_m').value
+      });
+
+      save();
+      close_();
+      render();
+    }
+
+    function expForm(jid) {
+      modal(`
+        <h3>Nova despesa</h3>
+        <div class="f">
+          <div class="w">
+            <label>Trabalho</label>
+            <select id="e_j">
+              ${db.jobs.map(j => `<option value="${j.id}" ${j.id === jid ? 'selected' : ''}>${esc(j.title)}</option>`).join('')}
+            </select>
+          </div>
+          <div class="w"><label>Descrição</label><input id="e_ds"></div>
+          <div><label>Categoria</label><select id="e_c">${opts(CATS)}</select></div>
+          <div><label>Valor (MT)</label><input id="e_a" type="number" min="0" step="any"></div>
+          <div><label>Data</label><input id="e_d" type="date" value="${today()}"></div>
+          <div><label>Método</label><select id="e_m">${opts(METH)}</select></div>
+          <div class="w"><label>Comprovativo (opcional)</label><input id="e_r" type="file"></div>
+        </div>
+        <div class="bar" style="margin:14px 0 0">
+          <div class="sp"></div>
+          <button class="b" onclick="close_()">Cancelar</button>
+          <button class="b p" onclick="saveExp()">Guardar</button>
+        </div>
+      `);
+    }
+
+    async function saveExp() {
+      const a = +$('e_a').value;
+      if (!a || !$('e_j').value) return alert('Indique trabalho e valor.');
+
+      db.expenses.push({
+        id: uid(),
+        jobId:   $('e_j').value,
+        desc:    $('e_ds').value,
+        cat:     $('e_c').value,
+        amount:  a,
+        date:    $('e_d').value,
+        method:  $('e_m').value,
+        receipt: await readF($('e_r').files[0])
+      });
+
+      save();
+      close_();
+      render();
+    }
+
+
+    /* =====================================================
+       10. CLIENTES
+       ===================================================== */
+
+    // --- Lista ---
+    function clients() {
+      $('main').innerHTML = `
+        <div class="bar">
+          <h2 style="margin:0">Clientes</h2>
+          <div class="sp"></div>
+          <button class="b p" onclick="clForm()">+ Novo cliente</button>
+        </div>
+
+        <div class="box wrap">
+          <table>
+            <tr>
+              <th>Nome</th><th>Contacto</th><th>E-mail</th><th>Trabalhos</th>
+              <th class="r">Total gasto</th><th class="r">Pago</th>
+            </tr>`
+        + db.clients.map(c => {
+            const js = db.jobs.filter(j => j.clientId === c.id);
+            const ca = js.map(calc);
+            return `
+              <tr class="k" onclick="clView('${c.id}')">
+                <td><b>${esc(c.name)}</b></td>
+                <td>${esc(c.tel)}</td>
+                <td>${esc(c.mail)}</td>
+                <td>${js.length}</td>
+                <td class="r">${fm(ca.reduce((a, x) => a + x.rev, 0))}</td>
+                <td class="r">${fm(ca.reduce((a, x) => a + x.rec, 0))}</td>
+              </tr>`;
+          }).join('')
+        + '</table>'
+        + (db.clients.length ? '' : '<p class="mu">Ainda sem clientes. Adicione o primeiro.</p>')
+        + '</div>';
+    }
+
+    // --- Ficha do cliente (modal) ---
+    function clView(id) {
+      const c  = cl(id);
+      const js = db.jobs.filter(j => j.clientId === id);
+      const ca = js.map(calc);
+
+      modal(`
+        <h3>${esc(c.name)}</h3>
+        <p class="mu">${esc(c.tel)} ${esc(c.mail)}<br>${esc(c.addr)}<br>${esc(c.obs)}</p>
+
+        <div class="kv">
+          <div class="card"><small>Total gasto</small><b>${fm(ca.reduce((a, x) => a + x.rev, 0))}</b></div>
+          <div class="card"><small>Pagamentos efetuados</small><b>${fm(ca.reduce((a, x) => a + x.rec, 0))}</b></div>
+        </div>
+
+        <h3>Histórico</h3>
+        ${js.map(j => `
+          <div class="li" onclick="close_();go('job','${j.id}')">
+            <span>${fd(j.date)} · <b>${esc(j.title)}</b></span>
+            ${stTag(j.status)}
+          </div>
+        `).join('') || '<p class="mu">Sem trabalhos.</p>'}
+
+        <div class="bar" style="margin:14px 0 0">
+          <button class="b d" onclick="delCl('${id}')">Eliminar</button>
+          <div class="sp"></div>
+          <button class="b" onclick="close_()">Fechar</button>
+          <button class="b p" onclick="clForm('${id}')">Editar</button>
+        </div>
+      `);
+    }
+
+    // --- Formulário (novo / editar) ---
+    function clForm(id) {
+      const c = id ? cl(id) : { name: '', tel: '', mail: '', addr: '', obs: '' };
+
+      modal(`
+        <h3>${id ? 'Editar' : 'Novo'} cliente</h3>
+        <div class="f">
+          <div class="w"><label>Nome completo</label><input id="c_n" value="${esc(c.name)}"></div>
+          <div><label>Telefone</label><input id="c_t" value="${esc(c.tel)}"></div>
+          <div><label>E-mail</label><input id="c_m" value="${esc(c.mail)}"></div>
+          <div class="w"><label>Endereço</label><input id="c_a" value="${esc(c.addr)}"></div>
+          <div class="w"><label>Observações</label><textarea id="c_o" rows="3">${esc(c.obs)}</textarea></div>
+        </div>
+        <div class="bar" style="margin:14px 0 0">
+          <div class="sp"></div>
+          <button class="b" onclick="close_()">Cancelar</button>
+          <button class="b p" onclick="saveCl('${id || ''}')">Guardar</button>
+        </div>
+      `);
+    }
+
+    // --- Guardar / eliminar ---
+    function saveCl(id) {
+      const name = $('c_n').value.trim();
+      if (!name) return alert('Indique o nome.');
+
+      const o = {
+        name,
+        tel:  $('c_t').value,
+        mail: $('c_m').value,
+        addr: $('c_a').value,
+        obs:  $('c_o').value
+      };
+
+      if (id) Object.assign(cl(id), o);
+      else    db.clients.push({ id: uid(), ...o });
+
+      save();
+      close_();
+      render();
+    }
+
+    function delCl(id) {
+      if (db.jobs.some(j => j.clientId === id)) {
+        return alert('Este cliente tem trabalhos associados. Elimine-os primeiro.');
+      }
+      db.clients = db.clients.filter(c => c.id !== id);
+      save();
+      close_();
+      render();
+    }
+
+
+    /* =====================================================
+       11. PÁGINAS "PAGAMENTOS" E "DESPESAS"
+       ===================================================== */
+    function pays() {
+      const total = db.payments.reduce((a, p) => a + +p.amount, 0);
+
+      $('main').innerHTML = `
+        <div class="bar">
+          <h2 style="margin:0">Pagamentos</h2>
+          <div class="sp"></div>
+          <button class="b p" onclick="payForm()" ${db.jobs.length ? '' : 'disabled'}>+ Novo pagamento</button>
+        </div>
+
+        <!-- Total + total por método -->
+        <div class="cards">
+          <div class="card"><small>Total recebido</small><b>${fm(total)}</b></div>
+          ${METH.slice(0, 4).map(m => `
+            <div class="card">
+              <small>${m}</small>
+              <b>${fm(db.payments.filter(p => p.method === m).reduce((a, p) => a + +p.amount, 0))}</b>
+            </div>
+          `).join('')}
+        </div>
+
+        <div class="box wrap">
+          <table>
+            <tr>
+              <th>Data</th><th>Trabalho</th><th>Cliente</th><th>Tipo</th>
+              <th>Método</th><th class="r">Valor</th><th></th>
+            </tr>`
+        + [...db.payments]
+            .sort((a, b) => b.date.localeCompare(a.date))
+            .map(p => {
+              const j = jb(p.jobId) || { title: '?', clientId: '' };
+              return `
+                <tr>
+                  <td>${fd(p.date)}</td>
+                  <td>${esc(j.title)}</td>
+                  <td>${esc(cl(j.clientId).name)}</td>
+                  <td>${p.type}</td>
+                  <td>${p.method}</td>
+                  <td class="r">${fm(p.amount)}</td>
+                  <td><button class="b s d" onclick="del('payments','${p.id}')">×</button></td>
+                </tr>`;
+            }).join('')
+        + '</table></div>';
+    }
+
+    function fin() {
+      $('main').innerHTML = `
+        <div class="bar">
+          <h2 style="margin:0">Despesas</h2>
+          <div class="sp"></div>
+          <button class="b p" onclick="expForm()" ${db.jobs.length ? '' : 'disabled'}>+ Nova despesa</button>
+        </div>
+
+        <div class="box wrap">
+          <table>
+            <tr>
+              <th>Data</th><th>Descrição</th><th>Trabalho</th><th>Categoria</th>
+              <th>Método</th><th class="r">Valor</th><th></th>
+            </tr>`
+        + [...db.expenses]
+            .sort((a, b) => b.date.localeCompare(a.date))
+            .map(e => `
+              <tr>
+                <td>${fd(e.date)}</td>
+                <td>${esc(e.desc)}</td>
+                <td>${esc((jb(e.jobId) || {}).title)}</td>
+                <td>${e.cat}</td>
+                <td>${e.method}</td>
+                <td class="r">${fm(e.amount)}</td>
+                <td><button class="b s d" onclick="del('expenses','${e.id}')">×</button></td>
+              </tr>
+            `).join('')
+        + '</table>'
+        + (db.expenses.length ? '' : '<p class="mu">Sem despesas. Registe-as aqui ou dentro de cada trabalho.</p>')
+        + '</div>';
+    }
+
+
+    /* =====================================================
+       12. SUPABASE · LOGIN E SINCRONIZAÇÃO
+       ===================================================== */
+
+    // Configuração (a anon key é pública por desenho; a segurança vem das regras RLS no Supabase)
+    const CFG = {
+      url: 'https://tygknmhlmswgokppgbcq.supabase.co',
+      key: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InR5Z2tubWhsbXN3Z29rcHBnYmNxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTE5ODA1MTcsImV4cCI6MjEwNzU1NjUxN30.PLHgLiiT1VoIiWlkhppdJXgvGYLNX2rB1Pwv9kUHpPg'
+    };
+
+    let sb = null;                 // cliente Supabase
+    let syncMsg = 'Modo local';    // mensagem de estado
+    let remoteIds = {};            // ids que existem na nuvem
+    let st;                        // temporizador do sync
+
+    const TB = ['clients', 'jobs', 'expenses', 'payments'];
+
+    // Mapa: campo local → coluna na base de dados
+    const MAP = {
+      clients: [
+        ['id', 'id'], ['name', 'name'], ['tel', 'phone'],
+        ['mail', 'email'], ['addr', 'address'], ['obs', 'notes']
+      ],
+      jobs: [
+        ['id', 'id'], ['title', 'title'], ['clientId', 'client_id'], ['type', 'job_type'],
+        ['date', 'job_date'], ['time', 'job_time'], ['loc', 'location'], ['desc', 'description'],
+        ['value', 'agreed_value'], ['status', 'status'], ['delivery', 'delivery_date'], ['docs', 'documents']
+      ],
+      expenses: [
+        ['id', 'id'], ['jobId', 'job_id'], ['desc', 'description'], ['cat', 'category'],
+        ['amount', 'amount'], ['date', 'expense_date'], ['method', 'payment_method'], ['receipt', 'receipt']
+      ],
+      payments: [
+        ['id', 'id'], ['jobId', 'job_id'], ['type', 'payment_type'],
+        ['amount', 'amount'], ['date', 'payment_date'], ['method', 'method']
+      ]
+    };
+
+    // Local → linha da base de dados ('' vira null)
+    const toRow = (t, o) => Object.fromEntries(
+      MAP[t].map(([local, remote]) => [
+        remote,
+        local === 'docs' ? (o.docs || [])
+          : (o[local] === '' || o[local] === undefined) ? null
+          : o[local]
+      ])
+    );
+
+    // Linha da base de dados → local (null vira '')
+    const fromRow = (t, r) => Object.fromEntries(
+      MAP[t].map(([local, col]) => {
+        let v = r[col];
+        if (col === 'job_time' && v) v = v.slice(0, 5);
+        if (local === 'docs')        v = v || [];
+        else if (v === null)         v = (local === 'receipt') ? null : '';
+        return [local, v];
+      })
+    );
+
+    // --- Estado da sincronização ---
+    function setSync(msg) {
+      syncMsg = msg;
+      const el = document.getElementById('sy');
+      if (el) el.textContent = msg;
+    }
+
+    function queueSync() {
+      if (!sb) return;
+      clearTimeout(st);
+      setSync('A sincronizar…');
+      st = setTimeout(push, 500);   // espera 500 ms para juntar alterações
+    }
+
+    // --- Enviar dados para a nuvem ---
+    async function push() {
+      try {
+        // Inserir / actualizar
+        for (const t of TB) {
+          const rows = db[t].map(o => toRow(t, o));
+          if (rows.length) {
+            const { error } = await sb.from(t).upsert(rows);
+            if (error) throw error;
+          }
+        }
+
+        // Apagar o que já não existe localmente (ordem inversa por causa das relações)
+        for (const t of [...TB].reverse()) {
+          const keep = new Set(db[t].map(o => o.id));
+          const gone = [...(remoteIds[t] || [])].filter(i => !keep.has(i));
+          if (gone.length) {
+            const { error } = await sb.from(t).delete().in('id', gone);
+            if (error) throw error;
+          }
+          remoteIds[t] = keep;
+        }
+
+        setSync('Guardado na nuvem ✓');
+      } catch (e) {
+        setSync('Erro: ' + (e.message || e));
+      }
+    }
+
+    // --- Carregar dados da nuvem ---
+    async function load() {
+      try {
+        const r = {};
+        for (const t of TB) {
+          const { data, error } = await sb.from(t).select('*');
+          if (error) throw error;
+          r[t] = data.map(x => fromRow(t, x));
+        }
+
+        const empty = TB.every(t => !r[t].length);   // nuvem vazia?
+        const local = TB.some(t => db[t].length);    // há dados locais?
+
+        TB.forEach(t => remoteIds[t] = new Set(r[t].map(o => o.id)));
+
+        if (empty && local) {
+          await push();                              // primeira vez: sobe os dados locais
+        } else {
+          db = r;                                    // senão, a nuvem manda
+          try { localStorage.setItem(KEY, JSON.stringify(db)); } catch (e) {}
+          setSync('Guardado na nuvem ✓');
+        }
+      } catch (e) {
+        setSync('Erro: ' + (e.message || e));
+      }
+      render();
+    }
+
+    // --- Ecrã de login ---
+    function loginScreen(msg) {
+      $('nav').innerHTML = '';
+      $('main').innerHTML = `
+        <div class="box" style="max-width:380px;margin:12vh auto">
+          <h2>Shutterlite</h2>
+          <div class="f">
+            <div class="w"><label>E-mail</label><input id="lg_m" type="email" autocomplete="username"></div>
+            <div class="w"><label>Palavra-passe</label><input id="lg_p" type="password" autocomplete="current-password"></div>
+          </div>
+          <p class="er">${esc(msg || '')}</p>
+          <div class="bar">
+            <button class="b p" onclick="auth(0)">Entrar</button>
+            <button class="b" onclick="auth(1)">Criar conta</button>
+          </div>
+        </div>
+      `;
+    }
+
+    // su = 1 → criar conta; su = 0 → entrar
+    async function auth(su) {
+      const email = $('lg_m').value;
+      const pass  = $('lg_p').value;
+
+      const { data, error } = su
+        ? await sb.auth.signUp({ email, password: pass })
+        : await sb.auth.signInWithPassword({ email, password: pass });
+
+      if (error) return loginScreen(error.message);
+
+      if (data.session) load();
+      else loginScreen('Conta criada. Confirme o e-mail e depois entre.');
+    }
+
+    async function logout() {
+      await sb.auth.signOut();
+      db = { clients: [], jobs: [], expenses: [], payments: [] };
+      try { localStorage.removeItem(KEY); } catch (e) {}
+      loginScreen();
+    }
+
+
+    /* =====================================================
+       13. ARRANQUE
+       ===================================================== */
+    if (CFG.url && CFG.key && window.supabase) {
+      sb = supabase.createClient(CFG.url, CFG.key);
+      sb.auth.getSession().then(({ data }) => data.session ? load() : loginScreen());
+    } else {
+      render();   // modo local (sem Supabase)
+    }
+
+    // Reaplica o tema para actualizar o texto do botão (agora que ele existe)
+    try { applyTheme(localStorage.getItem('Shutterlite-theme') || 'dark'); }
+    catch (e) { applyTheme('dark'); }
+
+  </script>
+</body>
+</html>
