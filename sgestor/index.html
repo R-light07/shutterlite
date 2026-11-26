@@ -1290,7 +1290,7 @@
     const CR = {
       pkgs:  { t: 'packages', title: 'Pacotes e serviços', one: 'pacote', f: [['name','Nome','text',1],['price','Preço (MT)','number'],['dur','Duração (min)','number'],['photos','Fotografias incluídas','number'],['services','Serviços incluídos / extras','textarea',1],['active','Ativo','bool']] },
       team:  { t: 'team', title: 'Equipa', one: 'colaborador', f: [['name','Nome','text',1],['role','Função','sel',0,ROLES],['phone','Telefone'],['email','E-mail'],['comm','Comissão (%)','number'],['active','Ativo','bool']] },
-      equip: { t: 'equipment', title: 'Equipamentos', one: 'equipamento', f: [['name','Nome','text',1],['cat','Categoria','sel',0,['Câmara','Lente','Flash','Iluminação','Tripé','Microfone','Acessório']],['serial','Nº de série'],['cond','Estado','sel',0,['Bom','Em manutenção','Avariado','Fora de uso']],['holder','Responsável'],['notes','Notas / manutenção','textarea',1]] }
+      equip: { t: 'equipment', title: 'Equipamentos', one: 'equipamento', f: [['name','Nome','text',1],['cat','Categoria','sel',0,['Câmara','Lente','Drone','Estabilizador','Flash','Iluminação','Tripé','Microfone','Acessório']],['serial','Nº de série'],['cond','Estado','sel',0,['Bom','Em manutenção','Avariado','Fora de uso']],['holder','Responsável'],['notes','Notas / manutenção','textarea',1]] }
     };
     function crud(k) {
       const c = CR[k];
