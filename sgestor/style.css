@@ -90,7 +90,7 @@ body {
   font: 14px/1.5 'Outfit',sans-serif;
   letter-spacing: -.01em;
   transition: background .2s, color .2s;
-  overflow-y: hidden;
+  /* overflow-y: hidden; */
 }
 
 

@@ -15,7 +15,7 @@
   <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@200;300;400;500&display=swap" rel="stylesheet">
 
   <!-- Estilos da aplicação -->
-  <link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="/style.css">
 
   <!-- Bibliotecas externas (cada <script src> fica sozinho, sem código dentro) -->
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js"></script>
@@ -90,7 +90,7 @@
     const TYPES = ['Casamento', 'Aniversário', 'Batizado', 'Sessão individual', 'Sessão de casal',
                    'Sessão familiar', 'Fotografia corporativa', 'Evento', 'Outro'];
 
-    const ST    = ['Pendente', 'Confirmado', 'Em execução', 'Concluído', 'Cancelado'];
+    const ST    = ['Novo pedido','Pendente de confirmação','Confirmado','Em preparação','Em execução','Realizado','Em edição','Entregue','Cancelado'];  // 'Pendente' e 'Concluído' continuam válidos (dados antigos)
 
     const CATS  = ['Transporte e combustível', 'Alimentação', 'Alojamento', 'Aluguer de equipamentos',
                    'Assistentes e colaboradores', 'Edição e tratamento', 'Impressões e álbuns',
@@ -102,10 +102,14 @@
 
     const VIEWS = [
       ['dash',    'Painel'],
-      ['jobs',    'Trabalhos'],
+      ['jobs',    'Sessões e Coberturas'],
       ['clients', 'Clientes'],
       ['pays',    'Pagamentos'],
-      ['fin',     'Despesas']
+      ['fin',     'Despesas'],
+      ['pkgs',    'Pacotes'],
+      ['team',    'Equipa'],
+      ['equip',   'Equipamentos'],
+      ['reports', 'Relatórios']
     ];
 
 
@@ -169,7 +173,7 @@
       `<span class="tag ${p === 'Totalmente pago' ? 'ok' : p === 'Não pago' ? 'er' : 'wn'}">${p}</span>`;
 
     const stTag = s =>
-      `<span class="tag ${s === 'Concluído' ? 'ok' : s === 'Cancelado' ? 'er' : s === 'Pendente' ? 'wn' : ''}">${s}</span>`;
+      `<span class="tag ${['Concluído','Entregue'].includes(s) ? 'ok' : s === 'Cancelado' ? 'er' : ['Pendente','Novo pedido','Pendente de confirmação'].includes(s) ? 'wn' : ''}">${s}</span>`;
 
     // Gera <option> a partir de uma lista
     const opts = (list, selected) =>
@@ -231,6 +235,7 @@
       // Menu lateral
       $('nav').innerHTML =
         '<h1>Shutter<span>lite</span></h1>' +
+        '<input placeholder="Pesquisa global…" style="margin-bottom:8px" onkeydown="if(event.key===\'Enter\')gsearch(this.value)">' +
 
         VIEWS.map(([key, label]) => `
           <button class="${view === key || (view === 'job' && key === 'jobs') ? 'on' : ''}"
@@ -253,7 +258,8 @@
       charts = [];
 
       // Chama a função da vista activa
-      ({ dash, jobs, clients, pays, fin, job })[view]();
+      TB.forEach(t => db[t] = db[t] || []);
+      ({ dash, jobs, clients, pays, fin, job, pkgs, team, equip, reports })[view]();
       window.scrollTo(0, 0);
     }
 
@@ -343,7 +349,7 @@
 
       // Próximos eventos
       const up = db.jobs
-        .filter(j => j.date >= today() && !['Cancelado', 'Concluído'].includes(j.status))
+        .filter(j => j.date >= today() && !['Cancelado', 'Concluído', 'Entregue', 'Realizado'].includes(j.status))
         .sort((a, b) => (a.date + a.time).localeCompare(b.date + b.time));
 
       // Trabalhos com valor por receber
@@ -382,9 +388,11 @@
           </div>
           <div class="card">
             <small>Trabalhos</small><b>${js.length}</b>
-            <span class="mu">${js.filter(j => j.status === 'Concluído').length} concluídos</span>
+            <span class="mu">${js.filter(j => isDone(j.status)).length} concluídos</span>
           </div>
         </div>
+
+        ${dashExtra()}
 
         <!-- Calendário, próximas sessões, pagamentos pendentes -->
         <div class="grid">
@@ -401,7 +409,7 @@
           </div>
 
           <div class="box">
-            <h3>Próximas sessões e eventos</h3>
+            <h3>Próximas sessões e coberturas</h3>
             ${up.slice(0, 6).map(j => `
               <div class="li" onclick="go('job','${j.id}')">
                 <span>
@@ -433,6 +441,7 @@
           <div class="box"><h3>Evolução do lucro</h3><div class="cv"><canvas id="c2"></canvas></div></div>
           <div class="box"><h3>Despesas por categoria</h3><div class="cv"><canvas id="c3"></canvas></div></div>
           <div class="box"><h3>Rentabilidade por tipo (lucro)</h3><div class="cv"><canvas id="c4"></canvas></div></div>
+          <div class="box"><h3>Sessões e coberturas por categoria</h3><div class="cv"><canvas id="c5"></canvas></div></div>
         </div>
       `;
 
@@ -500,7 +509,7 @@
       const tx = cs.getPropertyValue('--mu').trim();
 
       Chart.defaults.color = tx;
-      Chart.defaults.font.family = "'Bricolage Grotesque',system-ui";
+      Chart.defaults.font.family = "'Outfit',system-ui";
 
       const mk = (id, cfg) => charts.push(new Chart($(id), {
         ...cfg,
@@ -546,14 +555,19 @@
         options: { plugins: { legend: { position: 'right', labels: { boxWidth: 10, font: { size: 11 } } } } }
       });
 
+      // c5 · Sessões e coberturas por categoria
+      const ty = ALLT();
+      mk('c5', { type: 'doughnut', data: { labels: ty, datasets: [{ data: ty.map(x => act.filter(j => j.type === x).length), backgroundColor: pal, borderWidth: 0 }] },
+        options: { plugins: { legend: { position: 'right', labels: { boxWidth: 10, font: { size: 11 } } } } } });
+
       // c4 · Lucro por tipo de trabalho
       mk('c4', {
         type: 'bar',
         data: {
-          labels: TYPES,
+          labels: ALLT(),
           datasets: [{
             label: 'Lucro',
-            data: TYPES.map(tp => act.filter(j => j.type === tp).reduce((a, j) => a + calc(j).profit, 0)),
+            data: ALLT().map(tp => act.filter(j => j.type === tp).reduce((a, j) => a + calc(j).profit, 0)),
             backgroundColor: ac
           }]
         },
@@ -570,7 +584,7 @@
     function jobs() {
       const rows = () => db.jobs
         .filter(j => (!jf || j.status === jf)
-                  && (j.title + cl(j.clientId).name + j.type).toLowerCase().includes(jq.toLowerCase()))
+                  && (j.title + cl(j.clientId).name + j.type + (j.kind || '')).toLowerCase().includes(jq.toLowerCase()))
         .sort((a, b) => b.date.localeCompare(a.date));
 
       $('main').innerHTML = `
@@ -580,7 +594,7 @@
           <input style="width:200px" placeholder="Pesquisar…" value="${esc(jq)}" oninput="jq=this.value;jt()">
           <select style="width:150px" onchange="jf=this.value;jt()">
             <option value="">Todos os estados</option>
-            ${opts(ST, jf)}
+            ${opts(ST.concat(['Pendente', 'Concluído']), jf)}
           </select>
           <button class="b p" onclick="jobForm()">+ Novo trabalho</button>
         </div>
@@ -602,7 +616,7 @@
                   <td>${fd(j.date)}</td>
                   <td><b>${esc(j.title)}</b></td>
                   <td>${esc(cl(j.clientId).name)}</td>
-                  <td>${esc(j.type)}</td>
+                  <td>${esc(j.kind || 'Sessão')} · ${esc(j.type)}</td>
                   <td>${stTag(j.status)}</td>
                   <td>${payTag(c.pay)}</td>
                   <td class="r">${fm(j.value)}</td>
@@ -619,7 +633,7 @@
     function jobForm(id) {
       const j = id ? jb(id) : {
         title: '', clientId: '', type: TYPES[0], date: today(), time: '10:00',
-        loc: '', desc: '', value: '', status: 'Pendente', delivery: '', docs: []
+        loc: '', desc: '', value: '', status: 'Novo pedido', delivery: '', docs: []
       };
 
       modal(`
@@ -642,7 +656,7 @@
 
           <div>
             <label>Tipo de trabalho</label>
-            <select id="f_type">${opts(TYPES, j.type)}</select>
+            <select id="f_type">${opts(typesFor(j.kind, j.type), j.type)}</select>
           </div>
 
           <!-- Campos extra: aparecem ao escolher "+ Novo cliente…" -->
@@ -660,10 +674,11 @@
           <div><label>Valor total acordado (MT)</label><input id="f_val" type="number" min="0" step="any" value="${j.value}"></div>
           <div><label>Entrega prevista das fotos</label><input id="f_del" type="date" value="${j.delivery}"></div>
 
-          <div><label>Estado</label><select id="f_st">${opts(ST, j.status)}</select></div>
+          <div><label>Estado</label><select id="f_st">${opts(ST.includes(j.status) ? ST : [j.status, ...ST], j.status)}</select></div>
 
           ${id ? '' : `<div><label>Sinal recebido (MT)</label><input id="f_dep" type="number" min="0" step="any"></div>`}
 
+          ${jobExtra(j)}
           <div class="w"><label>Descrição e observações</label><textarea id="f_desc" rows="3">${esc(j.desc)}</textarea></div>
           <div class="w"><label>Anexar contratos / referências</label><input id="f_files" type="file" multiple></div>
         </div>
@@ -680,6 +695,8 @@
     async function saveJob(id) {
       const title = $('f_title').value.trim();
       if (!title) return alert('Indique o título.');
+      const cf = conflict($('f_date').value, $('f_time').value, $('f_end').value, $('f_asg').value, id);
+      if (cf && !confirm(cfMsg(cf))) return;
 
       // Cliente existente ou novo
       let cid = $('f_cl').value;
@@ -708,7 +725,8 @@
         desc:     $('f_desc').value,
         value:    +$('f_val').value || 0,
         status:   $('f_st').value,
-        delivery: $('f_del').value
+        delivery: $('f_del').value,
+        ...jobExtraVals()
       };
 
       if (id) {
@@ -752,6 +770,9 @@
           <button class="b" onclick="go('jobs')">‹ Trabalhos</button>
           <div class="sp"></div>
           <button class="b" onclick="jobForm('${j.id}')">Editar</button>
+          <button class="b" onclick="resched('${j.id}')">Reagendar</button>
+          <button class="b" onclick="setSt('${j.id}','Cancelado')">Cancelar</button>
+          <button class="b" onclick="printJob('${j.id}')">Orçamento / Ficha (PDF)</button>
           <button class="b d" onclick="delJob('${j.id}')">Eliminar</button>
         </div>
 
@@ -789,7 +810,7 @@
                   <td>${p.type}</td>
                   <td>${p.method}</td>
                   <td class="r">${fm(p.amount)}</td>
-                  <td><button class="b s d" onclick="del('payments','${p.id}')">×</button></td>
+                  <td><button class="b s" onclick="receipt('${p.id}')">Recibo</button> <button class="b s d" onclick="del('payments','${p.id}')">×</button></td>
                 </tr>
               `).join('') || '<tr><td class="mu">Sem pagamentos.</td></tr>'}
             </table>
@@ -819,6 +840,8 @@
           </div>
         </div>
 
+        ${jobPanels(j)}
+
         <!-- Documentos anexados -->
         <div class="box">
           <h3>Documentos</h3>
@@ -837,6 +860,8 @@
       db.jobs     = db.jobs.filter(j => j.id !== id);
       db.expenses = db.expenses.filter(e => e.jobId !== id);
       db.payments = db.payments.filter(p => p.jobId !== id);
+      db.shots    = db.shots.filter(x => x.jobId !== id);
+      db.timeline = db.timeline.filter(x => x.jobId !== id);
       save();
       go('jobs');
     }
@@ -1019,6 +1044,8 @@
           <div class="w"><label>Nome completo</label><input id="c_n" value="${esc(c.name)}"></div>
           <div><label>Telefone</label><input id="c_t" value="${esc(c.tel)}"></div>
           <div><label>E-mail</label><input id="c_m" value="${esc(c.mail)}"></div>
+          <div><label>WhatsApp</label><input id="c_w" value="${esc(c.wa)}"></div>
+          <div><label>Data de nascimento</label><input id="c_b" type="date" value="${esc(c.birth)}"></div>
           <div class="w"><label>Endereço</label><input id="c_a" value="${esc(c.addr)}"></div>
           <div class="w"><label>Observações</label><textarea id="c_o" rows="3">${esc(c.obs)}</textarea></div>
         </div>
@@ -1040,7 +1067,9 @@
         tel:  $('c_t').value,
         mail: $('c_m').value,
         addr: $('c_a').value,
-        obs:  $('c_o').value
+        obs:  $('c_o').value,
+        wa:   $('c_w').value,
+        birth: $('c_b').value
       };
 
       if (id) Object.assign(cl(id), o);
@@ -1104,7 +1133,7 @@
                   <td>${p.type}</td>
                   <td>${p.method}</td>
                   <td class="r">${fm(p.amount)}</td>
-                  <td><button class="b s d" onclick="del('payments','${p.id}')">×</button></td>
+                  <td><button class="b s" onclick="receipt('${p.id}')">Recibo</button> <button class="b s d" onclick="del('payments','${p.id}')">×</button></td>
                 </tr>`;
             }).join('')
         + '</table></div>';
@@ -1147,6 +1176,207 @@
        12. SUPABASE · LOGIN E SINCRONIZAÇÃO
        ===================================================== */
 
+    /* =====================================================
+       EVOLUÇÃO v2 · listas, pacotes, equipa, equipamentos,
+       conflitos, shot list, cronograma, documentos, relatórios
+       ===================================================== */
+    const SESS  = ['Retrato','Casal','Família','Maternidade','Recém-nascido','Aniversário','Corporativo','Moda','Produtos','Pré-wedding'];
+    const COVS  = ['Casamento','Aniversário','Batizado','Evento corporativo','Conferência','Festa','Outro evento'];
+    const POST  = ['Por importar','Em seleção','Em edição','Em revisão','Aguardando aprovação','Pronto para entrega','Entregue'];
+    const ROLES = ['Fotógrafo','Videógrafo','Editor','Assistente'];
+    const DEF   = { kind:'Sessão', post_status:'Por importar', active:true, done:false, commission_pct:0, price:0, condition:'Bom', role:'Fotógrafo' };
+    const typesFor = (k, cur) => { const l = k === 'Cobertura' ? COVS : SESS; return cur && !l.includes(cur) ? [cur, ...l] : l; };
+    const ALLT = () => [...new Set(db.jobs.map(j => j.type))];
+    const pkg = id => db.packages.find(p => p.id === id);
+    const asg = id => db.team.find(t => t.id === id);
+    const isDone = s => ['Realizado','Concluído','Entregue'].includes(s);
+
+
+    // --- Conflitos de horário (mesmo responsável ou, sem responsável, qualquer trabalho) ---
+    const toMin = t => t ? (+t.slice(0,2)) * 60 + (+t.slice(3,5)) : 0;
+    function conflict(date, t, end, asgId, selfId) {
+      if (!date || !t) return null;
+      const s = toMin(t), e = end ? toMin(end) : s + 120;
+      return db.jobs.find(j => j.id !== selfId && j.date === date && j.time && j.status !== 'Cancelado'
+        && (!asgId || !j.assigneeId || j.assigneeId === asgId)
+        && toMin(j.time) < e && (j.endTime ? toMin(j.endTime) : toMin(j.time) + 120) > s);
+    }
+    const cfMsg = c => `⚠ Conflito de horário com "${c.title}" (${fd(c.date)} ${c.time}). Guardar mesmo assim?`;
+
+    // --- Campos extra do formulário de trabalho ---
+    const jobExtra = j => `
+      <div><label>Natureza</label><select id="f_kind" onchange="$('f_type').innerHTML=opts(typesFor(this.value))">${opts(['Sessão','Cobertura'], j.kind || 'Sessão')}</select></div>
+      <div><label>Hora de término</label><input id="f_end" type="time" value="${j.endTime || ''}"></div>
+      <div><label>Pacote</label><select id="f_pk" onchange="pkFill(this.value)"><option value="">—</option>${db.packages.filter(p => p.active !== false).map(p => `<option value="${p.id}" ${p.id === j.packageId ? 'selected' : ''}>${esc(p.name)} · ${fm(p.price)}</option>`).join('')}</select></div>
+      <div><label>Fotógrafo responsável</label><select id="f_asg"><option value="">—</option>${db.team.filter(t => t.active !== false).map(t => `<option value="${t.id}" ${t.id === j.assigneeId ? 'selected' : ''}>${esc(t.name)} (${t.role})</option>`).join('')}</select></div>
+      <div class="w"><label>Endereço / coordenadas</label><input id="f_ad" value="${esc(j.addr)}"></div>
+      <div><label>Pós-produção</label><select id="f_post">${opts(POST, j.post || POST[0])}</select></div>`;
+    const jobExtraVals = () => ({ kind: $('f_kind').value, endTime: $('f_end').value, packageId: $('f_pk').value,
+      assigneeId: $('f_asg').value, addr: $('f_ad').value, post: $('f_post').value });
+    function pkFill(id) { const p = pkg(id); if (p && !+$('f_val').value) $('f_val').value = p.price; }
+
+    // --- Painel: indicadores, alertas e actividade (dados reais) ---
+    function dashExtra() {
+      const t = today(), m = t.slice(0, 7), soon = new Date(Date.now() + 3 * 864e5).toISOString().slice(0, 10);
+      const L = db.jobs.filter(j => j.status !== 'Cancelado');
+      const sess = L.filter(j => (j.kind || 'Sessão') === 'Sessão'), cov = L.filter(j => j.kind === 'Cobertura');
+      const fut = j => j.date >= t && !isDone(j.status) && j.status !== 'Em edição';
+      const undeliv = L.filter(j => j.date <= t && !['Entregue','Concluído'].includes(j.status) && j.post !== 'Entregue');
+      const late = undeliv.filter(j => j.delivery && j.delivery < t);
+      const overdue = L.filter(j => j.date < t && calc(j).due > 0);
+      const rec = db.payments.filter(p => p.date.startsWith(m)).reduce((a, p) => a + +p.amount, 0);
+      const exp = db.expenses.filter(e => e.date.startsWith(m)).reduce((a, e) => a + +e.amount, 0);
+      const k = (a, b, c = '') => `<div class="card"><small>${a}</small><b class="${c}">${b}</b></div>`;
+      const al = [
+        ...late.map(j => ['er', `Entrega em atraso: ${j.title} (previsto ${fd(j.delivery)})`, j.id]),
+        ...overdue.map(j => ['wn', `Pagamento pendente: ${j.title} · ${fm(calc(j).due)}`, j.id]),
+        ...L.filter(j => j.date >= t && j.date <= soon && !isDone(j.status)).map(j => ['', `Lembrete: ${j.title} em ${fd(j.date)} ${j.time || ''}`, j.id])
+      ];
+      const act = [
+        ...db.payments.map(p => ({ d: p.date, x: `Pagamento ${fm(p.amount)} · ${(jb(p.jobId) || {}).title || ''}` })),
+        ...db.expenses.map(e => ({ d: e.date, x: `Despesa ${fm(e.amount)} · ${e.desc || e.cat}` }))
+      ].sort((a, b) => b.d.localeCompare(a.d)).slice(0, 6);
+      return `<div class="cards">
+        ${k('Clientes', db.clients.length)}${k('Sessões', sess.length)}${k('Coberturas', cov.length)}
+        ${k('Sessões agendadas', sess.filter(fut).length)}${k('Coberturas futuras', cov.filter(fut).length)}
+        ${k('Em edição', L.filter(j => j.post === 'Em edição' || j.status === 'Em edição').length)}
+        ${k('Pendentes de entrega', undeliv.length, undeliv.length ? 'wn' : '')}
+        ${k('Receitas do mês', fm(rec))}${k('Despesas do mês', fm(exp))}${k('Lucro do mês', fm(rec - exp), rec - exp < 0 ? 'er' : '')}
+        ${k('Pagamentos pendentes', fm(L.reduce((a, j) => a + calc(j).due, 0)), 'wn')}</div>
+      <div class="grid">
+        <div class="box"><h3>Alertas e lembretes</h3>${al.slice(0, 8).map(([c, x, id]) => `<div class="li" onclick="go('job','${id}')"><span class="${c}">${esc(x)}</span></div>`).join('') || '<p class="mu">Sem alertas.</p>'}</div>
+        <div class="box"><h3>Actividade recente</h3>${act.map(a => `<div class="li"><span>${esc(a.x)}</span><span class="mu">${fd(a.d)}</span></div>`).join('') || '<p class="mu">Sem actividade.</p>'}</div></div>`;
+    }
+
+    // --- Painéis do detalhe do trabalho: shot list, cronograma, pós-produção ---
+    function jobPanels(j) {
+      const sh = db.shots.filter(s => s.jobId === j.id);
+      const tl = db.timeline.filter(s => s.jobId === j.id).sort((a, b) => (a.at || '').localeCompare(b.at || ''));
+      const a = asg(j.assigneeId), p = pkg(j.packageId);
+      return `<div class="grid">
+        <div class="box"><h3>Shot list (${sh.filter(s => s.done).length}/${sh.length})</h3>
+          ${sh.map(s => `<div class="li"><label><input type="checkbox" style="width:auto" ${s.done ? 'checked' : ''} onchange="shTg('${s.id}',this.checked)"> ${esc(s.text)}</label><button class="b s d" onclick="del('shots','${s.id}')">×</button></div>`).join('')}
+          <div class="bar" style="margin-top:8px"><input id="sh_t" placeholder="Momento ou foto obrigatória"><button class="b s p" onclick="shAdd('${j.id}')">+</button></div></div>
+        <div class="box"><h3>Cronograma</h3>
+          ${tl.map(s => `<div class="li"><span><b>${s.at || '—'}</b> ${esc(s.text)}</span><button class="b s d" onclick="del('timeline','${s.id}')">×</button></div>`).join('')}
+          <div class="bar" style="margin-top:8px"><input id="tl_h" type="time" style="width:110px"><input id="tl_t" placeholder="Momento"><button class="b s p" onclick="tlAdd('${j.id}')">+</button></div></div>
+        <div class="box"><h3>Equipa, pacote e entrega</h3>
+          <p class="mu">${a ? esc(a.name) + ' (' + a.role + ')' : 'Sem responsável'} · ${p ? esc(p.name) + (p.photos ? ' · ' + p.photos + ' fotos' : '') : 'Sem pacote'}</p>
+          <label class="mu">Pós-produção</label><select onchange="setPost('${j.id}',this.value)">${opts(POST, j.post || POST[0])}</select>
+          <p class="mu">Entrega prevista: ${fd(j.delivery)}</p></div></div>`;
+    }
+    function shAdd(jid) { const t = $('sh_t').value.trim(); if (!t) return; db.shots.push({ id: uid(), jobId: jid, text: t, done: false }); save(); render(); }
+    function shTg(id, v) { db.shots.find(s => s.id === id).done = v; save(); const y = scrollY; render(); scrollTo(0, y); }
+    function tlAdd(jid) { const t = $('tl_t').value.trim(); if (!t) return; db.timeline.push({ id: uid(), jobId: jid, at: $('tl_h').value, text: t }); save(); render(); }
+    function setPost(id, v) { const j = jb(id); j.post = v; if (v === 'Entregue') j.status = 'Entregue'; save(); render(); }
+    function setSt(id, s) { if (!confirm(`Alterar o estado para "${s}"?`)) return; jb(id).status = s; save(); render(); }
+
+    // --- Reagendar ---
+    function resched(id) {
+      const j = jb(id);
+      modal(`<h3>Reagendar</h3><div class="f">
+        <div><label>Data</label><input id="r_d" type="date" value="${j.date}"></div>
+        <div><label>Início</label><input id="r_t" type="time" value="${j.time || ''}"></div>
+        <div><label>Fim</label><input id="r_e" type="time" value="${j.endTime || ''}"></div></div>
+        <div class="bar" style="margin:14px 0 0"><div class="sp"></div><button class="b" onclick="close_()">Cancelar</button><button class="b p" onclick="doResched('${id}')">Guardar</button></div>`);
+    }
+    function doResched(id) {
+      const j = jb(id), d = $('r_d').value, t = $('r_t').value, e = $('r_e').value, c = conflict(d, t, e, j.assigneeId, id);
+      if (c && !confirm(cfMsg(c))) return;
+      Object.assign(j, { date: d, time: t, endTime: e }); save(); close_(); render();
+    }
+
+    // --- CRUD genérico: Pacotes, Equipa, Equipamentos ---
+    const CR = {
+      pkgs:  { t: 'packages', title: 'Pacotes e serviços', one: 'pacote', f: [['name','Nome','text',1],['price','Preço (MT)','number'],['dur','Duração (min)','number'],['photos','Fotografias incluídas','number'],['services','Serviços incluídos / extras','textarea',1],['active','Ativo','bool']] },
+      team:  { t: 'team', title: 'Equipa', one: 'colaborador', f: [['name','Nome','text',1],['role','Função','sel',0,ROLES],['phone','Telefone'],['email','E-mail'],['comm','Comissão (%)','number'],['active','Ativo','bool']] },
+      equip: { t: 'equipment', title: 'Equipamentos', one: 'equipamento', f: [['name','Nome','text',1],['cat','Categoria','sel',0,['Câmara','Lente','Flash','Iluminação','Tripé','Microfone','Acessório']],['serial','Nº de série'],['cond','Estado','sel',0,['Bom','Em manutenção','Avariado','Fora de uso']],['holder','Responsável'],['notes','Notas / manutenção','textarea',1]] }
+    };
+    function crud(k) {
+      const c = CR[k];
+      $('main').innerHTML = `<div class="bar"><h2 style="margin:0">${c.title}</h2><div class="sp"></div><button class="b p" onclick="crForm('${k}')">+ Novo</button></div>
+        <div class="box wrap"><table><tr>${c.f.filter(f => f[2] !== 'textarea').map(f => `<th>${f[1]}</th>`).join('')}</tr>
+        ${db[c.t].map(o => `<tr class="k" onclick="crForm('${k}','${o.id}')">${c.f.filter(f => f[2] !== 'textarea').map(([n,,ty]) => `<td>${ty === 'bool' ? (o[n] !== false ? 'Sim' : 'Não') : n === 'price' ? fm(o.price) : esc(o[n])}</td>`).join('')}</tr>`).join('')}</table>
+        ${db[c.t].length ? '' : '<p class="mu">Ainda sem registos.</p>'}</div>`;
+    }
+    const pkgs = () => crud('pkgs'), team = () => crud('team'), equip = () => crud('equip');
+    function crForm(k, id) {
+      const c = CR[k], o = id ? db[c.t].find(x => x.id === id) : { active: true };
+      modal(`<h3>${id ? 'Editar' : 'Novo'} ${c.one}</h3><div class="f">${c.f.map(([n, l, ty, w, ls]) => `<div class="${w ? 'w' : ''}"><label>${l}</label>${
+        ty === 'sel' ? `<select id="cr_${n}">${opts(ls, o[n])}</select>`
+        : ty === 'textarea' ? `<textarea id="cr_${n}" rows="3">${esc(o[n])}</textarea>`
+        : ty === 'bool' ? `<select id="cr_${n}"><option value="1" ${o[n] !== false ? 'selected' : ''}>Sim</option><option value="0" ${o[n] === false ? 'selected' : ''}>Não</option></select>`
+        : `<input id="cr_${n}" type="${ty || 'text'}" ${ty === 'number' ? 'min="0" step="any"' : ''} value="${esc(o[n])}">`}</div>`).join('')}</div>
+        <div class="bar" style="margin:14px 0 0">${id ? `<button class="b d" onclick="crDel('${k}','${id}')">Eliminar</button>` : ''}<div class="sp"></div><button class="b" onclick="close_()">Cancelar</button><button class="b p" onclick="crSave('${k}','${id || ''}')">Guardar</button></div>`);
+    }
+    function crSave(k, id) {
+      const c = CR[k], o = {};
+      c.f.forEach(([n,, ty]) => { const v = $('cr_' + n).value; o[n] = ty === 'bool' ? v === '1' : ty === 'number' ? (v === '' ? '' : +v) : v; });
+      if (!o.name.trim()) return alert('Indique o nome.');
+      if (id) Object.assign(db[c.t].find(x => x.id === id), o); else db[c.t].push({ id: uid(), ...o });
+      save(); close_(); render();
+    }
+    function crDel(k, id) {
+      if (!confirm('Eliminar este registo?')) return;
+      const t = CR[k].t;
+      if (t === 'packages') db.jobs.forEach(j => { if (j.packageId === id) j.packageId = ''; });
+      if (t === 'team')     db.jobs.forEach(j => { if (j.assigneeId === id) j.assigneeId = ''; });
+      db[t] = db[t].filter(x => x.id !== id); save(); close_(); render();
+    }
+
+    // --- Documentos (abrem a janela de impressão: "Guardar como PDF") ---
+    function printDoc(t, b) {
+      const w = window.open('', '_blank');
+      if (!w) return alert('Permita pop-ups para gerar o PDF.');
+      w.document.write(`<!doctype html><meta charset="utf-8"><title>${esc(t)}</title><style>body{font:14px system-ui;max-width:720px;margin:30px auto;color:#111}h1{font-size:22px}table{width:100%;border-collapse:collapse}td,th{border-bottom:1px solid #ccc;padding:6px;text-align:left}.r{text-align:right}.sg{margin-top:50px;display:flex;gap:40px}.sg div{flex:1;border-top:1px solid #111;padding-top:4px}</style><h1>${esc(t)}</h1>${b}<script>onload=()=>print()<\/script>`);
+      w.document.close();
+    }
+    function printJob(id) {
+      const j = jb(id), c = calc(j), p = pkg(j.packageId), a = asg(j.assigneeId), cc = cl(j.clientId);
+      printDoc(`Orçamento e ficha · ${j.title}`, `<p><b>Cliente:</b> ${esc(cc.name)} ${esc(cc.tel)} ${esc(cc.mail)}<br><b>${j.kind || 'Sessão'}:</b> ${esc(j.type)} · ${fd(j.date)} ${j.time || ''}${j.endTime ? '–' + j.endTime : ''}<br><b>Local:</b> ${esc(j.loc)} ${esc(j.addr)}<br><b>Responsável:</b> ${a ? esc(a.name) : '—'}<br><b>Pacote:</b> ${p ? esc(p.name) + ' — ' + esc(p.services) : '—'}<br><b>Entrega prevista:</b> ${fd(j.delivery)}</p>
+        <table><tr><td>Valor contratado</td><td class="r">${fm(j.value)}</td></tr><tr><td>Total pago</td><td class="r">${fm(c.rec)}</td></tr><tr><td><b>Saldo pendente</b></td><td class="r"><b>${fm(c.due)}</b></td></tr></table>
+        <p>${esc(j.desc)}</p><div class="sg"><div>Fotógrafo</div><div>Cliente</div></div>`);
+    }
+    function receipt(pid) {
+      const p = db.payments.find(x => x.id === pid), j = jb(p.jobId), c = calc(j);
+      printDoc(`Recibo nº ${pid.slice(0, 6).toUpperCase()}`, `<p>Recebemos de <b>${esc(cl(j.clientId).name)}</b> a quantia de <b>${fm(p.amount)}</b> (${p.type}) por <b>${esc(j.title)}</b>.<br>Data: ${fd(p.date)} · Método: ${p.method}</p>
+        <table><tr><td>Valor contratado</td><td class="r">${fm(j.value)}</td></tr><tr><td>Total pago até à data</td><td class="r">${fm(c.rec)}</td></tr><tr><td><b>Saldo pendente</b></td><td class="r"><b>${fm(c.due)}</b></td></tr></table><div class="sg"><div>Assinatura</div></div>`);
+    }
+
+    // --- Pesquisa global ---
+    function gsearch(q) {
+      q = q.toLowerCase().trim(); if (!q) return;
+      const c = db.clients.filter(x => (x.name + x.tel + x.mail).toLowerCase().includes(q));
+      const j = db.jobs.filter(x => (x.title + x.type + x.loc + cl(x.clientId).name).toLowerCase().includes(q));
+      modal(`<h3>Resultados</h3>${c.map(x => `<div class="li" onclick="clView('${x.id}')"><b>${esc(x.name)}</b><span class="mu">Cliente</span></div>`).join('')}
+        ${j.map(x => `<div class="li" onclick="close_();go('job','${x.id}')"><b>${esc(x.title)}</b><span class="mu">${fd(x.date)}</span></div>`).join('')}
+        ${c.length + j.length ? '' : '<p class="mu">Sem resultados.</p>'}<div class="bar" style="margin-top:12px"><div class="sp"></div><button class="b" onclick="close_()">Fechar</button></div>`);
+    }
+
+    // --- Relatórios (período do painel) e exportação ---
+    function reports() {
+      const L = db.jobs.filter(j => j.status !== 'Cancelado' && inPeriod(j.date));
+      const grp = f => { const m = {}; L.forEach(j => { const k = f(j) || '—', c = calc(j), r = m[k] = m[k] || { n: 0, rev: 0, exp: 0 }; r.n++; r.rev += c.rev; r.exp += c.exp; }); return m; };
+      const tb = (t, m) => `<div class="box wrap" style="margin-bottom:12px"><h3>${t}</h3><table><tr><th></th><th class="r">Nº</th><th class="r">Receita</th><th class="r">Despesas</th><th class="r">Lucro</th></tr>${Object.entries(m).map(([k, r]) => `<tr><td>${esc(k)}</td><td class="r">${r.n}</td><td class="r">${fm(r.rev)}</td><td class="r">${fm(r.exp)}</td><td class="r">${fm(r.rev - r.exp)}</td></tr>`).join('')}</table></div>`;
+      const P = [['day','Dia'],['week','Semana'],['month','Mês'],['quarter','Trimestre'],['year','Ano'],['all','Tudo']];
+      $('main').innerHTML = `<div class="bar"><h2 style="margin:0">Relatórios</h2><div class="sp"></div>
+        <div class="seg">${P.map(([k, l]) => `<button class="${period === k ? 'on' : ''}" onclick="period='${k}';render()">${l}</button>`).join('')}</div>
+        <button class="b" onclick="exportCsv()">Exportar Excel (CSV)</button><button class="b" onclick="print()">Imprimir / PDF</button></div>
+        <div class="cards"><div class="card"><small>Trabalhos entregues</small><b>${L.filter(j => ['Entregue','Concluído'].includes(j.status) || j.post === 'Entregue').length}</b></div>
+        <div class="card"><small>Trabalhos pendentes</small><b>${L.filter(j => !['Entregue','Concluído'].includes(j.status) && j.post !== 'Entregue').length}</b></div></div>
+        ${tb('Por categoria / tipo', grp(j => j.type))}${tb('Serviços mais vendidos (pacotes)', grp(j => (pkg(j.packageId) || {}).name))}
+        ${tb('Desempenho por responsável', grp(j => (asg(j.assigneeId) || {}).name))}${tb('Por cliente', grp(j => cl(j.clientId).name))}`;
+    }
+    function exportCsv() {
+      const q = v => `"${String(v ?? '').replace(/"/g, '""')}"`;
+      const rows = [['Data','Natureza','Trabalho','Cliente','Tipo','Estado','Valor','Despesas','Recebido','Saldo','Lucro']]
+        .concat(db.jobs.map(j => { const c = calc(j); return [j.date, j.kind || 'Sessão', j.title, cl(j.clientId).name, j.type, j.status, c.rev, c.exp, c.rec, c.due, c.profit]; }));
+      const a = document.createElement('a');
+      a.href = URL.createObjectURL(new Blob(['\ufeff' + rows.map(r => r.map(q).join(';')).join('\n')], { type: 'text/csv' }));
+      a.download = 'relatorio-trabalhos.csv'; a.click();
+    }
+
+
     // Configuração (a anon key é pública por desenho; a segurança vem das regras RLS no Supabase)
     const CFG = {
       url: 'https://tygknmhlmswgokppgbcq.supabase.co',
@@ -1158,18 +1388,19 @@
     let remoteIds = {};            // ids que existem na nuvem
     let st;                        // temporizador do sync
 
-    const TB = ['clients', 'jobs', 'expenses', 'payments'];
+    const TB = ['packages', 'team', 'clients', 'jobs', 'equipment', 'expenses', 'payments', 'shots', 'timeline'];  // ordem respeita as relações
 
     // Mapa: campo local → coluna na base de dados
     const MAP = {
       clients: [
         ['id', 'id'], ['name', 'name'], ['tel', 'phone'],
-        ['mail', 'email'], ['addr', 'address'], ['obs', 'notes']
+        ['mail', 'email'], ['addr', 'address'], ['obs', 'notes'], ['wa', 'whatsapp'], ['birth', 'birth_date']
       ],
       jobs: [
         ['id', 'id'], ['title', 'title'], ['clientId', 'client_id'], ['type', 'job_type'],
         ['date', 'job_date'], ['time', 'job_time'], ['loc', 'location'], ['desc', 'description'],
-        ['value', 'agreed_value'], ['status', 'status'], ['delivery', 'delivery_date'], ['docs', 'documents']
+        ['value', 'agreed_value'], ['status', 'status'], ['delivery', 'delivery_date'], ['docs', 'documents'],
+        ['kind', 'kind'], ['endTime', 'end_time'], ['addr', 'address'], ['packageId', 'package_id'], ['assigneeId', 'assignee_id'], ['post', 'post_status']
       ],
       expenses: [
         ['id', 'id'], ['jobId', 'job_id'], ['desc', 'description'], ['cat', 'category'],
@@ -1181,12 +1412,20 @@
       ]
     };
 
+    Object.assign(MAP, {
+      packages:  [['id','id'],['name','name'],['price','price'],['dur','duration_min'],['photos','photos_included'],['services','services'],['active','active']],
+      team:      [['id','id'],['name','name'],['role','role'],['phone','phone'],['email','email'],['comm','commission_pct'],['active','active']],
+      equipment: [['id','id'],['name','name'],['cat','category'],['serial','serial'],['cond','condition'],['holder','holder'],['notes','notes']],
+      shots:     [['id','id'],['jobId','job_id'],['text','description'],['done','done']],
+      timeline:  [['id','id'],['jobId','job_id'],['at','at_time'],['text','description']]
+    });
+
     // Local → linha da base de dados ('' vira null)
     const toRow = (t, o) => Object.fromEntries(
       MAP[t].map(([local, remote]) => [
         remote,
         local === 'docs' ? (o.docs || [])
-          : (o[local] === '' || o[local] === undefined) ? null
+          : (o[local] === '' || o[local] == null) ? (DEF[remote] ?? null)
           : o[local]
       ])
     );
@@ -1195,7 +1434,7 @@
     const fromRow = (t, r) => Object.fromEntries(
       MAP[t].map(([local, col]) => {
         let v = r[col];
-        if (col === 'job_time' && v) v = v.slice(0, 5);
+        if (/_time$/.test(col) && v) v = v.slice(0, 5);
         if (local === 'docs')        v = v || [];
         else if (v === null)         v = (local === 'receipt') ? null : '';
         return [local, v];
