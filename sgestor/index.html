@@ -1290,7 +1290,7 @@
     const CR = {
       pkgs:  { t: 'packages', title: 'Pacotes e serviços', one: 'pacote', f: [['name','Nome','text',1],['price','Preço (MT)','number'],['dur','Duração (min)','number'],['photos','Fotografias incluídas','number'],['services','Serviços incluídos / extras','textarea',1],['active','Ativo','bool']] },
       team:  { t: 'team', title: 'Equipa', one: 'colaborador', f: [['name','Nome','text',1],['role','Função','sel',0,ROLES],['phone','Telefone'],['email','E-mail'],['comm','Comissão (%)','number'],['active','Ativo','bool']] },
-      equip: { t: 'equipment', title: 'Equipamentos', one: 'equipamento', f: [['name','Nome','text',1],['cat','Categoria','sel',0,['Câmara','Lente','Flash','Iluminação','Tripé','Microfone','Acessório']],['serial','Nº de série'],['cond','Estado','sel',0,['Bom','Em manutenção','Avariado','Fora de uso']],['holder','Responsável'],['notes','Notas / manutenção','textarea',1]] }
+      equip: { t: 'equipment', title: 'Equipamentos', one: 'equipamento', f: [['name','Nome','text',1],['cat','Categoria','sel',0,['Câmara','Lente','Drone','Estabilizador','Flash','Iluminação','Tripé','Microfone','Acessório']],['serial','Nº de série'],['cond','Estado','sel',0,['Bom','Em manutenção','Avariado','Fora de uso']],['holder','Responsável'],['notes','Notas / manutenção','textarea',1]] }
     };
     function crud(k) {
       const c = CR[k];
@@ -1388,7 +1388,6 @@
     let remoteIds = {};            // ids que existem na nuvem
     let st;                        // temporizador do sync
 
-    const TBL = { team: 'team_members' };  // nome da tabela no Supabase (evita colisão com uma tabela 'team' já existente)
     const TB = ['packages', 'team', 'clients', 'jobs', 'equipment', 'expenses', 'payments', 'shots', 'timeline'];  // ordem respeita as relações
 
     // Mapa: campo local → coluna na base de dados
@@ -1463,7 +1462,7 @@
         for (const t of TB) {
           const rows = db[t].map(o => toRow(t, o));
           if (rows.length) {
-            const { error } = await sb.from(TBL[t] || t).upsert(rows);
+            const { error } = await sb.from(t).upsert(rows);
             if (error) throw error;
           }
         }
@@ -1473,7 +1472,7 @@
           const keep = new Set(db[t].map(o => o.id));
           const gone = [...(remoteIds[t] || [])].filter(i => !keep.has(i));
           if (gone.length) {
-            const { error } = await sb.from(TBL[t] || t).delete().in('id', gone);
+            const { error } = await sb.from(t).delete().in('id', gone);
             if (error) throw error;
           }
           remoteIds[t] = keep;
@@ -1490,7 +1489,7 @@
       try {
         const r = {};
         for (const t of TB) {
-          const { data, error } = await sb.from(TBL[t] || t).select('*');
+          const { data, error } = await sb.from(t).select('*');
           if (error) throw error;
           r[t] = data.map(x => fromRow(t, x));
         }
