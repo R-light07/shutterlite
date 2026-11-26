@@ -784,16 +784,6 @@
         </p>
         ${j.desc ? `<p>${esc(j.desc)}</p>` : ''}
 
-        <!-- Cartões financeiros -->
-        <div class="cards">
-          <div class="card"><small>Valor cobrado</small><b>${fm(c.rev)}</b></div>
-          <div class="card"><small>Total de despesas</small><b>${fm(c.exp)}</b></div>
-          <div class="card hero"><small>Lucro líquido · margem</small><b>${fm(c.profit)}</b> · ${c.margin.toFixed(1)}%</div>
-          <div class="card"><small>Recebido</small><b>${fm(c.rec)}</b></div>
-          <div class="card"><small>Por receber</small><b class="wn">${fm(c.due)}</b></div>
-          <div class="card"><small>Disponível (recebido − despesas)</small><b>${fm(c.realized)}</b></div>
-        </div>
-
         <!-- Pagamentos e despesas do trabalho -->
         <div class="grid">
 
