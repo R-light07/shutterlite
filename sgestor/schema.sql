@@ -109,3 +109,38 @@ select
 from public.jobs j
 left join (select job_id, sum(amount) total from public.expenses group by job_id) e on e.job_id = j.id
 left join (select job_id, sum(amount) total from public.payments group by job_id) p on p.job_id = j.id;
+
+
+-- =====================================================================
+-- Saída de Equipamentos (checklist, assinaturas e controlo de devolução)
+-- Os itens ficam em "items" (jsonb): [{id, equipId, name, cat, serial, qty, state, retQty, note}]
+-- Execute este bloco no Supabase antes de usar a nova funcionalidade.
+-- =====================================================================
+create table if not exists public.outings (
+  id              text primary key default gen_random_uuid()::text,
+  user_id         uuid not null default auth.uid() references auth.users(id) on delete cascade,
+  job_id          text references public.jobs(id) on delete set null,
+  event_name      text not null,
+  location        text,
+  outing_date     date not null,
+  expected_return date,
+  responsible     text,
+  delivered_by    text,
+  received_by     text,
+  notes           text,
+  items           jsonb not null default '[]'::jsonb,
+  returned_at     date,
+  return_notes    text,
+  created_at      timestamptz not null default now(),
+  updated_at      timestamptz not null default now()
+);
+create index if not exists outings_user_date_idx on public.outings(user_id, outing_date);
+
+drop trigger if exists trg_outings_updated on public.outings;
+create trigger trg_outings_updated before update on public.outings
+  for each row execute function public.set_updated_at();
+
+alter table public.outings enable row level security;
+drop policy if exists "own_rows" on public.outings;
+create policy "own_rows" on public.outings for all to authenticated
+  using (user_id = auth.uid()) with check (user_id = auth.uid());

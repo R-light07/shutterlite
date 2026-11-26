@@ -109,6 +109,7 @@
       ['pkgs',    'Pacotes'],
       ['team',    'Equipa'],
       ['equip',   'Equipamentos'],
+      ['outs',    'Saída de Equipamentos'],
       ['reports', 'Relatórios']
     ];
 
@@ -238,7 +239,7 @@
         '<input placeholder="Pesquisa global…" style="margin-bottom:8px" onkeydown="if(event.key===\'Enter\')gsearch(this.value)">' +
 
         VIEWS.map(([key, label]) => `
-          <button class="${view === key || (view === 'job' && key === 'jobs') ? 'on' : ''}"
+          <button class="${view === key || (view === 'job' && key === 'jobs') || (view === 'out' && key === 'outs') ? 'on' : ''}"
                   onclick="go('${key}')">${label}</button>
         `).join('') +
 
@@ -259,7 +260,7 @@
 
       // Chama a função da vista activa
       TB.forEach(t => db[t] = db[t] || []);
-      ({ dash, jobs, clients, pays, fin, job, pkgs, team, equip, reports })[view]();
+      ({ dash, jobs, clients, pays, fin, job, pkgs, team, equip, outs, out, reports })[view]();
       window.scrollTo(0, 0);
     }
 
@@ -1379,6 +1380,345 @@
     }
 
 
+    /* =====================================================
+       SAÍDA DE EQUIPAMENTOS
+       Registo de saídas para eventos, checklist imprimível,
+       assinaturas e controlo de devolução.
+       Cada saída guarda os itens (cópia do nome/série no momento da saída).
+       ===================================================== */
+    const OST = ['Pendente', 'Devolvido', 'Danificado', 'Em falta'];   // estado de cada item
+    let oqf = 'all';          // filtro da lista: all | open | done
+    let od  = null;           // rascunho do formulário {id, items}
+    let oqs = '';             // pesquisa no seletor de equipamentos
+
+    const outById = id => db.outings.find(o => o.id === id);
+    const outNo   = o  => 'SE-' + o.id.slice(0, 6).toUpperCase();
+    const outIt   = o  => o.items || [];
+    const itQty   = i  => Math.max(1, +i.qty || 1);
+
+    // Quantidade em falta de um item (Em falta = tudo; Devolvido parcial = diferença)
+    const itMissing = i => i.state === 'Em falta' ? itQty(i)
+      : i.state === 'Devolvido' ? Math.max(0, itQty(i) - (+i.retQty || 0)) : 0;
+
+    // Estado geral de uma saída
+    function outStat(o) {
+      const it = outIt(o);
+      const pend = it.filter(i => i.state === 'Pendente').length;
+      const miss = it.reduce((a, i) => a + itMissing(i), 0);
+      const dmg  = it.filter(i => i.state === 'Danificado').length;
+      const late = pend > 0 && o.expReturn && o.expReturn < today();
+      let k, t;
+      if (!it.length)      { k = 'mu'; t = 'Sem itens'; }
+      else if (late)       { k = 'er'; t = 'Devolução em atraso'; }
+      else if (pend)       { k = 'wn'; t = 'Pendente de devolução'; }
+      else if (miss || dmg){ k = 'er'; t = 'Concluída com ocorrências'; }
+      else                 { k = 'ok'; t = 'Devolvido'; }
+      return { k, t, pend, miss, dmg, late };
+    }
+    const outTag = o => { const s = outStat(o); return `<span class="tag ${s.k}">${s.t}</span>`; };
+
+    // Equipamentos que estão actualmente fora (noutras saídas por devolver)
+    function outBusy(exceptId) {
+      const s = new Set();
+      db.outings.filter(o => o.id !== exceptId)
+        .forEach(o => outIt(o).forEach(i => { if (i.equipId && i.state === 'Pendente') s.add(i.equipId); }));
+      return s;
+    }
+
+    // --- Lista de saídas ---
+    function outs() {
+      const all  = [...db.outings].sort((a, b) => (b.date || '').localeCompare(a.date || ''));
+      const st   = o => outStat(o);
+      const rows = all.filter(o => oqf === 'all' || (oqf === 'open' ? st(o).pend > 0 : st(o).pend === 0));
+      const its  = all.flatMap(outIt);
+      const k = (a, b, c = '') => `<div class="card"><small>${a}</small><b class="${c}">${b}</b></div>`;
+      const P = [['all', 'Todas'], ['open', 'Por devolver'], ['done', 'Concluídas']];
+
+      $('main').innerHTML = `
+        <div class="bar">
+          <h2 style="margin:0">Saída de Equipamentos</h2>
+          <div class="sp"></div>
+          <div class="seg">${P.map(([key, l]) => `<button class="${oqf === key ? 'on' : ''}" onclick="oqf='${key}';render()">${l}</button>`).join('')}</div>
+          <button class="b p" onclick="outForm()">+ Nova saída</button>
+        </div>
+
+        <div class="cards">
+          ${k('Saídas por devolver', all.filter(o => st(o).pend > 0).length, all.some(o => st(o).pend > 0) ? 'wn' : '')}
+          ${k('Itens fora', its.filter(i => i.state === 'Pendente').reduce((a, i) => a + itQty(i), 0))}
+          ${k('Devoluções em atraso', all.filter(o => st(o).late).length, all.some(o => st(o).late) ? 'er' : '')}
+          ${k('Em falta', its.reduce((a, i) => a + itMissing(i), 0), its.some(i => itMissing(i)) ? 'er' : '')}
+          ${k('Danificados', its.filter(i => i.state === 'Danificado').length, its.some(i => i.state === 'Danificado') ? 'er' : '')}
+        </div>
+
+        <div class="box wrap">
+          <table>
+            <tr><th>Nº</th><th>Evento</th><th>Data</th><th>Local</th><th>Responsável</th><th class="r">Itens</th><th class="r">Devolvidos</th><th>Estado</th></tr>
+            ${rows.map(o => {
+              const it = outIt(o);
+              return `<tr class="k" onclick="go('out','${o.id}')">
+                <td>${outNo(o)}</td><td><b>${esc(o.event)}</b></td><td>${fd(o.date)}</td><td>${esc(o.loc) || '—'}</td>
+                <td>${esc(o.resp) || '—'}</td><td class="r">${it.length}</td>
+                <td class="r">${it.filter(i => i.state !== 'Pendente').length}/${it.length}</td><td>${outTag(o)}</td></tr>`;
+            }).join('')}
+          </table>
+          ${rows.length ? '' : '<p class="mu">Sem saídas registadas.</p>'}
+        </div>`;
+    }
+
+    // --- Formulário (nova saída / editar) ---
+    function outForm(id) {
+      const o = id ? outById(id) : { items: [], date: today() };
+      od = { id: id || '', items: JSON.parse(JSON.stringify(outIt(o))) };
+      oqs = '';
+      const jl = [...db.jobs].filter(j => j.status !== 'Cancelado').sort((a, b) => b.date.localeCompare(a.date));
+      const names = [...new Set([...db.team.map(t => t.name), ...db.equipment.map(e => e.holder)].filter(Boolean))];
+
+      modal(`
+        <h3>${id ? 'Editar saída' : 'Nova saída de equipamentos'}</h3>
+        <div class="f">
+          <div class="w"><label>Trabalho associado (opcional · preenche os campos abaixo)</label>
+            <select id="o_job" onchange="outFromJob(this.value)"><option value="">—</option>
+              ${jl.map(j => `<option value="${j.id}" ${j.id === o.jobId ? 'selected' : ''}>${fd(j.date)} · ${esc(j.title)}</option>`).join('')}
+            </select></div>
+          <div class="w"><label>Nome do evento *</label><input id="o_ev" value="${esc(o.event)}"></div>
+          <div><label>Local</label><input id="o_loc" value="${esc(o.loc)}"></div>
+          <div><label>Data de realização *</label><input id="o_date" type="date" value="${o.date || ''}"></div>
+          <div><label>Devolução prevista</label><input id="o_exp" type="date" value="${o.expReturn || ''}"></div>
+          <div><label>Responsável pela retirada *</label><input id="o_resp" list="o_names" value="${esc(o.resp)}">
+            <datalist id="o_names">${names.map(n => `<option value="${esc(n)}">`).join('')}</datalist></div>
+          <div><label>Entregue por (responsável do stock)</label><input id="o_del" list="o_names" value="${esc(o.deliveredBy)}"></div>
+          <div><label>Recebido por</label><input id="o_rec" list="o_names" value="${esc(o.receivedBy)}"></div>
+          <div class="w"><label>Observações</label><textarea id="o_notes" rows="2">${esc(o.notes)}</textarea></div>
+        </div>
+
+        <h3 style="margin-top:16px">Equipamentos do stock</h3>
+        <input placeholder="Pesquisar equipamento…" oninput="oqs=this.value;outPick()" style="margin-bottom:6px">
+        <div id="o_pick" style="max-height:190px;overflow:auto;border:1px solid var(--bd);border-radius:8px;padding:0 10px"></div>
+
+        <h3 style="margin-top:16px">Material avulso (sem registo em Equipamentos)</h3>
+        <div class="bar" style="margin:0">
+          <input id="o_mn" placeholder="Descrição (ex.: Baterias, Cartões SD)" style="flex:1;min-width:160px">
+          <input id="o_mq" type="number" min="1" step="1" value="1" style="width:70px" title="Quantidade">
+          <input id="o_ms" placeholder="Nº série" style="width:110px">
+          <button class="b s p" onclick="outAddMat()">+ Adicionar</button>
+        </div>
+
+        <h3 style="margin-top:16px">Itens da checklist (<span id="o_cnt">0</span>)</h3>
+        <div id="o_sel"></div>
+
+        <div class="bar" style="margin:14px 0 0"><div class="sp"></div>
+          <button class="b" onclick="close_()">Cancelar</button>
+          <button class="b p" onclick="outSave('${id || ''}')">Guardar saída</button></div>`);
+      outPick(); outSel();
+    }
+
+    function outFromJob(jid) {
+      const j = jb(jid); if (!j) return;
+      const a = asg(j.assigneeId);
+      if (!$('o_ev').value)   $('o_ev').value   = j.title;
+      if (!$('o_loc').value)  $('o_loc').value  = j.loc || '';
+      if (j.date)             $('o_date').value = j.date;
+      if (!$('o_resp').value && a) $('o_resp').value = a.name;
+    }
+
+    // Lista de equipamentos com caixas de seleção
+    function outPick() {
+      const q = oqs.toLowerCase(), busy = outBusy(od.id);
+      const sel = new Set(od.items.map(i => i.equipId).filter(Boolean));
+      const L = db.equipment.filter(e => (e.name + ' ' + e.cat + ' ' + e.serial).toLowerCase().includes(q));
+      $('o_pick').innerHTML = L.map(e => {
+        const out = busy.has(e.id), bad = e.cond && e.cond !== 'Bom';
+        const dis = !sel.has(e.id) && (out || bad);
+        return `<label class="li" style="align-items:center;opacity:${dis ? .5 : 1};cursor:${dis ? 'not-allowed' : 'pointer'}">
+          <span><input type="checkbox" style="width:auto" ${sel.has(e.id) ? 'checked' : ''} ${dis ? 'disabled' : ''} onchange="outTog('${e.id}',this.checked)">
+            ${esc(e.name)} <span class="mu">${esc(e.cat)}${e.serial ? ' · S/N ' + esc(e.serial) : ''}</span></span>
+          ${out ? '<span class="tag wn">Em saída</span>' : bad ? `<span class="tag er">${esc(e.cond)}</span>` : ''}</label>`;
+      }).join('') || '<p class="mu">Sem equipamentos registados. Adicione-os em “Equipamentos”.</p>';
+    }
+
+    function outTog(eid, on) {
+      const e = db.equipment.find(x => x.id === eid); if (!e) return;
+      if (on) od.items.push({ id: uid(), equipId: e.id, name: e.name, cat: e.cat || '', serial: e.serial || '', qty: 1, state: 'Pendente', retQty: '', note: '' });
+      else od.items = od.items.filter(i => i.equipId !== eid);
+      outSel();
+    }
+
+    function outAddMat() {
+      const n = $('o_mn').value.trim(); if (!n) return alert('Indique a descrição do material.');
+      const q = Math.max(1, Math.floor(+$('o_mq').value || 1));
+      od.items.push({ id: uid(), equipId: '', name: n, cat: 'Material', serial: $('o_ms').value.trim(), qty: q, state: 'Pendente', retQty: '', note: '' });
+      $('o_mn').value = ''; $('o_ms').value = ''; $('o_mq').value = 1;
+      outSel();
+    }
+
+    function outQty(iid, v) { const i = od.items.find(x => x.id === iid); if (i) i.qty = Math.max(1, Math.floor(+v || 1)); outSel(); }
+    function outRm(iid) { od.items = od.items.filter(x => x.id !== iid); outPick(); outSel(); }
+
+    // Tabela dos itens escolhidos
+    function outSel() {
+      $('o_cnt').textContent = od.items.length;
+      $('o_sel').innerHTML = od.items.length
+        ? `<div class="wrap"><table><tr><th>#</th><th>Descrição</th><th>Nº série</th><th>Qtd</th><th></th></tr>
+            ${od.items.map((i, n) => `<tr><td>${n + 1}</td><td>${esc(i.name)}<br><span class="mu">${esc(i.cat)}</span></td><td>${esc(i.serial) || '—'}</td>
+              <td><input type="number" min="1" step="1" style="width:70px" value="${i.qty}" onchange="outQty('${i.id}',this.value)"></td>
+              <td><button class="b s d" onclick="outRm('${i.id}')">×</button></td></tr>`).join('')}</table></div>`
+        : '<p class="mu">Nenhum item selecionado.</p>';
+    }
+
+    function outSave(id) {
+      const ev = $('o_ev').value.trim(), date = $('o_date').value, resp = $('o_resp').value.trim();
+      if (!ev)   return alert('Indique o nome do evento.');
+      if (!date) return alert('Indique a data de realização.');
+      if (!resp) return alert('Indique o responsável pela retirada.');
+      if (!od.items.length) return alert('Selecione pelo menos um equipamento ou material.');
+      const v = { jobId: $('o_job').value, event: ev, loc: $('o_loc').value.trim(), date, expReturn: $('o_exp').value,
+                  resp, deliveredBy: $('o_del').value.trim(), receivedBy: $('o_rec').value.trim(),
+                  notes: $('o_notes').value, items: od.items };
+      if (id) { Object.assign(outById(id), v); outSync(outById(id)); }
+      else { id = uid(); db.outings.push({ id, ...v, returnedAt: '', returnNotes: '' }); }
+      save(); close_(); go('out', id);
+    }
+
+    // Data de devolução automática: preenchida quando já não há itens pendentes
+    function outSync(o) {
+      const s = outStat(o);
+      if (outIt(o).length && !s.pend) { if (!o.returnedAt) o.returnedAt = today(); }
+      else o.returnedAt = '';
+    }
+
+    function outDel(id) {
+      const o = outById(id), p = outStat(o).pend;
+      if (!confirm(p ? `Esta saída ainda tem ${p} item(ns) por devolver. Eliminar mesmo assim?` : 'Eliminar esta saída?')) return;
+      db.outings = db.outings.filter(x => x.id !== id);
+      save(); go('outs');
+    }
+
+    // --- Detalhe: dados, checklist e controlo de devolução ---
+    function out() {
+      const o = outById(cur); if (!o) return go('outs');
+      const s = outStat(o), it = outIt(o), j = jb(o.jobId);
+      const kv = (a, b) => `<div class="card" style="min-height:0"><small>${a}</small><div>${b || '—'}</div></div>`;
+
+      $('main').innerHTML = `
+        <div class="bar">
+          <button class="b" onclick="go('outs')">‹ Saídas</button>
+          <div class="sp"></div>
+          <button class="b p" onclick="outPrint('${o.id}')">Imprimir checklist</button>
+          <button class="b" onclick="outForm('${o.id}')">Editar</button>
+          <button class="b d" onclick="outDel('${o.id}')">Eliminar</button>
+        </div>
+
+        <h2>${esc(o.event)} ${outTag(o)}</h2>
+        <p class="mu">${outNo(o)}${j ? ' · Trabalho: <a href="#" onclick="go(\'job\',\'' + j.id + '\');return false">' + esc(j.title) + '</a>' : ''}</p>
+
+        <div class="kv">
+          ${kv('Local', esc(o.loc))}${kv('Data do evento', fd(o.date))}${kv('Devolução prevista', fd(o.expReturn))}
+          ${kv('Responsável pela retirada', esc(o.resp))}${kv('Entregue por', esc(o.deliveredBy))}${kv('Recebido por', esc(o.receivedBy))}
+        </div>
+        ${o.notes ? `<p>${esc(o.notes)}</p>` : ''}
+
+        <div class="cards">
+          <div class="card"><small>Itens</small><b>${it.length}</b></div>
+          <div class="card"><small>Devolvidos</small><b class="ok">${it.filter(i => i.state === 'Devolvido').length}</b></div>
+          <div class="card"><small>Pendentes</small><b class="${s.pend ? 'wn' : ''}">${s.pend}</b></div>
+          <div class="card"><small>Em falta (unid.)</small><b class="${s.miss ? 'er' : ''}">${s.miss}</b></div>
+          <div class="card"><small>Danificados</small><b class="${s.dmg ? 'er' : ''}">${s.dmg}</b></div>
+        </div>
+
+        <div class="box wrap" style="margin-bottom:12px">
+          <div class="bar" style="margin:0 0 8px"><h3 style="margin:0">Checklist e controlo de devolução</h3><div class="sp"></div>
+            <button class="b s" onclick="outAll('${o.id}')">Marcar tudo como devolvido</button></div>
+          <table>
+            <tr><th>#</th><th>Descrição</th><th>Nº série</th><th class="r">Qtd</th><th>Estado</th><th class="r">Qtd devolvida</th><th>Observação</th></tr>
+            ${it.map((i, n) => `<tr>
+              <td>${n + 1}</td><td>${esc(i.name)}<br><span class="mu">${esc(i.cat)}</span></td><td>${esc(i.serial) || '—'}</td><td class="r">${itQty(i)}</td>
+              <td><select style="width:130px" onchange="outSet('${o.id}','${i.id}','state',this.value)">${opts(OST, i.state)}</select></td>
+              <td class="r">${i.state === 'Pendente' || i.state === 'Em falta' ? '—'
+                : `<input type="number" min="0" max="${itQty(i)}" step="1" style="width:70px" value="${i.retQty === '' ? itQty(i) : i.retQty}" onchange="outSet('${o.id}','${i.id}','retQty',this.value)">`}</td>
+              <td><input style="width:220px" placeholder="Ex.: lente riscada" value="${esc(i.note)}" onchange="outSet('${o.id}','${i.id}','note',this.value)"></td></tr>`).join('')}
+          </table>
+        </div>
+
+        <div class="box">
+          <div class="f">
+            <div><label>Data da devolução</label><input type="date" value="${o.returnedAt || ''}" onchange="outMeta('${o.id}','returnedAt',this.value)"></div>
+            <div><label>Estado da saída</label><div style="padding-top:8px">${outTag(o)}</div></div>
+            <div class="w"><label>Notas da devolução</label><textarea rows="2" onchange="outMeta('${o.id}','returnNotes',this.value)">${esc(o.returnNotes)}</textarea></div>
+          </div>
+        </div>`;
+    }
+
+    // Altera um item (estado, quantidade devolvida, observação)
+    function outSet(oid, iid, f, v) {
+      const o = outById(oid), i = outIt(o).find(x => x.id === iid); if (!i) return;
+      if (f === 'state') {
+        i.state = v;
+        i.retQty = (v === 'Devolvido' || v === 'Danificado') ? itQty(i) : (v === 'Em falta' ? 0 : '');
+        // Equipamento danificado: marca-o como avariado em "Equipamentos"
+        const e = db.equipment.find(x => x.id === i.equipId);
+        if (v === 'Danificado' && e && e.cond === 'Bom' && confirm(`Marcar "${e.name}" como "Avariado" na lista de Equipamentos?`)) e.cond = 'Avariado';
+      } else if (f === 'retQty') {
+        i.retQty = Math.min(itQty(i), Math.max(0, Math.floor(+v || 0)));
+      } else i[f] = v;
+      outSync(o); save();
+      if (f === 'note') return;                 // sem redesenhar: não perder o foco
+      const y = scrollY; render(); scrollTo(0, y);
+    }
+    function outMeta(oid, f, v) { outById(oid)[f] = v; save(); if (f === 'returnedAt') { const y = scrollY; render(); scrollTo(0, y); } }
+    function outAll(oid) {
+      const o = outById(oid);
+      outIt(o).forEach(i => { if (i.state === 'Pendente') { i.state = 'Devolvido'; i.retQty = itQty(i); } });
+      outSync(o); save(); const y = scrollY; render(); scrollTo(0, y);
+    }
+
+    // --- Checklist para impressão (A4) ---
+    function outPrint(id) {
+      const o = outById(id), it = outIt(o), j = jb(o.jobId);
+      const w = window.open('', '_blank');
+      if (!w) return alert('Permita pop-ups para imprimir a checklist.');
+      const stTxt = i => i.state === 'Pendente' ? '' : i.state + (i.state === 'Devolvido' && itMissing(i) ? ` (${i.retQty || 0}/${itQty(i)})` : '');
+      const rows = it.map((i, n) => `<tr><td class="c">${n + 1}</td><td><b>${esc(i.name)}</b><br><small>${esc(i.cat)}</small></td>
+        <td>${esc(i.serial) || '—'}</td><td class="c">${itQty(i)}</td><td class="c"><span class="bx"></span></td>
+        <td class="c"><span class="bx"></span></td><td>${esc(stTxt(i))}${i.note ? (stTxt(i) ? ' · ' : '') + esc(i.note) : ''}</td></tr>`).join('');
+      const css = `
+        @page{size:A4;margin:16mm 14mm}*{box-sizing:border-box}
+        body{font:12px/1.45 "Segoe UI",Arial,sans-serif;color:#111;margin:0}
+        .hd{display:flex;justify-content:space-between;align-items:flex-end;border-bottom:2px solid #111;padding-bottom:8px;margin-bottom:12px}
+        .br{font-size:20px;font-weight:300;letter-spacing:.04em}.br b{font-weight:600}
+        h1{font-size:16px;margin:0;text-transform:uppercase;letter-spacing:.08em}.no{text-align:right;font-size:11px;color:#444}
+        .info{display:grid;grid-template-columns:1fr 1fr;gap:6px 20px;border:1px solid #bbb;padding:10px 12px;margin-bottom:14px}
+        .info span{display:block;font-size:9px;text-transform:uppercase;letter-spacing:.08em;color:#666}
+        table{width:100%;border-collapse:collapse}
+        th{background:#eee;font-size:9px;text-transform:uppercase;letter-spacing:.06em;text-align:left}
+        th,td{border:1px solid #999;padding:6px 7px;vertical-align:top}.c{text-align:center}
+        tr{page-break-inside:avoid}.bx{display:inline-block;width:13px;height:13px;border:1.5px solid #111}
+        .nt{margin-top:10px;font-size:11px}.sg{display:grid;grid-template-columns:1fr 1fr;gap:36px;margin-top:46px;page-break-inside:avoid}
+        .sg div{border-top:1px solid #111;padding-top:4px;font-size:11px}.sg small{display:block;color:#555;margin-top:14px}
+        .ft{margin-top:26px;font-size:10px;color:#666;text-align:center}
+        .rt{margin-top:30px;page-break-inside:avoid}.rt h2{font-size:12px;text-transform:uppercase;letter-spacing:.08em;margin:0 0 4px}`;
+      w.document.write(`<!doctype html><html lang="pt"><meta charset="utf-8"><title>Checklist ${outNo(o)} · ${esc(o.event)}</title><style>${css}</style>
+        <div class="hd"><div class="br">Shutter<b>lite</b></div><div><h1>Checklist de Saída de Equipamentos</h1><div class="no">Nº ${outNo(o)} · Emitido em ${fd(today())}</div></div></div>
+        <div class="info">
+          <div><span>Evento</span><b>${esc(o.event)}</b></div><div><span>Local</span>${esc(o.loc) || '—'}</div>
+          <div><span>Data de realização</span>${fd(o.date)}</div><div><span>Devolução prevista</span>${fd(o.expReturn)}</div>
+          <div><span>Responsável pela retirada</span>${esc(o.resp) || '—'}</div><div><span>Trabalho associado</span>${j ? esc(j.title) : '—'}</div>
+        </div>
+        <table><tr><th class="c" style="width:28px">#</th><th>Descrição</th><th style="width:100px">Nº de série</th><th class="c" style="width:38px">Qtd</th>
+          <th class="c" style="width:48px">Saída</th><th class="c" style="width:58px">Devolução</th><th style="width:130px">Obs. / estado</th></tr>${rows}</table>
+        ${o.notes ? `<p class="nt"><b>Observações:</b> ${esc(o.notes)}</p>` : ''}
+        <p class="nt">Total: <b>${it.length}</b> item(ns) · <b>${it.reduce((a, i) => a + itQty(i), 0)}</b> unidade(s). O recebedor declara ter conferido os materiais acima e assume a responsabilidade pela sua guarda e devolução.</p>
+        <div class="sg">
+          <div>Responsável pela entrega<br><b>${esc(o.deliveredBy)}</b><small>Assinatura: ______________________________</small><small>Data: ____/____/________</small></div>
+          <div>Responsável pelo recebimento<br><b>${esc(o.receivedBy || o.resp)}</b><small>Assinatura: ______________________________</small><small>Data: ____/____/________</small></div>
+        </div>
+        <div class="rt"><h2>Conferência na devolução</h2>
+          <div class="sg" style="margin-top:34px"><div>Devolvido por<small>Assinatura: ______________________________</small></div>
+          <div>Recebido no stock por<small>Assinatura: ______________________________</small></div></div></div>
+        <div class="ft">Shutterlite · Gestão de Trabalhos Fotográficos</div>
+        <script>onload=()=>print()<\/script></html>`);
+      w.document.close();
+    }
+
     // Configuração (a anon key é pública por desenho; a segurança vem das regras RLS no Supabase)
     const CFG = {
       url: 'https://tygknmhlmswgokppgbcq.supabase.co',
@@ -1390,7 +1730,7 @@
     let remoteIds = {};            // ids que existem na nuvem
     let st;                        // temporizador do sync
 
-    const TB = ['packages', 'team', 'clients', 'jobs', 'equipment', 'expenses', 'payments', 'shots', 'timeline'];  // ordem respeita as relações
+    const TB = ['packages', 'team', 'clients', 'jobs', 'equipment', 'outings', 'expenses', 'payments', 'shots', 'timeline'];  // ordem respeita as relações
 
     // Mapa: campo local → coluna na base de dados
     const MAP = {
@@ -1418,6 +1758,7 @@
       packages:  [['id','id'],['name','name'],['price','price'],['dur','duration_min'],['photos','photos_included'],['services','services'],['active','active']],
       team:      [['id','id'],['name','name'],['role','role'],['phone','phone'],['email','email'],['comm','commission_pct'],['active','active']],
       equipment: [['id','id'],['name','name'],['cat','category'],['serial','serial'],['cond','condition'],['holder','holder'],['notes','notes']],
+      outings:   [['id','id'],['jobId','job_id'],['event','event_name'],['loc','location'],['date','outing_date'],['expReturn','expected_return'],['resp','responsible'],['deliveredBy','delivered_by'],['receivedBy','received_by'],['notes','notes'],['items','items'],['returnedAt','returned_at'],['returnNotes','return_notes']],
       shots:     [['id','id'],['jobId','job_id'],['text','description'],['done','done']],
       timeline:  [['id','id'],['jobId','job_id'],['at','at_time'],['text','description']]
     });
@@ -1427,6 +1768,7 @@
       MAP[t].map(([local, remote]) => [
         remote,
         local === 'docs' ? (o.docs || [])
+          : local === 'items' ? (o.items || [])
           : (o[local] === '' || o[local] == null) ? (DEF[remote] ?? null)
           : o[local]
       ])
@@ -1437,7 +1779,7 @@
       MAP[t].map(([local, col]) => {
         let v = r[col];
         if (/_time$/.test(col) && v) v = v.slice(0, 5);
-        if (local === 'docs')        v = v || [];
+        if (local === 'docs' || local === 'items') v = v || [];
         else if (v === null)         v = (local === 'receipt') ? null : '';
         return [local, v];
       })
