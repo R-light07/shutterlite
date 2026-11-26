@@ -1183,7 +1183,7 @@
     const SESS  = ['Retrato','Casal','Família','Maternidade','Recém-nascido','Aniversário','Corporativo','Moda','Produtos','Pré-wedding'];
     const COVS  = ['Casamento','Aniversário','Batizado','Evento corporativo','Conferência','Festa','Outro evento'];
     const POST  = ['Por importar','Em seleção','Em edição','Em revisão','Aguardando aprovação','Pronto para entrega','Entregue'];
-    const ROLES = ['Fotógrafo','Videógrafo','Operador de Drone','Editor','Assistente'];
+    const ROLES = ['Fotógrafo','Videógrafo','Droneman','Editor','Assistente'];
     const DEF   = { kind:'Sessão', post_status:'Por importar', active:true, done:false, commission_pct:0, price:0, condition:'Bom', role:'Fotógrafo' };
     const typesFor = (k, cur) => { const l = k === 'Cobertura' ? COVS : SESS; return cur && !l.includes(cur) ? [cur, ...l] : l; };
     const ALLT = () => [...new Set(db.jobs.map(j => j.type))];
@@ -1388,6 +1388,7 @@
     let remoteIds = {};            // ids que existem na nuvem
     let st;                        // temporizador do sync
 
+    const TBL = { team: 'team_members' };  // nome da tabela no Supabase (evita colisão com uma tabela 'team' já existente)
     const TB = ['packages', 'team', 'clients', 'jobs', 'equipment', 'expenses', 'payments', 'shots', 'timeline'];  // ordem respeita as relações
 
     // Mapa: campo local → coluna na base de dados
@@ -1462,7 +1463,7 @@
         for (const t of TB) {
           const rows = db[t].map(o => toRow(t, o));
           if (rows.length) {
-            const { error } = await sb.from(t).upsert(rows);
+            const { error } = await sb.from(TBL[t] || t).upsert(rows);
             if (error) throw error;
           }
         }
@@ -1472,7 +1473,7 @@
           const keep = new Set(db[t].map(o => o.id));
           const gone = [...(remoteIds[t] || [])].filter(i => !keep.has(i));
           if (gone.length) {
-            const { error } = await sb.from(t).delete().in('id', gone);
+            const { error } = await sb.from(TBL[t] || t).delete().in('id', gone);
             if (error) throw error;
           }
           remoteIds[t] = keep;
@@ -1489,7 +1490,7 @@
       try {
         const r = {};
         for (const t of TB) {
-          const { data, error } = await sb.from(t).select('*');
+          const { data, error } = await sb.from(TBL[t] || t).select('*');
           if (error) throw error;
           r[t] = data.map(x => fromRow(t, x));
         }
