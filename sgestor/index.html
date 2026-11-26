@@ -392,7 +392,6 @@
           </div>
         </div>
 
-        ${dashExtra()}
 
         <!-- Calendário, próximas sessões, pagamentos pendentes -->
         <div class="grid">
@@ -443,6 +442,9 @@
           <div class="box"><h3>Rentabilidade por tipo (lucro)</h3><div class="cv"><canvas id="c4"></canvas></div></div>
           <div class="box"><h3>Sessões e coberturas por categoria</h3><div class="cv"><canvas id="c5"></canvas></div></div>
         </div>
+
+        <!-- Indicadores, alertas e actividade (abaixo dos gráficos) -->
+        ${dashExtra()}
       `;
 
       drawCal();
@@ -783,6 +785,16 @@
           Entrega prevista: ${fd(j.delivery)}${cl(j.clientId).tel ? ' · ' + esc(cl(j.clientId).tel) : ''}${cl(j.clientId).mail ? ' · ' + esc(cl(j.clientId).mail) : ''}
         </p>
         ${j.desc ? `<p>${esc(j.desc)}</p>` : ''}
+
+        <!-- Cartões financeiros -->
+        <div class="cards">
+          <div class="card"><small>Valor cobrado</small><b>${fm(c.rev)}</b></div>
+          <div class="card"><small>Total de despesas</small><b>${fm(c.exp)}</b></div>
+          <div class="card hero"><small>Lucro líquido · margem</small><b>${fm(c.profit)}</b> · ${c.margin.toFixed(1)}%</div>
+          <div class="card"><small>Recebido</small><b>${fm(c.rec)}</b></div>
+          <div class="card"><small>Por receber</small><b class="wn">${fm(c.due)}</b></div>
+          <div class="card"><small>Disponível (recebido − despesas)</small><b>${fm(c.realized)}</b></div>
+        </div>
 
         <!-- Pagamentos e despesas do trabalho -->
         <div class="grid">
